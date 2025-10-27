@@ -1,4 +1,6 @@
-Hello we can add information about our website here.
-Maliyka 240119641
-khalil 240248572
-Jahirul 24021983
+9Mint — a collaborative web project by 
+Maliyka 240119641, 
+Naomi 240229043, 
+Khalil 240248572,
+Jahirul 24021983, 
+and Dariusz 240353669.
