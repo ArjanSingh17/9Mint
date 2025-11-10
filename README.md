@@ -40,12 +40,6 @@
 - a user-friendly interface for browsing, searching, and purchasing digital art
 - the platform will also be securely hosted and maintain a reliable database for all critical information
 
-**Target Audience**
-The targeted audience for 9Mint is young professionals interested in digital art and technology.
-
-**Technology Stack**
-For development, the team plans to use the Laravel PHP Framework for the backend, React for the frontend, and MySQL for the database. This technology stack was chosen due to Laravel’s robust Model-View-Controller (MVC) structure, strong security features, and excellent community support, which enable rapid, reliable, and maintainable development.
-
 ---
 
 ## Full local setup & docs
