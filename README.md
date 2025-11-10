@@ -28,7 +28,7 @@
 
 ---
 
-**Project Summary**
+## Project Summary
 
 9Mint is a simulated e-commerce platform designed to sell and manage Non-Fungible Tokens (NFTs). The business domain falls within specialised digital asset retail, a growing area of the broader e-commerce sector.
 
