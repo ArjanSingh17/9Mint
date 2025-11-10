@@ -4,9 +4,7 @@
 
 ---
 
-<div align="center">
-
-<h2>The 9Mint Team</h2>
+## The 9Mint Team
 
 <table>
   <tr>
@@ -26,8 +24,6 @@
     <td><b>Khalil Suleiman</b><br><sub><code>240248572</code></sub></td>
   </tr>
 </table>
-
-</div>
 
 ---
 
