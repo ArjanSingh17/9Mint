@@ -4,8 +4,30 @@
 
 ---
 
-**A collaborative web project by:**
-Hamza Heybe 240158042, Maliyka Liaqat 240119641, Jahirul islam 240219893, Dariusz Dabrowski 240353669, Arjan Singh 240209768, Naomi Olowu 240229043, Vlas Yermachenko 240180928, and Khalil suleiman 240248572.
+<div align="center">
+
+<h2>The 9Mint Team</h2>
+
+<table>
+  <tr>
+    <td><b>Hamza Heybe</b><br><sub><code>240158042</code></sub></td>
+    <td><b>Maliyka Liaqat</b><br><sub><code>240119641</code></sub></td>
+  </tr>
+  <tr>
+    <td><b>Jahirul Islam</b><br><sub><code>240219893</code></sub></td>
+    <td><b>Dariusz Dabrowski</b><br><sub><code>240353669</code></sub></td>
+  </tr>
+  <tr>
+    <td><b>Arjan Singh</b><br><sub><code>240209768</code></sub></td>
+    <td><b>Naomi Olowu</b><br><sub><code>240229043</code></sub></td>
+  </tr>
+  <tr>
+    <td><b>Vlas Yermachenko</b><br><sub><code>240180928</code></sub></td>
+    <td><b>Khalil Suleiman</b><br><sub><code>240248572</code></sub></td>
+  </tr>
+</table>
+
+</div>
 
 ---
 
