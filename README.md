@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="9mint.png" alt="9Mint logo" width="180">
+</p>
+
 # 9Mint
 
 **A collaborative web project by:**
