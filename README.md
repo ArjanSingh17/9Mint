@@ -44,7 +44,9 @@
 
 ## Full local setup & docs
 
-- **Windows setup:** [docs/Local-Dev-Setup-Windows.md](docs/Local-Dev-Setup-Windows.md)
-- **Troubleshooting / common fixes:** [docs/Troubleshooting.md](docs/Troubleshooting.md)
+- **Windows setup:** [docs/local-setup.md](docs/local-setup.md)
+- **Troubleshooting / common fixes:** [docs/troubleshooting.md](docs/troubleshooting.md)
+- **Daily routine (pull/push):** [docs/dev-workflow.md](docs/dev-workflow.md)
+- **Frontend foundation (API & flows):** [docs/frontend-api-overview.md](docs/frontend-api-overview.md)
 
 > Keep `.env`, `vendor/`, `node_modules/`, dumps out of Git. Commit migrations/seeders instead.
