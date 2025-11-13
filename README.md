@@ -45,7 +45,7 @@
 ## Full local setup & docs
 
 - **Local setup:** [docs/local-setup.md](docs/local-setup.md)
-- **Troubleshooting / common fixes:** [docs/troubleshooting.md](docs/troubleshooting.md)
+- **Troubleshooting / common fixes:** [docs/Troubleshooting.md](docs/Troubleshooting.md)
 - **Dev Workflow (pull/push):** [docs/dev-workflow.md](docs/dev-workflow.md)
 - **Frontend foundation (API & flows):** [docs/frontend-api-overview.md](docs/frontend-api-overview.md)
 

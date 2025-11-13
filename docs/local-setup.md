@@ -1,4 +1,4 @@
-# 9Mint — Local Dev Setup (Windows)
+## 9Mint — Local Dev Setup (Windows)
 
 You will install **PHP 8.x**, **Composer 2**, **Node.js 20 LTS**, and **MySQL 8**, then wire Laravel to your local DB.
 
@@ -204,4 +204,4 @@ Open **http://127.0.0.1:8000**.
 - Keep DB bound to **127.0.0.1:3306** (don't expose to LAN).  
 - Never put real secrets in Git.
 
-### Daily/Pre-push routine moved to `docs/dev-workflow.md`.
+### Daily/Pre-push routine moved to [docs/dev-workflow.md](docs/dev-workflow.md)
