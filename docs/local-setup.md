@@ -204,4 +204,4 @@ Open **http://127.0.0.1:8000**.
 - Keep DB bound to **127.0.0.1:3306** (don't expose to LAN).  
 - Never put real secrets in Git.
 
-### Daily/Pre-push routine moved to `docs/Dev-Routine.md`.
+### Daily/Pre-push routine moved to `docs/dev-workflow.md`.

@@ -1,8 +1,8 @@
-\# 9Mint — Dev Routine (Daily \& Pre-Push)
+# 9Mint — Dev Routine (Daily \& Pre-Push)
 
 
 
-This is the small set of things you do \*\*every time\*\* you pull or push. Keep it short, keep it predictable.
+This is the small set of things you do **every time** you pull or push. Keep it short, keep it predictable.
 
 
 
@@ -10,81 +10,37 @@ This is the small set of things you do \*\*every time\*\* you pull or push. Keep
 
 
 
-\## After you \*\*clone\*\* (first time only)
+## After you **clone** (first time only)
 
 
 
 1\. Copy env \& install deps:
 
-&nbsp;  ```cmd
+```cmd
 
-&nbsp;  composer install
+composer install
 
-&nbsp;  copy .env.example .env
+copy .env.example .env
 
-&nbsp;  npm ci
+npm ci
 
-&nbsp;  ```
+```
 
 
 
 2\. Edit `.env` (DB creds, APP\_URL), then apply:
 
-&nbsp;  ```cmd
+```cmd
 
-&nbsp;  php artisan config:clear
+php artisan config:clear
 
-&nbsp;  php artisan key:generate
+php artisan key:generate
 
-&nbsp;  php artisan migrate
+php artisan migrate
 
-&nbsp;  php artisan storage:link
+php artisan storage:link
 
-&nbsp;  ```
-
-
-
----
-
-
-
-\## After you \*\*pull\*\* from Git
-
-
-
-1\. \*\*Dependencies\*\* (only if lockfiles changed):
-
-&nbsp;  ```cmd
-
-&nbsp;  composer install
-
-&nbsp;  npm ci
-
-&nbsp;  ```
-
-
-
-2\. \*\*Config \& DB\*\* (always safe to run):
-
-&nbsp;  ```cmd
-
-&nbsp;  php artisan config:clear
-
-&nbsp;  php artisan migrate
-
-&nbsp;  ```
-
-
-
-3\. \*\*Start dev servers\*\* (two terminals):
-
-&nbsp;  ```cmd
-
-&nbsp;  php artisan serve
-
-&nbsp;  npm run dev
-
-&nbsp;  ```
+```
 
 
 
@@ -92,11 +48,53 @@ This is the small set of things you do \*\*every time\*\* you pull or push. Keep
 
 
 
-\## Day-to-day quick checks
+## After you **pull** from Git
 
 
 
-\*\*Routes visible:\*\*
+1\. **Dependencies** (only if lockfiles changed):
+
+```cmd
+
+composer install
+
+npm ci
+
+```
+
+
+
+2\. **Config \& DB** (always safe to run):
+
+```cmd
+
+php artisan config:clear
+
+php artisan migrate
+
+```
+
+
+
+3\. **Start dev servers** (two terminals):
+
+```cmd
+
+php artisan serve
+
+npm run dev
+
+```
+
+---
+
+
+
+## Day-to-day quick checks
+
+
+
+**Routes visible:**
 
 ```cmd
 
@@ -106,11 +104,11 @@ php artisan route:list --path=/api/v1
 
 
 
-\*\*App URL:\*\* open `http://127.0.0.1:8000/api/v1/health`
+**App URL:** open `http://127.0.0.1:8000/api/v1/health`
 
 
 
-\*\*Storage link OK:\*\*
+**Storage link OK:**
 
 ```cmd
 
@@ -126,7 +124,7 @@ echo ok> storage/app/public/ping.txt
 
 
 
-\## Protected endpoints during dev (no login UI yet)
+## Protected endpoints during dev (no login UI yet)
 
 
 
@@ -134,7 +132,7 @@ Use a Sanctum personal access token.
 
 
 
-\*\*Create token (one-time):\*\*
+**Create token (one-time):**
 
 ```cmd
 
@@ -150,7 +148,7 @@ php artisan tinker
 
 
 
-\*\*Call protected routes with header:\*\*
+**Call protected routes with header:**
 
 ```
 
@@ -160,7 +158,7 @@ Authorization: Bearer <paste-token>
 
 
 
-\*(When you later add SPA login, routes don't change; only the client auth method changes.)\*
+*(When you later add SPA login, routes don't change; only the client auth method changes.)*
 
 
 
@@ -168,19 +166,19 @@ Authorization: Bearer <paste-token>
 
 
 
-\## Before you \*\*push\*\* (PR checklist)
+## Before you **push** (PR checklist)
 
 
 
-\- Compiles / boots locally: `php artisan serve` + `npm run dev`
+- Compiles / boots locally: `php artisan serve` + `npm run dev`
 
-\- DB up to date: `php artisan migrate` (no pending local changes)
+- DB up to date: `php artisan migrate` (no pending local changes)
 
-\- New schema? Add a migration, don't edit old ones
+- New schema? Add a migration, don't edit old ones
 
-\- Run formatters/tests if they exist (e.g. `php artisan test`, `vendor/bin/pint`)
+- Run formatters/tests if they exist (e.g. `php artisan test`, `vendor/bin/pint`)
 
-\- No secrets in Git (`.env` ignored)
+- No secrets in Git (`.env` ignored)
 
 
 
@@ -188,7 +186,7 @@ Authorization: Bearer <paste-token>
 
 
 
-\## Common commands (copy-paste)
+## Common commands (copy-paste)
 
 
 
@@ -214,15 +212,15 @@ composer dump-autoload
 
 
 
-\## Useful docs
+## Useful docs
 
 
 
-\- \*\*Sanctum tokens vs SPA cookies:\*\* https://laravel.com/docs/sanctum
+- **Sanctum tokens vs SPA cookies:** https://laravel.com/docs/sanctum
 
-\- \*\*Routing \& route:list:\*\* https://laravel.com/docs/routing
+- **Routing \& route:list:** https://laravel.com/docs/routing
 
-\- \*\*Migrations:\*\* https://laravel.com/docs/migrations
+- **Migrations:** https://laravel.com/docs/migrations
 
 
 

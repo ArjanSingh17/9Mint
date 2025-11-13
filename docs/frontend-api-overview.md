@@ -2,9 +2,9 @@
 
 
 
-\*\*API base:\*\* `/api/v1`  
+**API base:** `/api/v1`  
 
-\*\*Auth right now:\*\* public endpoints only, or use a dev \*\*Bearer token\*\* for protected routes.
+**Auth right now:** public endpoints only, or use a dev **Bearer token** for protected routes.
 
 
 
@@ -12,19 +12,19 @@
 
 
 
-\## Build these screens now
+## Build these screens now
 
 
 
-\- \*\*Collections list\*\* → `GET /collections` (paginated)
+- **Collections list\*\* → `GET /collections` (paginated)
 
-\- \*\*Collection detail\*\* → `GET /collections/{slug}`
+- **Collection detail*\* → `GET /collections/{slug}`
 
-\- \*\*NFTs list\*\* → `GET /nfts?search=\&collection\_id=` (paginated; both filters optional)
+- **NFTs list** → `GET /nfts?search=\&collection\_id=` (paginated; both filters optional)
 
-\- \*\*NFT detail\*\* → `GET /nfts/{slug}`
+- **NFT detail** → `GET /nfts/{slug}`
 
-\- \*\*(Optional)\*\* price helper → `GET /price/convert?amount=0.08`
+- **(Optional)** price helper → `GET /price/convert?amount=0.08`
 
 
 
@@ -36,11 +36,11 @@
 
 
 
-\## Minimal contract (quick reference)
+## Minimal contract (quick reference)
 
 
 
-\### Collections
+### Collections
 
 
 
@@ -58,7 +58,7 @@ JSON fields: `id, slug, name, cover, creator\_name`
 
 
 
-\### NFTs
+### NFTs
 
 
 
@@ -74,7 +74,7 @@ GET /api/v1/nfts/{slug}
 
 JSON fields (per item):
 
-```json
+```
 
 {
 
@@ -100,7 +100,7 @@ JSON fields (per item):
 
 
 
-\### Protected (use dev token during FE build)
+### Protected (use dev token during FE build)
 
 
 
@@ -126,7 +126,7 @@ POST   /api/v1/admin/nfts        (multipart: image + fields)
 
 
 
-\*\*Auth header for dev:\*\*
+**Auth header for dev:**
 
 ```
 
@@ -144,19 +144,19 @@ Sanctum overview: https://laravel.com/docs/sanctum
 
 
 
-\## Conventions
+## Conventions
 
 
 
-\- \*\*Slugs\*\* for detail routes (`/nfts/{slug}`, `/collections/{slug}`)
+- **Slugs** for detail routes (`/nfts/{slug}`, `/collections/{slug}`)
 
-\- \*\*Images\*\* come as absolute/relative `image\_url`; just render it
+- **Images** come as absolute/relative `image\_url`; just render it
 
-\- \*\*Search:\*\* `?search=` does a simple LIKE on name
+- **Search:** `?search=` does a simple LIKE on name
 
-\- \*\*Filtering:\*\* `?collection\_id=` narrows the NFTs list
+- **Filtering:** `?collection\_id=` narrows the NFTs list
 
-\- \*\*Errors:\*\* unauthenticated → 401, validation errors → 422 with field messages (standard Laravel)  
+- **Errors:** unauthenticated → 401, validation errors → 422 with field messages (standard Laravel)  
 
 &nbsp; Docs: https://laravel.com/docs/validation#quick-writing-the-validation-logic
 
