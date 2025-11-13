@@ -1,4 +1,4 @@
-# 9Mint — Local Dev Setup (Windows)
+## 9Mint — Local Dev Setup (Windows)
 
 You will install **PHP 8.x**, **Composer 2**, **Node.js 20 LTS**, and **MySQL 8**, then wire Laravel to your local DB.
 
@@ -36,7 +36,7 @@ You will install **PHP 8.x**, **Composer 2**, **Node.js 20 LTS**, and **MySQL 8*
      `where php` must show `C:\Users\<you>\php\php.exe` first.
 4. **Create a real config**
    - Copy `php.ini-development` → rename the copy to **`php.ini`**  
-     *(Turn on “File name extensions” in Explorer so you don’t create `php.ini.ini`.)*
+     *(Turn on "File name extensions" in Explorer so you don't create `php.ini.ini`.)*
 5. **Edit** `C:\Users\<you>\php\php.ini`
    - Set:
      ```
@@ -82,7 +82,7 @@ You will install **PHP 8.x**, **Composer 2**, **Node.js 20 LTS**, and **MySQL 8*
    ```cmd
    composer self-update --2
    ```
-> If Composer whines about `openssl`/`mbstring`/etc., you didn’t enable them in `php.ini`.
+> If Composer whines about `openssl`/`mbstring`/etc., you didn't enable them in `php.ini`.
 
 ---
 
@@ -194,17 +194,6 @@ Open **http://127.0.0.1:8000**.
 
 ## Notes
 
-### Daily workflow
-- `git pull`  
-- `php artisan migrate` (apply new migrations)  
-- Start servers: `php artisan serve` (A) + `npm run dev` (B)
-
-### Migrations & seeders (shared source of truth)
-- Commit your schema in `database/migrations/**`.  
-- Optional demo data in `database/seeders/**` (+ factories).  
-- Don’t edit old migrations on main; add new ones (e.g., `add_x_to_y_table`).  
-- Clean dev reset (if needed): `php artisan migrate:fresh --seed` (dev only).
-
 ### What is shared vs local
 **Shared (commit):** `app/**`, `routes/**`, `resources/**`, `database/migrations/**`, `database/seeders/**`, `database/factories/**`, `composer.json`/`composer.lock`, `package.json`/`package-lock.json`, `vite.config.*`, `README.md`, `docs/**`, `.env.example` (keys listed, no secrets).  
 **Local (never commit):** `.env`, `vendor/`, `node_modules/`, `storage/logs/*`, any `.sql` dumps.
@@ -212,10 +201,7 @@ Open **http://127.0.0.1:8000**.
 ### Security baseline (local)
 - Root password: **strong & unique** (per dev).  
 - App user: **`mint/devpass`**, limited to **`9mint`** (do **not** use root in `.env`).  
-- Keep DB bound to **127.0.0.1:3306** (don’t expose to LAN).  
+- Keep DB bound to **127.0.0.1:3306** (don't expose to LAN).  
 - Never put real secrets in Git.
 
-### Quick “after editing `.env`” command
-```cmd
-php artisan config:clear && php artisan migrate
-```
+### Daily/Pre-push routine moved to [docs/dev-workflow.md](dev-workflow.md)
