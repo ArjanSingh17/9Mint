@@ -7,59 +7,34 @@ use Illuminate\Auth\Access\Response;
 
 class UserProfilePolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
-    {
-        return false;
+
+public function view(User $user, User $targetUser): bool
+{
+    // viewing their own profile
+    if ($user->id === $targetUser->id) {
+        return true; 
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, User $model): bool
-    {
-        return false;
+    // 2. Admin Management (Admin with explicit permission)
+    if ($user->hasRole('admin') && $user->can('manage_users')) {
+        return true;
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
-    public function create(User $user): bool
-    {
-        return false;
+    // DENY BY DEFAULT
+    return false;
+}
+
+public function update(User $user, User $targetUser): bool
+{
+    // The same security rules apply to updating data as viewing it.
+    if ($user->id === $targetUser->id) {
+        return true; 
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, User $model): bool
-    {
-        return false;
+    if ($user->hasRole('admin') && $user->can('manage_users')) {
+        return true;
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, User $model): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, User $model): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, User $model): bool
-    {
-        return false;
-    }
+    return false;
+}
 }
