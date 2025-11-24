@@ -15,7 +15,7 @@ public function view(User $user, User $targetUser): bool
         return true; 
     }
 
-    // 2. Admin Management (Admin with explicit permission)
+    // Admin Management (Admin with explicit permission)
     if ($user->hasRole('admin') && $user->can('manage_users')) {
         return true;
     }
