@@ -23,7 +23,14 @@ class AdminNftController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validated();
+        $data = $request->validate([
+    'name'             => 'required|string|max:255',
+    'collection_id'    => 'required|integer|exists:collections,id',
+    'price_crypto'     => 'required|numeric|min:0',
+    'editions_total'   => 'required|integer|min:1',
+    'image'            => 'required|image|max:2048',
+    'description'      => 'nullable|string',
+]);
 
         $path = $request->file('image')->store('nfts','public');
         $data['image_url'] = Storage::url($path);
