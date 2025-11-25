@@ -51,16 +51,40 @@ class AdminNftController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        //
+   public function update(Request $request, Nft $nft)
+{
+    $validated = $request->validate([
+        'name'          => 'sometimes|string|max:255',
+        'description'   => 'nullable|string',
+        'price_crypto'  => 'sometimes|numeric|min:0',
+        'editions_total' => 'sometimes|integer|min:1',
+        'image'         => 'sometimes|image|max:2048',
+    ]);
+
+    if ($request->hasFile('image')) {
+        if ($nft->image_url) {
+            $old = str_replace('/storage/', '', $nft->image_url);
+            Storage::disk('public')->delete($old);
+        }
+
+        $path = $request->file('image')->store('nfts', 'public');
+        $validated['image_url'] = Storage::url($path);
     }
+
+    $nft->update($validated);
+
+    return response()->json([
+        'message' => 'NFT updated successfully',
+        'data'    => $nft
+    ]);
+}
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        //
+        
     }
 }
