@@ -83,8 +83,18 @@ class AdminNftController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        
+   public function destroy(Nft $nft)
+{
+    if ($nft->image_url) {
+        $old = str_replace('/storage/', '', $nft->image_url);
+        Storage::disk('public')->delete($old);
     }
+
+    $nft->delete();
+
+    return response()->json([
+        'message' => 'NFT deleted successfully'
+    ]);
+}
+
 }
