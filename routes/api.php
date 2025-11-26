@@ -32,11 +32,19 @@ Route::prefix('v1')->group(function () {
         Route::get('me/favourites', [FavouriteController::class, 'index']);
         Route::post('nfts/{nft}/favourite', [FavouriteController::class, 'toggle']);
 
+        // Cart routes
         Route::get('cart', [CartController::class, 'index']);
         Route::post('cart', [CartController::class, 'store']);
+        Route::get('cart/{id}', [CartController::class, 'show']);
+        Route::put('cart/{id}', [CartController::class, 'update']);
         Route::delete('cart/{nft}', [CartController::class, 'destroy']);
 
+        // Checkout routes
+        Route::get('checkout', [CheckoutController::class, 'index']);
         Route::post('checkout', [CheckoutController::class, 'store']);
+        Route::get('checkout/{id}', [CheckoutController::class, 'show']);
+        Route::put('checkout/{id}', [CheckoutController::class, 'update']);   
+        Route::delete('checkout/{id}', [CheckoutController::class, 'destroy']);
 
         // Admin
         Route::prefix('admin')->group(function () {
