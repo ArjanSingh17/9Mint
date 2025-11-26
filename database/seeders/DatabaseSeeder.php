@@ -24,9 +24,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
         ]);
 
-        // Source - https://stackoverflow.com/a
-        // Posted by Angel M., modified by community. See post 'Timeline' for change history
-        // Retrieved 2025-11-26, License - CC BY-SA 3.0
+        
         $this->call(UsersTableSeeder::class);
     }
 }
