@@ -44,7 +44,10 @@ Route::prefix('v1')->group(function () {
     // Price Conversion
     Route::get('price/convert', [PriceController::class, 'convert']);
 
-
+// Authentication
+Route::post('login', [AuthController::class, 'login']);
+Route::post('register', [AuthController::class, 'register']);
+  
     /*
     | AUTHENTICATED ROUTES
     */
