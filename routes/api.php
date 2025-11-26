@@ -18,7 +18,7 @@ use App\Http\Controllers\Api\V1\AdminCollectionController;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes (Token-based authentication via Sanctum)
+| API Routes (Laravel Sanctum Token Authentication)
 |--------------------------------------------------------------------------
 */
 
@@ -26,7 +26,7 @@ Route::prefix('v1')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | PUBLIC ROUTES (No authentication required)
+    | PUBLIC ROUTES
     |--------------------------------------------------------------------------
     */
 
@@ -36,26 +36,26 @@ Route::prefix('v1')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
 
-    // Collections (Public browsing)
+    // Public Collections
     Route::get('collections', [CollectionController::class, 'index']);
     Route::get('collections/{slug}', [CollectionController::class, 'show']);
 
-    // NFTs (Public browsing)
+    // Public NFTs
     Route::get('nfts', [NftController::class, 'index']);
     Route::get('nfts/{slug}', [NftController::class, 'show']);
 
-    // Price Conversion
+    // Crypto Conversion
     Route::get('price/convert', [PriceController::class, 'convert']);
 
     /*
     |--------------------------------------------------------------------------
-    | AUTHENTICATED ROUTES (Require valid Sanctum token)
+    | AUTHENTICATED ROUTES
     |--------------------------------------------------------------------------
     */
 
     Route::middleware('auth:sanctum')->group(function () {
 
-        // Authentication
+        // User Account
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('me', [AuthController::class, 'me']);
 
@@ -72,20 +72,19 @@ Route::prefix('v1')->group(function () {
         Route::post('checkout', [CheckoutController::class, 'store']);
 
         /*
-        |----------------------------------------------------------------------
-        | ADMIN ROUTES (Authenticated users only - add role check if needed)
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
+        | ADMIN ROUTES
+        |--------------------------------------------------------------------------
         */
 
         Route::prefix('admin')->group(function () {
-            // TODO: Add middleware('role:admin') once you implement role checking
 
-            // NFT Admin CRUD
+            // NFT ADMIN CRUD
             Route::post('nfts', [AdminNftController::class, 'store']);
             Route::put('nfts/{nft}', [AdminNftController::class, 'update']);
             Route::delete('nfts/{nft}', [AdminNftController::class, 'destroy']);
 
-            // Collection Admin CRUD
+            // COLLECTION ADMIN CRUD
             Route::post('collections', [AdminCollectionController::class, 'store']);
             Route::put('collections/{collection}', [AdminCollectionController::class, 'update']);
             Route::delete('collections/{collection}', [AdminCollectionController::class, 'destroy']);
