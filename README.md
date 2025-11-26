@@ -1,3 +1,7 @@
+Hello we can add information about our website here.
+Naomi 240229043
+
+Maliyka 240119641
 <p align="center">
   <img src="9mint.png" alt="9Mint logo" width="180">
 </p>
