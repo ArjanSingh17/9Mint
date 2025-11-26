@@ -1,32 +1,43 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\UserProfileController;
 
-Route::get('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout']);
+/*
+|--------------------------------------------------------------------------
+| Web Routes (Session-based, for traditional web pages)
+|--------------------------------------------------------------------------
+*/
 
-Route::middleware('auth')->group(function () {
-    // view and update details
+// If you need a web-based login page in the future, create a separate WebAuthController
+// For now, redirect to API documentation or your React app
+Route::get('/login', function () {
+    return response()->json([
+        'message' => 'This is an API-only application. Please use POST /api/v1/login',
+        'documentation' => url('/api/documentation')
+    ], 200);
+});
+
+Route::get('/', function () {
+    return response()->json([
+        'app' => '9Mint NFT Marketplace',
+        'version' => '1.0',
+        'api_base' => url('/api/v1'),
+    ]);
+});
+
+// Profile routes (if you actually need web-based profile pages)
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');
-    // Handle the form submission to update the profile
     Route::patch('/profile', [UserProfileController::class, 'updateSelf'])->name('profile.update');
-
-    // change Password
     Route::patch('/profile/password', [UserProfileController::class, 'updatePassword'])->name('password.update');
 });
 
-
-// --- Define the routes that allow an Admin to manage any user's profile
-
+// Admin web routes (if needed)
 Route::group([
-    'middleware' => ['auth', 'role:admin'], // Must be logged in AND have the 'admin' role
-    'prefix' => 'admin' 
+    'middleware' => ['auth:sanctum', 'role:admin'],
+    'prefix' => 'admin'
 ], function () {
-    // GET /admin/users/{user} -> Admin views a specific customer's profile
     Route::get('/users/{user}', [UserProfileController::class, 'showUser'])->name('admin.users.show');
-    
-    // PATCH /admin/users/{user} -> Admin updates a specific customer's profile
     Route::patch('/users/{user}', [UserProfileController::class, 'updateUser'])->name('admin.users.update');
 });
