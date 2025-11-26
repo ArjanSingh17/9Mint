@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Collection extends Model
 {
@@ -20,7 +21,7 @@ class Collection extends Model
         'creator_name',
     ];
 
-    public function nfts()
+    public function nfts(): HasMany
     {
         return $this->hasMany(Nft::class);
     }
