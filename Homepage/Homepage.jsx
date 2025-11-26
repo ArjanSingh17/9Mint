@@ -10,13 +10,14 @@ export default function Homepage() {
                 <img src="/logo.png" alt="Logo" className="logo-image">
         </div>
             
-    <ul className="nav-center">
-      <Route path="/homepage" element={<Homepage />} />
-      <Route path="/aboutus" element={<Aboutus />} />
-      <Route path="/products" element={<Products />} />
-      <Route path="/pricing" element={<Pricing />} />
-      <Route path="/contactus" element={<ContactUs />} />
-      </ul>
+    <nav className="nav-links">
+        <Link to="/home">Homepage</Link>
+        <Link to="/AboutUs">AbouttUs</Link>
+         <Link to="/products">Products</Link>
+         <Link to="/pricing">Pricing</Link>
+         <Link to="/contact">ContactUs</Link>
+         
+        </nav>
 
       <div className="nav-right">
         <Link to="/account" className="account-link">Account</Link>
@@ -38,4 +39,5 @@ export default function Homepage() {
     </section>
     </div>
    );
+
 }
