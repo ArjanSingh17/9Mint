@@ -55,7 +55,7 @@ class AuthController extends Controller
             ]);
         }
 
-        // Revoke old tokens (optional - remove if you want multiple sessions)
+        // Optional: Revoke old tokens (comment out if you want multiple sessions)
         $user->tokens()->delete();
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -73,7 +73,6 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        // Revoke current token
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([

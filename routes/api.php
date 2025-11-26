@@ -17,44 +17,46 @@ use App\Http\Controllers\Api\V1\AdminNftController;
 use App\Http\Controllers\Api\V1\AdminCollectionController;
 
 /*
-| API Routes
+|--------------------------------------------------------------------------
+| API Routes (Token-based authentication via Sanctum)
+|--------------------------------------------------------------------------
 */
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 
 Route::prefix('v1')->group(function () {
 
     /*
-    | PUBLIC ROUTES
+    |--------------------------------------------------------------------------
+    | PUBLIC ROUTES (No authentication required)
+    |--------------------------------------------------------------------------
     */
 
-    Route::get('health', fn () => ['ok' => true]);
+    Route::get('health', fn () => ['ok' => true, 'timestamp' => now()]);
 
-    // Collections
+    // Authentication
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('register', [AuthController::class, 'register']);
+
+    // Collections (Public browsing)
     Route::get('collections', [CollectionController::class, 'index']);
     Route::get('collections/{slug}', [CollectionController::class, 'show']);
 
-    // NFTs
+    // NFTs (Public browsing)
     Route::get('nfts', [NftController::class, 'index']);
     Route::get('nfts/{slug}', [NftController::class, 'show']);
 
     // Price Conversion
     Route::get('price/convert', [PriceController::class, 'convert']);
 
-// Authentication
-Route::post('login', [AuthController::class, 'login']);
-Route::post('register', [AuthController::class, 'register']);
-  
     /*
-    | AUTHENTICATED ROUTES
+    |--------------------------------------------------------------------------
+    | AUTHENTICATED ROUTES (Require valid Sanctum token)
+    |--------------------------------------------------------------------------
     */
 
     Route::middleware('auth:sanctum')->group(function () {
 
-        // User Profile
+        // Authentication
+        Route::post('logout', [AuthController::class, 'logout']);
         Route::get('me', [AuthController::class, 'me']);
 
         // Favourites
@@ -69,12 +71,14 @@ Route::post('register', [AuthController::class, 'register']);
         // Checkout
         Route::post('checkout', [CheckoutController::class, 'store']);
 
-
         /*
-        | ADMIN ROUTES (authenticated only)
+        |----------------------------------------------------------------------
+        | ADMIN ROUTES (Authenticated users only - add role check if needed)
+        |----------------------------------------------------------------------
         */
 
         Route::prefix('admin')->group(function () {
+            // TODO: Add middleware('role:admin') once you implement role checking
 
             // NFT Admin CRUD
             Route::post('nfts', [AdminNftController::class, 'store']);
