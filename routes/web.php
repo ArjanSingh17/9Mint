@@ -2,11 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
+use Inertia\Inertia;
 use App\Http\Controllers\UserProfileController;
 
 Route::get('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
 
+Route::get('/', function () {
+    return view('homepage');
 Route::middleware('auth')->group(function () {
     // view and update details
     Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');
