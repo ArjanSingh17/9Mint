@@ -5,10 +5,10 @@
             
     <nav class="nav-links">
         <a href="/">Homepage</a>
-        <Link to="/AboutUs">About Us</Link>
+        <a href="/aboutUs">About Us</a>
          <a href="/products">Products</a>
          <a href="/pricing">Pricing</a>
-         <Link to="/contact">ContactUs</Link>
+         <a href="/contactUs">ContactUs</a>
         </nav>
 
       <div class="nav-right">

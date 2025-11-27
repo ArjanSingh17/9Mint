@@ -27,7 +27,21 @@ Route::get('/products/SuperheroCollection', function () {
     return view('SuperheroCollection');
 });
 
+Route::get('/contactUs', function () {
+    return view('ContactUs');
+});
 
+Route::get('/aboutUs', function () {
+    return view('aboutUs');
+});
+
+Route::get('/contactUs/terms', function () {
+    return view('TermsAndConditions');
+});
+
+Route::get('/contactUs/faqs', function () {
+    return view('Faqs');
+});
 //Route::middleware('auth')->group(function () {
     // view and update details
   //  Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');

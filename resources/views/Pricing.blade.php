@@ -32,7 +32,7 @@
                 <div class="pricing-item pricing-small">
                     <div class="pricing-content">
                     <div class="diagram">
-                        <img src="/NFT-small.png" alt="Small diagram" />
+                       <img src="{{ asset('images/NFT-small.png')}}" alt="NFT"/>
                     </div>
                 <div class="pricing-text">
                     <h4>Small:</h4>
@@ -44,7 +44,7 @@
             <div class="pricing-item pricing-medium">
                 <div class="pricing-content">
                     <div class="diagram">
-                        <img src="/NFT-medium.png" alt="Medium diagram" />
+                        <img src="{{ asset('images/NFT-medium.png')}}" alt="NFT"/>
                     </div>
                 <div class="pricing-text">
                     <h4>Medium:</h4>
@@ -56,7 +56,7 @@
             <div class="pricing-item pricing-large">
                 <div class="pricing-content">
                     <div class="diagram">
-                        <img src="/NFT-large.png" alt="Large diagram" />
+                        <img src="{{ asset('images/NFT-large.png')}}" alt="NFT"/>
                     </div>
                 <div class="pricing-text">
                     <h4>Large:</h4>
