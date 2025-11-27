@@ -2,34 +2,52 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
-use Inertia\Inertia;
 use App\Http\Controllers\UserProfileController;
 
-Route::get('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout']);
+//Route::get('/login', [AuthController::class, 'login']);
+//Route::post('/logout', [AuthController::class, 'logout']);
 
 Route::get('/', function () {
     return view('homepage');
-Route::middleware('auth')->group(function () {
+});
+
+Route::get('/products', function () {
+    return view('products');
+});
+
+Route::get('/products/Glossy-collection', function () {
+    return view('Glossy-collection');
+});
+
+Route::get('/pricing', function () {
+    return view('Pricing');
+});
+
+Route::get('/products/SuperheroCollection', function () {
+    return view('SuperheroCollection');
+});
+
+
+//Route::middleware('auth')->group(function () {
     // view and update details
-    Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');
+  //  Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');
     // Handle the form submission to update the profile
-    Route::patch('/profile', [UserProfileController::class, 'updateSelf'])->name('profile.update');
+    //Route::patch('/profile', [UserProfileController::class, 'updateSelf'])->name('profile.update');
 
     // change Password
-    Route::patch('/profile/password', [UserProfileController::class, 'updatePassword'])->name('password.update');
-});
+    //Route::patch('/profile/password', [UserProfileController::class, 'updatePassword'])->name('password.update');
+//});
 
 
 // --- Define the routes that allow an Admin to manage any user's profile
 
-Route::group([
-    'middleware' => ['auth', 'role:admin'], // Must be logged in AND have the 'admin' role
-    'prefix' => 'admin' 
-], function () {
+//Route::group([
+  //  'middleware' => ['auth', 'role:admin'], // Must be logged in AND have the 'admin' role
+    //'prefix' => 'admin' 
+//], function () {
     // GET /admin/users/{user} -> Admin views a specific customer's profile
-    Route::get('/users/{user}', [UserProfileController::class, 'showUser'])->name('admin.users.show');
+  //  Route::get('/users/{user}', [UserProfileController::class, 'showUser'])->name('admin.users.show');
     
     // PATCH /admin/users/{user} -> Admin updates a specific customer's profile
-    Route::patch('/users/{user}', [UserProfileController::class, 'updateUser'])->name('admin.users.update');
-});
+    //Route::patch('/users/{user}', [UserProfileController::class, 'updateUser'])->name('admin.users.update');
+//});
