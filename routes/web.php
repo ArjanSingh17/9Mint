@@ -11,6 +11,10 @@ Route::get('/', function () {
     return view('login-register');
 });
 
+Route::get('/cart', function () {
+    return view('cart');
+});
+
 Route::get('/checkout', function () {
     return view('checkout');
 });

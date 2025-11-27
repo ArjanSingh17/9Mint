@@ -15,7 +15,7 @@
          <a href="/contactUs">Contact Us</a>
         </div>
 
-        <div class="nav-auth"><a href="/checkout">
+        <div class="nav-auth"><a href="/cart">
           <button class="basket-btn">
             <span class="basket-icon">🛒</span>
             <span class="basket-badge">1</span>
