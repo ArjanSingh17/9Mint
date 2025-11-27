@@ -8,7 +8,15 @@ use App\Http\Controllers\UserProfileController;
 //Route::post('/logout', [AuthController::class, 'logout']);
 
 Route::get('/', function () {
-    return view('homepage');
+    return view('login-register');
+});
+
+Route::get('/checkout', function () {
+    return view('checkout');
+});
+
+Route::get('/homepage', function () {
+    return view('Homepage');
 });
 
 Route::get('/products', function () {
