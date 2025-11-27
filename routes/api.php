@@ -24,6 +24,7 @@ Route::prefix('v1')->group(function () {
     Route::get('nfts', [NftController::class, 'index']);
     Route::get('nfts/{slug}', [NftController::class, 'show']);
     Route::get('price/convert', [PriceController::class, 'convert']);
+    Route::post('register', [AuthController::class, 'register']);
 
     // Authenticated
     Route::middleware('auth:sanctum')->group(function () {
@@ -43,7 +44,7 @@ Route::prefix('v1')->group(function () {
         Route::get('checkout', [CheckoutController::class, 'index']);
         Route::post('checkout', [CheckoutController::class, 'store']);
         Route::get('checkout/{id}', [CheckoutController::class, 'show']);
-        Route::put('checkout/{id}', [CheckoutController::class, 'update']);   
+        Route::put('checkout/{id}', [CheckoutController::class, 'update']);
         Route::delete('checkout/{id}', [CheckoutController::class, 'destroy']);
 
         // Admin

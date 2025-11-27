@@ -1,19 +1,17 @@
-      <nav class="navbar">
-        <div class="logo-container">
-          <img
-            src="{{ asset('images/logo.png')}}"
-            alt="9 Mint Logo"
-            class="logo-image"
-          />
-        </div>
+<nav class="navbar">
+  <div class="logo-container">
+    <a href="/homepage">
+      <img src="{{ asset('images/logo.png') }}" alt="9 Mint Logo" class="logo-image" />
+    </a>
+  </div>
 
-        <div class="nav-links">
-          <a href="/homepage">Homepage</a>
-        <a href="/aboutUs">About Us</a>
-         <a href="/products">Products</a>
-         <a href="/pricing">Pricing</a>
-         <a href="/contactUs">Contact Us</a>
-        </div>
+  <div class="nav-links">
+    <a href="/homepage">Homepage</a>
+    <a href="/aboutUs">About Us</a>
+    <a href="/products">Products</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/contactUs">Contact Us</a>
+  </div>
 
         <div class="nav-auth"><a href="/cart">
           <button class="basket-btn">
@@ -21,8 +19,17 @@
             <span class="basket-badge">1</span>
           </button></a>
 
-          <button class="nav-btn signin" >
-            <a href="/">Account</a>
-          </button>
-        </div>
-      </nav>
+    @auth
+      <a href="{{ route('profile') }}" class="nav-btn account">
+        Account
+      </a>
+
+      <form method="POST" action="{{ route('logout') }}" class="inline">
+        @csrf
+        <button type="submit" class="nav-btn signout">Logout</button>
+      </form>
+    @else
+      <a href="{{ route('login') }}" class="nav-btn signin">Login / Register</a>
+    @endauth
+  </div>
+</nav>

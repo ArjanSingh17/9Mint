@@ -9,9 +9,9 @@
      <link rel="stylesheet" href="{{ asset('css/Glossy-collection.css') }}">
 </head>
 <body>
-  
+
         <div>
-        
+
             <x-navbar />
 
     <div class="Duck-NFT">
@@ -30,7 +30,19 @@
                 <button class="large-size">large</button>
             </div>
 
-            <button class="Add-to-basket">Add to basket</button>
+            @auth
+              <form method="POST" action="{{ route('cart.store') }}" class="inline">
+                @csrf
+                <input type="hidden" name="nft_slug" value="MY_SLUG">
+                <button type="submit" class="Add-to-basket">Add to basket</button>
+              </form>
+            @else
+              <a class="Add-to-basket"
+                 href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
+                Login to add to basket
+              </a>
+            @endauth
+
         </div>
     </div>
 
@@ -50,7 +62,19 @@
                 <button class="large-size">large</button>
             </div>
 
-            <button class="Add-to-basket">Add to basket</button>
+            @auth
+              <form method="POST" action="{{ route('cart.store') }}" class="inline">
+                @csrf
+                <input type="hidden" name="nft_slug" value="MY_SLUG">
+                <button type="submit" class="Add-to-basket">Add to basket</button>
+              </form>
+            @else
+              <a class="Add-to-basket"
+                 href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
+                Login to add to basket
+              </a>
+            @endauth
+
         </div>
     </div>
 
@@ -70,7 +94,19 @@
                 <button class="large-size">large</button>
             </div>
 
-            <button class="Add-to-basket">Add to basket</button>
+            @auth
+              <form method="POST" action="{{ route('cart.store') }}" class="inline">
+                @csrf
+                <input type="hidden" name="nft_slug" value="MY_SLUG">
+                <button type="submit" class="Add-to-basket">Add to basket</button>
+              </form>
+            @else
+              <a class="Add-to-basket"
+                 href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
+                Login to add to basket
+              </a>
+            @endauth
+
         </div>
     </div>
 
@@ -90,7 +126,19 @@
                 <button class="large-size">large</button>
             </div>
 
-            <button class="Add-to-basket">Add to basket</button>
+            @auth
+              <form method="POST" action="{{ route('cart.store') }}" class="inline">
+                @csrf
+                <input type="hidden" name="nft_slug" value="MY_SLUG">
+                <button type="submit" class="Add-to-basket">Add to basket</button>
+              </form>
+            @else
+              <a class="Add-to-basket"
+                 href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
+                Login to add to basket
+              </a>
+            @endauth
+
         </div>
     </div>
 
@@ -110,7 +158,19 @@
                 <button class="large-size">large</button>
             </div>
 
-            <button class="Add-to-basket">Add to basket</button>
+            @auth
+              <form method="POST" action="{{ route('cart.store') }}" class="inline">
+                @csrf
+                <input type="hidden" name="nft_slug" value="MY_SLUG">
+                <button type="submit" class="Add-to-basket">Add to basket</button>
+              </form>
+            @else
+              <a class="Add-to-basket"
+                 href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
+                Login to add to basket
+              </a>
+            @endauth
+
         </div>
     </div>
 
@@ -130,7 +190,19 @@
                 <button class="large-size">large</button>
             </div>
 
-            <button class="Add-to-basket">Add to basket</button>
+            @auth
+              <form method="POST" action="{{ route('cart.store') }}" class="inline">
+                @csrf
+                <input type="hidden" name="nft_slug" value="MY_SLUG">
+                <button type="submit" class="Add-to-basket">Add to basket</button>
+              </form>
+            @else
+              <a class="Add-to-basket"
+                 href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
+                Login to add to basket
+              </a>
+            @endauth
+
         </div>
     </div>
 
@@ -150,9 +222,21 @@
                 <button class="large-size">large</button>
             </div>
 
-            <button class="Add-to-basket">Add to basket</button>
+            @auth
+              <form method="POST" action="{{ route('cart.store') }}" class="inline">
+                @csrf
+                <input type="hidden" name="nft_slug" value="MY_SLUG">
+                <button type="submit" class="Add-to-basket">Add to basket</button>
+              </form>
+            @else
+              <a class="Add-to-basket"
+                 href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
+                Login to add to basket
+              </a>
+            @endauth
+
         </div>
     </div>
-</div>  
+</div>
 </body>
 </html>
