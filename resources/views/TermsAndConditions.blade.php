@@ -1,25 +1,21 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import "./contactUs.css"; // same stylesheet you were using in HTML
 
-const TermsAndConditions = () => {
-  return (
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+ <link rel="stylesheet" href="{{ asset('css/contactUs.css') }}">
+</head>
+<body>
+ 
     <div>
-      <header className="navbar">
-        <div className="logo">
-          <img src="/logo.png" alt="Logo" className="logo-image" />
-        </div>
+      
+      <x-navbar />
 
-        <nav className="nav-links">
-          <Link to="/products">Products</Link>
-          <Link to="/home">Home</Link>
-          <Link to="/pricing">Pricing</Link>
-          <Link to="/account">Account</Link>
-          <Link to="/aboutus">About Us</Link>
-        </nav>
-      </header>
-
-      <main className="terms-section">
+      <main class="terms-section">
         <h2>Terms and Conditions</h2>
         <p>
           Welcome to Our Website. By accessing or using our website, you agree
@@ -56,15 +52,13 @@ const TermsAndConditions = () => {
         </p>
 
         <p>
-          If you have more questions, click{" "}
-          <Link to="/faqs" className="FAQs">
+          If you have more questions, click
+          <Link to="/faqs" class="FAQs">
             here
-          </Link>{" "}
+          </Link>
           to view the FAQs.
         </p>
       </main>
-    </div>
-  );
-};
-
-export default TermsAndConditions;
+    </div> 
+</body>
+</html>
