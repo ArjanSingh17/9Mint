@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
-  <link rel="stylesheet" href="{{ asset('css/contactUs.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/checkout.css') }}">
 </head>
 <body>
 
@@ -16,11 +16,11 @@
        
         <x-navbar />
   
-    <div className="checkout-container">
+    <div class="checkoutContainer">
       <h1>Checkout</h1>
 
      
-      <section className="checkout-section">
+      <section class="checkoutSection">
         <h2>Shipping Information</h2>
         <form>
           <input type="text" placeholder="Full Name" />
@@ -31,7 +31,7 @@
       </section>
 
     
-      <section className="checkout-section">
+      <section class="checkoutSection">
         <h2>Your Order</h2>
         <p>No items in cart yet…</p>
      
