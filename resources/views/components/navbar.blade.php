@@ -13,12 +13,11 @@
     <a href="/contactUs">Contact Us</a>
   </div>
 
-  <div class="nav-auth">
-    {{-- Cart --}}
-    <a href="/checkout" class="basket-btn">
-      <span class="basket-icon">🛒</span>
-      <span class="basket-badge">{{ (int) session('cart_count', 0) }}</span>
-    </a>
+        <div class="nav-auth"><a href="/cart">
+          <button class="basket-btn">
+            <span class="basket-icon">🛒</span>
+            <span class="basket-badge">1</span>
+          </button></a>
 
     @auth
       <a href="{{ route('profile') }}" class="nav-btn account">
