@@ -6,22 +6,61 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Http\Requests\RegisterRequest;
 
 class AuthController extends Controller
 {
-    public function register(Request $r)
+    public function register(RegisterRequest $r)
     {
-    //
+        $user = User::create($r->validated());
+        return response()->json(['data' => $user], 201);
     }
 
-    public function login(Request $r)
+    public function me(Request $r)
     {
-        $r->validate(['email'=>'required|email','password'=>'required']);
-        if (! Auth::attempt($r->only('email','password'), true)) {
-            return response()->json(['message'=>'Invalid credentials'], 422);
-        }
+        return $r->user();
+    }
+
+    public function showLogin()
+    {
+        return view('login-register');
+    }
+
+    public function showRegister()
+    {
+        return view('login-register');
+    }
+
+    public function registerWeb(RegisterRequest $r)
+    {
+        $user = User::create($r->validated());
+        Auth::login($user);
         $r->session()->regenerate();
-        return response()->noContent();
+
+        if ($r->expectsJson()) {
+            return response()->json(['data' => $user], 201);
+        }
+
+        return redirect()->intended(route('homepage'));
+    }
+
+    public function loginWeb(Request $r)
+    {
+        $r->validateWithBag('login', ['email' => ['required','email'],'password' => ['required'],
+        ]);
+
+        if (! \Illuminate\Support\Facades\Auth::attempt(
+            $r->only('email','password'),
+            $r->boolean('remember')
+        )){
+            return back()
+                ->withErrors(['email' => 'Invalid credentials'], 'login')
+                ->withinput();
+        }
+
+        $r->session()->regenerate();
+
+        return redirect()->intended(route('profile'));
     }
 
     public function logout(Request $r)
@@ -29,10 +68,15 @@ class AuthController extends Controller
         Auth::logout();
         $r->session()->invalidate();
         $r->session()->regenerateToken();
-        return response()->noContent();
+
+        if($r->expectsJson()) {
+            return response()->noContent();
+        }
+        return redirect()->route('login');
     }
 
-    public function me(Request $r)
+    public function profile(Request $r)
     {
-        return $r->user(); }
+        return view('Homepage');
+    }
 }
