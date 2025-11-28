@@ -26,7 +26,7 @@ Route::get('/checkout', function () {
 
 Route::get('/homepage', function () {
     return view('Homepage');
-});
+})->name('homepage');
 
 Route::get('/products', function () {
     return view('products');
