@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CartItem extends Model
 {
-    protected $fillable = ['user_id','nft_id','quantity'];
+    protected $fillable = ['user_id','nft_id','quantity','size'];
     public function user() { return $this->belongsTo(User::class); }
     public function nft()  { return $this->belongsTo(Nft::class); }
 }

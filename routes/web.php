@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\Web\CartController;
+use App\Http\Controllers\Web\CheckoutController;
 use Illuminate\Http\Request;
 
 Route::middleware('guest')->group(function () {
@@ -66,10 +68,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
 
-    Route::post('/cart', function (Request $r) {
-            // TODO: implement cart here
-            return back()->with('status', 'Added to basket (stub)');
-        })->name('cart.store');
+    // Web Cart Routes (JSON responses for AJAX)
+    Route::get('/web/cart', [CartController::class, 'index'])->name('web.cart.index');
+    Route::post('/web/cart', [CartController::class, 'store'])->name('web.cart.store');
+    Route::delete('/web/cart/{cartItem}', [CartController::class, 'destroy'])->name('web.cart.destroy');
+
+    // Web Checkout Route (JSON response for AJAX)
+    Route::post('/web/checkout', [CheckoutController::class, 'store'])->name('web.checkout.store');
 
     // view and update details
   //  Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');
