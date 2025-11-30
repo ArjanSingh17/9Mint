@@ -36,17 +36,13 @@ Route::get('/homepage', [HomeController::class, 'index'])->name('homepage');
 
 Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
 
-Route::get('/products/Glossy-collection', function () {
-    return view('Glossy-collection');
-});
+
 
 Route::get('/pricing', function () {
     return view('Pricing');
 });
 
-Route::get('/products/SuperheroCollection', function () {
-    return view('SuperheroCollection');
-});
+
 Route::get('/products/{slug}', [CollectionPageController::class, 'show'])->name('collections.show');
 
 Route::get('/contactUs', function () {
@@ -69,7 +65,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
 
     Route::post('/cart', function (Request $r) {
-        // TODO: implement cart here
         return back()->with('status', 'Added to basket (stub)');
     })->name('cart.store');
 });
@@ -81,4 +76,3 @@ Route::middleware('auth')->group(function () {
 Route::get('/collections', [WebCollection::class, 'index'])->name('collections.index');
 Route::get('/collections/{slug}', [WebCollection::class, 'show'])->name('collections.show');
 Route::get('/collections/{collectionSlug}/{nftSlug}', [WebNft::class, 'show'])->name('nfts.show');
-
