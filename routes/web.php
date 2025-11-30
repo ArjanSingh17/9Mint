@@ -67,9 +67,52 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
 
     Route::post('/cart', function (Request $r) {
-            // TODO: implement cart here
-            return back()->with('status', 'Added to basket (stub)');
+            // Get or create cart in session
+            $cart = session()->get('cart', []);
+
+            // Get the NFT slug and size from the request
+            $nftSlug = $r->input('nft_slug');
+            $size = $r->input('size');
+
+            // Create a unique key for this item (slug + size)
+            $itemKey = $nftSlug . '_' . $size;
+
+            // If item already exists in cart, increment quantity
+            if (isset($cart[$itemKey])) {
+                $cart[$itemKey]['quantity']++;
+            } else {
+                // Add new item to cart
+                $cart[$itemKey] = [
+                    'nft_slug' => $nftSlug,
+                    'size' => $size,
+                    'quantity' => 1,
+                    'price' => 0.00 // You can set actual prices later
+                ];
+            }
+
+            // Save cart back to session
+            session()->put('cart', $cart);
+
+            return back()->with('status', 'Added to basket successfully!');
         })->name('cart.store');
+
+    Route::delete('/cart/{itemKey}', function ($itemKey) {
+            // Get cart from session
+            $cart = session()->get('cart', []);
+
+            // Check if item exists in cart
+            if (isset($cart[$itemKey])) {
+                // Remove the item
+                unset($cart[$itemKey]);
+
+                // Save updated cart back to session
+                session()->put('cart', $cart);
+
+                return back()->with('status', 'Item removed from basket');
+            }
+
+            return back()->with('error', 'Item not found in basket');
+        })->name('cart.destroy');
 
     // view and update details
   //  Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');

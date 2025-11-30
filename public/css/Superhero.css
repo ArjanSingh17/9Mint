@@ -114,6 +114,8 @@ body {
     padding: 8px 16px;
     border-radius: 5px;
     margin-right:10px;
+    cursor: pointer;
+    border: 2px solid transparent;
 }
 
 .Add-to-basket {
@@ -123,6 +125,9 @@ body {
     padding: 12px 20px;
     background: #307ea8;
     border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .small-size:hover,
@@ -130,6 +135,14 @@ body {
 .large-size:hover {
     color: black;
     background: white;
+}
+
+.small-size.selected,
+.medium-size.selected,
+.large-size.selected {
+    color: black;
+    background: white;
+    border: 2px solid #307ea8;
 }
 
 .Add-to-basket:hover {

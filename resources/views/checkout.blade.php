@@ -30,14 +30,51 @@
         </form>
       </section>
 
-    
+
       <section class="checkoutSection">
         <h2>Your Order</h2>
-        <p>No items in cart yet…</p>
-     
+
+        @php
+          $cart = session()->get('cart', []);
+          $subtotal = 0;
+        @endphp
+
+        @if(empty($cart))
+          <p>No items in cart yet…</p>
+        @else
+          <div style="margin-bottom: 20px;">
+            @foreach($cart as $key => $item)
+              @php
+                $itemTotal = $item['price'] * $item['quantity'];
+                $subtotal += $itemTotal;
+                $nftName = ucwords(str_replace('-', ' ', $item['nft_slug']));
+              @endphp
+
+              <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; margin-bottom: 10px;">
+                <div>
+                  <strong>{{ $nftName }}</strong><br>
+                  <small>Size: {{ ucfirst($item['size']) }} | Quantity: {{ $item['quantity'] }}</small>
+                </div>
+                <div>
+                  <strong>£{{ number_format($itemTotal, 2) }}</strong>
+                </div>
+              </div>
+            @endforeach
+
+            <div style="display: flex; justify-content: space-between; padding: 15px 10px; border-top: 2px solid #333; margin-top: 15px;">
+              <strong>Total:</strong>
+              <strong>£{{ number_format($subtotal, 2) }}</strong>
+            </div>
+          </div>
+        @endif
+
       </section>
 
-      <button disabled>Proceed to Payment</button>
+      @if(empty($cart))
+        <button disabled>Proceed to Payment</button>
+      @else
+        <button>Proceed to Payment</button>
+      @endif
     </div>
     </div>
 </body>
