@@ -11,6 +11,7 @@ use App\Http\Controllers\Web\NftController as WebNft;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\AboutUsController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\CollectionPageController;
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -46,6 +47,7 @@ Route::get('/pricing', function () {
 Route::get('/products/SuperheroCollection', function () {
     return view('SuperheroCollection');
 });
+Route::get('/products/{slug}', [CollectionPageController::class, 'show'])->name('collections.show');
 
 Route::get('/contactUs', function () {
     return view('ContactUs');
