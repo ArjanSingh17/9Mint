@@ -5,6 +5,10 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Http\Request;
 
+// FRONTEND NFT CONTROLLERS
+use App\Http\Controllers\Web\CollectionController as WebCollection;
+use App\Http\Controllers\Web\NftController as WebNft;
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -61,35 +65,21 @@ Route::get('/contactUs/faqs', function () {
 });
 
 // AUTHENTICATION
-
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
 
     Route::post('/cart', function (Request $r) {
-            // TODO: implement cart here
-            return back()->with('status', 'Added to basket (stub)');
-        })->name('cart.store');
-
-    // view and update details
-  //  Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');
-    // Handle the form submission to update the profile
-    //Route::patch('/profile', [UserProfileController::class, 'updateSelf'])->name('profile.update');
-
-    // change Password
-    //Route::patch('/profile/password', [UserProfileController::class, 'updatePassword'])->name('password.update');
+        // TODO: implement cart here
+        return back()->with('status', 'Added to basket (stub)');
+    })->name('cart.store');
 });
 
+// ------------------------------
+// NEW NFT FRONTEND ROUTES
+// ------------------------------
 
-// --- Define the routes that allow an Admin to manage any user's profile
+Route::get('/collections', [WebCollection::class, 'index'])->name('collections.index');
+Route::get('/collections/{slug}', [WebCollection::class, 'show'])->name('collections.show');
+Route::get('/collections/{collectionSlug}/{nftSlug}', [WebNft::class, 'show'])->name('nfts.show');
 
-//Route::group([
-  //  'middleware' => ['auth', 'role:admin'], // Must be logged in AND have the 'admin' role
-    //'prefix' => 'admin'
-//], function () {
-    // GET /admin/users/{user} -> Admin views a specific customer's profile
-  //  Route::get('/users/{user}', [UserProfileController::class, 'showUser'])->name('admin.users.show');
-
-    // PATCH /admin/users/{user} -> Admin updates a specific customer's profile
-    //Route::patch('/users/{user}', [UserProfileController::class, 'updateUser'])->name('admin.users.update');
-//});
