@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Document</title>
      <link rel="stylesheet" href="{{ asset('css/Superhero.css') }}">
 </head>
@@ -237,25 +238,28 @@
 </style>
 
 <script>
-// save selcted nft size
+// Track selected sizes for each NFT (defaults to medium)
 const selectedSizes = {};
 
 function selectSize(nftSlug, size) {
-    // store said size
+    // Store the selected size
     selectedSizes[nftSlug] = size;
 
-   //remove active class from other buttons
+    // Update visual state - remove active class from all buttons in this NFT's size selector
     const sizeContainer = document.getElementById('size-' + nftSlug);
     const buttons = sizeContainer.querySelectorAll('.size-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
 
-    //ad active to current butt
+    // Add active class to selected button
     const selectedButton = sizeContainer.querySelector(`[data-size="${size}"]`);
     selectedButton.classList.add('active');
 }
 
 async function addToCart(nftSlug) {
     try {
+        // Get CSRF token from meta tag
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
         // Get selected size (default to medium if not selected)
         const size = selectedSizes[nftSlug] || 'medium';
 
@@ -264,7 +268,8 @@ async function addToCart(nftSlug) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
             },
             credentials: 'same-origin',
             body: JSON.stringify({

@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Your Cart - 9Mint</title>
   <link rel="stylesheet" href="{{ asset('css/App.css') }}">
 </head>
@@ -44,10 +45,12 @@ let cartItems = [];
 // Fetch cart items on page load
 async function loadCart() {
     try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         const response = await fetch('/web/cart', {
       method: 'GET',
     headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+    'X-CSRF-TOKEN': csrfToken
      },
      credentials: 'same-origin'
         });
@@ -129,10 +132,12 @@ cartItems.forEach(item => {
 // remove item from cart
 async function removeFromCart(cartItemId) {
     try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         const response = await fetch(`/web/cart/${cartItemId}`, {
          method: 'DELETE',
         headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+         'X-CSRF-TOKEN': csrfToken
         },
             credentials: 'same-origin'
         });
