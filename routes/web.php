@@ -10,6 +10,7 @@ use App\Http\Controllers\Web\CollectionController as WebCollection;
 use App\Http\Controllers\Web\NftController as WebNft;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\AboutUsController;
+use App\Http\Controllers\ProductsController;
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -32,9 +33,7 @@ Route::get('/checkout', function () {
 
 Route::get('/homepage', [HomeController::class, 'index'])->name('homepage');
 
-Route::get('/products', function () {
-    return view('products');
-});
+Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
 
 Route::get('/products/Glossy-collection', function () {
     return view('Glossy-collection');
