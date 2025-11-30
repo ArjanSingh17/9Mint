@@ -12,7 +12,7 @@ class HomeController extends Controller
         // Pick any 2 random NFTs
         $nfts = Nft::where('is_active', 1)->inRandomOrder()->take(2)->get();
 
-        // If your DB has less than 2 NFTs, it won't break
+        // it won't break if there are less than 2 active NFTs
         return view('Homepage', compact('nfts'));
     }
 }

@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 // FRONTEND NFT CONTROLLERS
 use App\Http\Controllers\Web\CollectionController as WebCollection;
 use App\Http\Controllers\Web\NftController as WebNft;
-
+use App\Http\Controllers\Web\HomeController;
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -28,9 +28,7 @@ Route::get('/checkout', function () {
     return view('checkout');
 });
 
-Route::get('/homepage', function () {
-    return view('Homepage');
-});
+Route::get('/homepage', [HomeController::class, 'index'])->name('homepage');
 
 Route::get('/products', function () {
     return view('products');
