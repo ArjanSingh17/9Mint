@@ -58,18 +58,20 @@ body {
 .Giraffe-NFT,
 .Lobster-NFT,
 .Rooster-NFT,
-.Squirrel-NFT {
+.Squirrel-NFT,
+.NFT-Card {
     display: flex;
     color: white;
     align-items: flex-start;
     background: black;
     padding: 25px;
-    border-radius:12px;
+    border-radius: 12px;
     margin: 30px auto;
     width: 90%;
     max-width: 800px;
     gap: 20px;
 }
+
 
 .nft-image {
     height: auto;

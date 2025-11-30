@@ -13,6 +13,10 @@ use App\Http\Controllers\AboutUsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CollectionPageController;
 
+
+// ------------------------------
+// AUTH (GUEST)
+// ------------------------------
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -20,46 +24,54 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'registerWeb']);
 });
 
-Route::get('/', function () {
-    return view('login-register');
-});
 
-Route::get('/cart', function () {
-    return view('cart');
-});
+// ------------------------------
+// STATIC PAGES
+// ------------------------------
+Route::get('/', fn() => view('login-register'));
+Route::get('/cart', fn() => view('cart'));
+Route::get('/checkout', fn() => view('checkout'));
+Route::get('/pricing', fn() => view('Pricing'));
+Route::get('/contactUs', fn() => view('ContactUs'));
+Route::get('/contactUs/terms', fn() => view('TermsAndConditions'));
+Route::get('/contactUs/faqs', fn() => view('Faqs'));
 
-Route::get('/checkout', function () {
-    return view('checkout');
-});
 
+// ------------------------------
+// MAIN PAGES
+// ------------------------------
 Route::get('/homepage', [HomeController::class, 'index'])->name('homepage');
-
 Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
-
-
-
-Route::get('/pricing', function () {
-    return view('Pricing');
-});
-
-
-Route::get('/products/{slug}', [CollectionPageController::class, 'show'])->name('collections.show');
-
-Route::get('/contactUs', function () {
-    return view('ContactUs');
-});
-
 Route::get('/aboutUs', [AboutUsController::class, 'index'])->name('about');
 
-Route::get('/contactUs/terms', function () {
-    return view('TermsAndConditions');
+
+// ------------------------------
+// FRONTEND TEAM OLD URL SUPPORT
+// ------------------------------
+
+// Old Glossy URL used in frontend
+Route::get('/products/Glossy-collection', function () {
+    return redirect()->route('collections.show', ['slug' => 'glossy-collection']);
 });
 
-Route::get('/contactUs/faqs', function () {
-    return view('Faqs');
+// Old Superhero URL used in frontend
+Route::get('/products/SuperheroCollection', function () {
+    return redirect()->route('collections.show', ['slug' => 'superhero-collection']);
 });
 
-// AUTHENTICATION
+
+// ------------------------------
+// NEW DYNAMIC COLLECTION ROUTE
+// ------------------------------
+// This handles: /products/{slug}
+Route::get('/products/{slug}', [CollectionPageController::class, 'show'])
+    ->where('slug', '.*')
+    ->name('collections.show');
+
+
+// ------------------------------
+// AUTHENTICATED ROUTES
+// ------------------------------
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
@@ -69,10 +81,10 @@ Route::middleware('auth')->group(function () {
     })->name('cart.store');
 });
 
-// ------------------------------
-// NEW NFT FRONTEND ROUTES
-// ------------------------------
 
+// ------------------------------
+// NFT COLLECTION & NFT DETAIL (Optional Future Use)
+// ------------------------------
 Route::get('/collections', [WebCollection::class, 'index'])->name('collections.index');
-Route::get('/collections/{slug}', [WebCollection::class, 'show'])->name('collections.show');
+Route::get('/collections/{slug}', [WebCollection::class, 'show'])->name('collections.show.web');
 Route::get('/collections/{collectionSlug}/{nftSlug}', [WebNft::class, 'show'])->name('nfts.show');
