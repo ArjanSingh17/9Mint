@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Web\CollectionController as WebCollection;
 use App\Http\Controllers\Web\NftController as WebNft;
 use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\AboutUsController;
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -50,9 +52,7 @@ Route::get('/contactUs', function () {
     return view('ContactUs');
 });
 
-Route::get('/aboutUs', function () {
-    return view('aboutUs');
-});
+Route::get('/aboutUs', [AboutUsController::class, 'index'])->name('about');
 
 Route::get('/contactUs/terms', function () {
     return view('TermsAndConditions');
