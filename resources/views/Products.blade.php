@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Products</title>
     <link rel="stylesheet" href="{{ asset('css/products.css') }}">
 </head>
-
 <body>
 
     <x-navbar />
@@ -14,41 +14,49 @@
     <section id="NFT_collections">
         <h2>Our Collections</h2>
 
-        {{-- ========= GLOSSY COLLECTION ========= --}}
-        <div class="collection-card">
-            <img class="collection-image"
-                 src="{{ asset('images/nfts/glossy/GlossyDuckNFT.png') }}"
-                 alt="Glossy Collection">
-
+        <!-- GLOSSY COLLECTION -->
+        <div class="Glossy-collection">
             <h3>
-                <a href="{{ url('/products/glossy-collection') }}">
-                    Glossy Collection
-                </a>
+                <a href="/products/Glossy-collection">Glossy Collection</a>
             </h3>
 
-            <p>A curated set of glossy, high-quality animal NFTs.</p>
+            <p>This collection contains Glossy Animal NFTs.</p>
+            <p>Click to find more about each individual NFT.</p>
 
-            <div class="stock-count">
-                <p>Stock: {{ \App\Models\Nft::where('collection_id', 1)->sum('editions_remaining') }}</p>
+            <!-- NFT PREVIEW IMAGE INSIDE BOX -->
+            <div class="collection-image-wrapper">
+                <img 
+                    src="{{ asset('images/nfts/glossy/GlossyDuckNFT.png') }}"
+                    alt="Glossy Collection Preview"
+                    class="collection-preview"
+                >
+            </div>
+
+            <div class="Glossy-Stock">
+                <p>Stock: 27</p>
             </div>
         </div>
 
-        {{-- ========= SUPERHERO COLLECTION ========= --}}
-        <div class="collection-card">
-            <img class="collection-image"
-                 src="{{ asset('images/nfts/superhero/IronMan.png') }}"
-                 alt="Superhero Collection">
-
+        <!-- SUPERHERO COLLECTION -->
+        <div class="Superhero-collection">
             <h3>
-                <a href="{{ url('/products/superhero-collection') }}">
-                    Superhero Collection
-                </a>
+                <a href="/products/SuperheroCollection">Superhero Collection</a>
             </h3>
 
-            <p>A powerful collection of superhero-themed NFTs.</p>
+            <p>This collection contains Superhero NFTs.</p>
+            <p>Click to find more about each individual NFT.</p>
 
-            <div class="stock-count">
-                <p>Stock: {{ \App\Models\Nft::where('collection_id', 2)->sum('editions_remaining') }}</p>
+            <!-- NFT PREVIEW IMAGE INSIDE BOX -->
+            <div class="collection-image-wrapper">
+                <img 
+                    src="{{ asset('images/nfts/superhero/Superman.png') }}"
+                    alt="Superhero Collection Preview"
+                    class="collection-preview"
+                >
+            </div>
+
+            <div class="Superhero-Stock">
+                <p>Stock: 35</p>
             </div>
         </div>
 
