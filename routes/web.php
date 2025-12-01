@@ -5,6 +5,18 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Http\Request;
 
+// FRONTEND NFT CONTROLLERS
+use App\Http\Controllers\Web\CollectionController as WebCollection;
+use App\Http\Controllers\Web\NftController as WebNft;
+use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\AboutUsController;
+use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\CollectionPageController;
+
+
+// ------------------------------
+// AUTH (GUEST)
+// ------------------------------
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -12,61 +24,60 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'registerWeb']);
 });
 
-Route::get('/', function () {
-    return view('login-register');
-});
 
-Route::get('/cart', function () {
-    return view('cart');
-});
+// ------------------------------
+// STATIC PAGES
+// ------------------------------
+Route::get('/', fn() => view('login-register'));
+Route::get('/cart', fn() => view('cart'));
+Route::get('/checkout', fn() => view('checkout'));
+Route::get('/pricing', fn() => view('Pricing'));
+Route::get('/contactUs', fn() => view('ContactUs'));
+Route::get('/contactUs/terms', fn() => view('TermsAndConditions'));
+Route::get('/contactUs/faqs', fn() => view('Faqs'));
 
-Route::get('/checkout', function () {
-    return view('checkout');
-});
 
-Route::get('/homepage', function () {
-    return view('Homepage');
-});
+// ------------------------------
+// MAIN PAGES
+// ------------------------------
+Route::get('/homepage', [HomeController::class, 'index'])->name('homepage');
+Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
+Route::get('/aboutUs', [AboutUsController::class, 'index'])->name('about');
 
-Route::get('/products', function () {
-    return view('products');
-});
 
+// ------------------------------
+// FRONTEND TEAM OLD URL SUPPORT
+// ------------------------------
+
+// Old Glossy URL used in frontend
 Route::get('/products/Glossy-collection', function () {
-    return view('Glossy-collection');
+    return redirect()->route('collections.show', ['slug' => 'glossy-collection']);
 });
 
-Route::get('/pricing', function () {
-    return view('Pricing');
-});
-
+// Old Superhero URL used in frontend
 Route::get('/products/SuperheroCollection', function () {
-    return view('SuperheroCollection');
+    return redirect()->route('collections.show', ['slug' => 'superhero-collection']);
 });
 
-Route::get('/contactUs', function () {
-    return view('ContactUs');
-});
 
-Route::get('/aboutUs', function () {
-    return view('aboutUs');
-});
+// ------------------------------
+// NEW DYNAMIC COLLECTION ROUTE
+// ------------------------------
+// This handles: /products/{slug}
+Route::get('/products/{slug}', [CollectionPageController::class, 'show'])
+    ->where('slug', '.*')
+    ->name('collections.show');
 
-Route::get('/contactUs/terms', function () {
-    return view('TermsAndConditions');
-});
 
-Route::get('/contactUs/faqs', function () {
-    return view('Faqs');
-});
-
-// AUTHENTICATION
-
+// ------------------------------
+// AUTHENTICATED ROUTES
+// ------------------------------
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
 
     Route::post('/cart', function (Request $r) {
+<<<<<<< HEAD
             // Get or create cart in session
             $cart = session()->get('cart', []);
 
@@ -121,18 +132,16 @@ Route::middleware('auth')->group(function () {
 
     // change Password
     //Route::patch('/profile/password', [UserProfileController::class, 'updatePassword'])->name('password.update');
+=======
+        return back()->with('status', 'Added to basket (stub)');
+    })->name('cart.store');
+>>>>>>> 694fa108299251785959d74f17d4c946bb6eeb56
 });
 
 
-// --- Define the routes that allow an Admin to manage any user's profile
-
-//Route::group([
-  //  'middleware' => ['auth', 'role:admin'], // Must be logged in AND have the 'admin' role
-    //'prefix' => 'admin'
-//], function () {
-    // GET /admin/users/{user} -> Admin views a specific customer's profile
-  //  Route::get('/users/{user}', [UserProfileController::class, 'showUser'])->name('admin.users.show');
-
-    // PATCH /admin/users/{user} -> Admin updates a specific customer's profile
-    //Route::patch('/users/{user}', [UserProfileController::class, 'updateUser'])->name('admin.users.update');
-//});
+// ------------------------------
+// NFT COLLECTION & NFT DETAIL (Optional Future Use)
+// ------------------------------
+Route::get('/collections', [WebCollection::class, 'index'])->name('collections.index');
+Route::get('/collections/{slug}', [WebCollection::class, 'show'])->name('collections.show.web');
+Route::get('/collections/{collectionSlug}/{nftSlug}', [WebNft::class, 'show'])->name('nfts.show');
