@@ -210,4 +210,4 @@ Route::middleware('auth')->group(function () {
     //Route::patch('/profile/password', [UserProfileController::class, 'updatePassword'])->name('password.update');
 });
 
-Route::post('send-email',[ContactController::class,'sendEmail'])->name('send.email');
+ Route::post('send-email',[ContactController::class,'sendEmail'])->name('send.email');
