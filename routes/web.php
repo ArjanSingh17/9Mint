@@ -13,11 +13,13 @@ use App\Http\Controllers\AboutUsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CollectionPageController;
 
+
 // MODELS
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Nft;
 use App\Models\Collection;
+use App\Http\Controllers\ContactController;
 
 
 // ------------------------------
@@ -209,3 +211,4 @@ Route::middleware('auth')->group(function () {
     //Route::patch('/profile/password', [UserProfileController::class, 'updatePassword'])->name('password.update');
 });
 
+ Route::post('send-email',[ContactController::class,'sendEmail'])->name('send.email');
