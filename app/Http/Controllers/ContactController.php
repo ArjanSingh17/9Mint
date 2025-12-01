@@ -22,7 +22,7 @@ class ContactController extends Controller
         Mail::raw(
     "Name: {$data['name']}\nEmail: {$data['email']}\n\nMessage:\n{$data['message']}", 
     function ($message) use ($data) {
-        $message->to('jahirul.islam200518@gmail.com')
+        $message->to('project.9mint@outlook.com')
                 ->subject('New Contact Form Submission')
                 ->replyTo($data['email'], $data['name']);
     }
