@@ -63,16 +63,13 @@ document.addEventListener('DOMContentLoaded', function() {
 <div>
     <x-navbar />
 
-<<<<<<< HEAD
     @if(session('status'))
         <div style="background: #4CAF50; color: white; padding: 15px; margin: 20px auto; max-width: 800px; border-radius: 8px; text-align: center;">
             {{ session('status') }}
         </div>
     @endif
 
-=======
     <!-- GLOSSY DUCK -->
->>>>>>> 694fa108299251785959d74f17d4c946bb6eeb56
     <div class="Duck-NFT">
         <img src="{{ asset('images/nfts/glossy/GlossyDuckNFT.png') }}" alt="Duck" class="nft-image" />
 
@@ -90,19 +87,11 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
 
             @auth
-<<<<<<< HEAD
-              <form method="POST" action="{{ route('cart.store') }}" class="inline">
-                @csrf
-                <input type="hidden" name="nft_slug" value="glossy-duck">
-                <button type="submit" class="Add-to-basket">Add to basket</button>
-              </form>
-=======
                 <form method="POST" action="{{ route('cart.store') }}" class="inline">
                     @csrf
                     <input type="hidden" name="nft_slug" value="glossy-duck">
                     <button type="submit" class="Add-to-basket">Add to basket</button>
                 </form>
->>>>>>> 694fa108299251785959d74f17d4c946bb6eeb56
             @else
                 <a class="Add-to-basket" href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
                     Login to add to basket
@@ -129,19 +118,11 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
 
             @auth
-<<<<<<< HEAD
-              <form method="POST" action="{{ route('cart.store') }}" class="inline">
-                @csrf
-                <input type="hidden" name="nft_slug" value="glossy-cat">
-                <button type="submit" class="Add-to-basket">Add to basket</button>
-              </form>
-=======
                 <form method="POST" action="{{ route('cart.store') }}" class="inline">
                     @csrf
                     <input type="hidden" name="nft_slug" value="glossy-cat">
                     <button type="submit" class="Add-to-basket">Add to basket</button>
                 </form>
->>>>>>> 694fa108299251785959d74f17d4c946bb6eeb56
             @else
                 <a class="Add-to-basket" href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
                     Login to add to basket
@@ -168,19 +149,11 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
 
             @auth
-<<<<<<< HEAD
-              <form method="POST" action="{{ route('cart.store') }}" class="inline">
-                @csrf
-                <input type="hidden" name="nft_slug" value="glossy-donkey">
-                <button type="submit" class="Add-to-basket">Add to basket</button>
-              </form>
-=======
                 <form method="POST" action="{{ route('cart.store') }}" class="inline">
                     @csrf
                     <input type="hidden" name="nft_slug" value="glossy-donkey">
                     <button type="submit" class="Add-to-basket">Add to basket</button>
                 </form>
->>>>>>> 694fa108299251785959d74f17d4c946bb6eeb56
             @else
                 <a class="Add-to-basket" href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
                     Login to add to basket
@@ -207,19 +180,11 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
 
             @auth
-<<<<<<< HEAD
-              <form method="POST" action="{{ route('cart.store') }}" class="inline">
-                @csrf
-                <input type="hidden" name="nft_slug" value="glossy-giraffe">
-                <button type="submit" class="Add-to-basket">Add to basket</button>
-              </form>
-=======
                 <form method="POST" action="{{ route('cart.store') }}" class="inline">
                     @csrf
                     <input type="hidden" name="nft_slug" value="glossy-giraffe">
                     <button type="submit" class="Add-to-basket">Add to basket</button>
                 </form>
->>>>>>> 694fa108299251785959d74f17d4c946bb6eeb56
             @else
                 <a class="Add-to-basket" href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
                     Login to add to basket
@@ -246,19 +211,11 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
 
             @auth
-<<<<<<< HEAD
-              <form method="POST" action="{{ route('cart.store') }}" class="inline">
-                @csrf
-                <input type="hidden" name="nft_slug" value="glossy-lobster">
-                <button type="submit" class="Add-to-basket">Add to basket</button>
-              </form>
-=======
                 <form method="POST" action="{{ route('cart.store') }}" class="inline">
                     @csrf
                     <input type="hidden" name="nft_slug" value="glossy-lobster">
                     <button type="submit" class="Add-to-basket">Add to basket</button>
                 </form>
->>>>>>> 694fa108299251785959d74f17d4c946bb6eeb56
             @else
                 <a class="Add-to-basket" href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
                     Login to add to basket
@@ -283,19 +240,11 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
 
             @auth
-<<<<<<< HEAD
-              <form method="POST" action="{{ route('cart.store') }}" class="inline">
-                @csrf
-                <input type="hidden" name="nft_slug" value="glossy-rooster">
-                <button type="submit" class="Add-to-basket">Add to basket</button>
-              </form>
-=======
                 <form method="POST" action="{{ route('cart.store') }}" class="inline">
                     @csrf
                     <input type="hidden" name="nft_slug" value="glossy-rooster">
                     <button type="submit" class="Add-to-basket">Add to basket</button>
                 </form>
->>>>>>> 694fa108299251785959d74f17d4c946bb6eeb56
             @else
                 <a class="Add-to-basket" href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
                     Login to add to basket
@@ -320,19 +269,11 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
 
             @auth
-<<<<<<< HEAD
-              <form method="POST" action="{{ route('cart.store') }}" class="inline">
-                @csrf
-                <input type="hidden" name="nft_slug" value="glossy-squirrel">
-                <button type="submit" class="Add-to-basket">Add to basket</button>
-              </form>
-=======
                 <form method="POST" action="{{ route('cart.store') }}" class="inline">
                     @csrf
                     <input type="hidden" name="nft_slug" value="glossy-squirrel">
                     <button type="submit" class="Add-to-basket">Add to basket</button>
                 </form>
->>>>>>> 694fa108299251785959d74f17d4c946bb6eeb56
             @else
                 <a class="Add-to-basket" href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
                     Login to add to basket

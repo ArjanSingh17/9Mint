@@ -13,6 +13,12 @@ use App\Http\Controllers\AboutUsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CollectionPageController;
 
+// MODELS
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Nft;
+use App\Models\Collection;
+
 
 // ------------------------------
 // AUTH (GUEST)
@@ -77,27 +83,37 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
 
     Route::post('/cart', function (Request $r) {
-<<<<<<< HEAD
-            // Get or create cart in session
-            $cart = session()->get('cart', []);
-
-            // Get the NFT slug and size from the request
             $nftSlug = $r->input('nft_slug');
             $size = $r->input('size');
 
-            // Create a unique key for this item (slug + size)
-            $itemKey = $nftSlug . '_' . $size;
+            if (!$size) {
+                return back()->with('error', 'Please select a size before adding to basket');
+            }
 
-            // If item already exists in cart, increment quantity
-            if (isset($cart[$itemKey])) {
-                $cart[$itemKey]['quantity']++;
+            // Get the cart from session or create empty array
+            $cart = session()->get('cart', []);
+
+            // Create a unique key for this item (nft + size combination)
+            $cartKey = $nftSlug . '_' . $size;
+
+            // Determine price based on size
+            $prices = [
+                'small' => 29.99,
+                'medium' => 39.99,
+                'large' => 49.99
+            ];
+            $price = $prices[$size] ?? 39.99;
+
+            // If item already exists, increase quantity
+            if (isset($cart[$cartKey])) {
+                $cart[$cartKey]['quantity']++;
             } else {
                 // Add new item to cart
-                $cart[$itemKey] = [
+                $cart[$cartKey] = [
                     'nft_slug' => $nftSlug,
                     'size' => $size,
-                    'quantity' => 1,
-                    'price' => 0.00 // You can set actual prices later
+                    'price' => $price,
+                    'quantity' => 1
                 ];
             }
 
@@ -107,23 +123,88 @@ Route::middleware('auth')->group(function () {
             return back()->with('status', 'Added to basket successfully!');
         })->name('cart.store');
 
-    Route::delete('/cart/{itemKey}', function ($itemKey) {
-            // Get cart from session
+    Route::delete('/cart/{key}', function ($key) {
             $cart = session()->get('cart', []);
 
-            // Check if item exists in cart
-            if (isset($cart[$itemKey])) {
-                // Remove the item
-                unset($cart[$itemKey]);
-
-                // Save updated cart back to session
+            if (isset($cart[$key])) {
+                unset($cart[$key]);
                 session()->put('cart', $cart);
-
                 return back()->with('status', 'Item removed from basket');
             }
 
             return back()->with('error', 'Item not found in basket');
         })->name('cart.destroy');
+
+    Route::post('/orders', function (Request $r) {
+            $cart = session()->get('cart', []);
+
+            if (empty($cart)) {
+                return back()->with('error', 'Your cart is empty');
+            }
+
+            // Calculate total
+            $totalGbp = 0;
+            foreach ($cart as $item) {
+                $totalGbp += $item['price'] * $item['quantity'];
+            }
+
+            // Store shipping info in session (optional - can be saved to orders table if you add columns)
+            if ($r->has('full_name')) {
+                session()->put('shipping_info', [
+                    'full_name' => $r->input('full_name'),
+                    'address' => $r->input('address'),
+                    'city' => $r->input('city'),
+                    'postal_code' => $r->input('postal_code'),
+                ]);
+            }
+
+            // Create the order
+            $order = Order::create([
+                'user_id' => auth()->id(),
+                'status' => 'pending',
+                'currency_code' => 'GBP',
+                'total_crypto' => 0,
+                'total_gbp' => $totalGbp,
+                'placed_at' => now(),
+            ]);
+
+            // Create order items
+            foreach ($cart as $item) {
+                // Find or create NFT by slug
+                $collection = Collection::firstOrCreate(
+                    ['slug' => 'general'],
+                    ['name' => 'General Collection', 'description' => 'General NFTs']
+                );
+
+                $nft = Nft::firstOrCreate(
+                    ['slug' => $item['nft_slug']],
+                    [
+                        'collection_id' => $collection->id,
+                        'name' => ucwords(str_replace('-', ' ', $item['nft_slug'])),
+                        'description' => 'NFT: ' . $item['nft_slug'],
+                        'image_url' => '/images/placeholder.png',
+                        'currency_code' => 'GBP',
+                        'price_crypto' => 0,
+                        'editions_total' => 1000,
+                        'editions_remaining' => 1000,
+                        'is_active' => true,
+                    ]
+                );
+
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'nft_id' => $nft->id,
+                    'quantity' => $item['quantity'],
+                    'unit_price_crypto' => 0,
+                    'unit_price_gbp' => $item['price'],
+                ]);
+            }
+
+            // Clear the cart
+            session()->forget('cart');
+
+            return redirect('/cart')->with('status', 'Order placed successfully! Order #' . $order->id);
+        })->name('orders.store');
 
     // view and update details
   //  Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');
@@ -132,16 +213,18 @@ Route::middleware('auth')->group(function () {
 
     // change Password
     //Route::patch('/profile/password', [UserProfileController::class, 'updatePassword'])->name('password.update');
-=======
-        return back()->with('status', 'Added to basket (stub)');
-    })->name('cart.store');
->>>>>>> 694fa108299251785959d74f17d4c946bb6eeb56
 });
 
 
-// ------------------------------
-// NFT COLLECTION & NFT DETAIL (Optional Future Use)
-// ------------------------------
-Route::get('/collections', [WebCollection::class, 'index'])->name('collections.index');
-Route::get('/collections/{slug}', [WebCollection::class, 'show'])->name('collections.show.web');
-Route::get('/collections/{collectionSlug}/{nftSlug}', [WebNft::class, 'show'])->name('nfts.show');
+// --- Define the routes that allow an Admin to manage any user's profile
+
+//Route::group([
+  //  'middleware' => ['auth', 'role:admin'], // Must be logged in AND have the 'admin' role
+    //'prefix' => 'admin'
+//], function () {
+    // GET /admin/users/{user} -> Admin views a specific customer's profile
+  //  Route::get('/users/{user}', [UserProfileController::class, 'showUser'])->name('admin.users.show');
+
+    // PATCH /admin/users/{user} -> Admin updates a specific customer's profile
+    //Route::patch('/users/{user}', [UserProfileController::class, 'updateUser'])->name('admin.users.update');
+//});

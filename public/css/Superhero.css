@@ -1,4 +1,4 @@
-/* NAVBAR (unchanged) */
+/* NAVBAR */
 .navbar {
     width: 100%;
     background-color: white;
@@ -12,33 +12,79 @@
     z-index: 100;
 }
 
-.nav-left img {
-    width: 60px;
-    height: auto;
+.logo-container .logo-image {
+    height: 50px;
+    width: auto;
 }
 
-.nav-center {
+.nav-links {
     display: flex;
-    gap: 40px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
+    gap: 30px;
+    align-items: center;
 }
 
-.nav-center a {
+.nav-links a {
     text-decoration: none;
     color: black;
     font-weight: 500;
     font-size: 16px;
+    transition: color 0.3s;
 }
 
-.nav-right .account-link {
-    text-decoration: none;
-    color: grey;
+.nav-links a:hover {
+    color: #307ea8;
+}
+
+.nav-auth {
     display: flex;
-    gap: 15px;
-    font-weight: 600;
-    font-size: 16px;
+    gap: 12px;
+    align-items: center;
+}
+
+.basket-btn {
+    position: relative;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+    padding: 4px;
+}
+
+.basket-icon {
+    display: inline-block;
+}
+
+.basket-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ff4d4f;
+    color: white;
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.nav-btn {
+    padding: 8px 16px;
+    background: black;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.nav-btn:hover {
+    background: #333;
 }
 
 body {
@@ -96,13 +142,8 @@ body {
     background: #222;
     padding: 8px 16px;
     border-radius: 5px;
-<<<<<<< HEAD
-    margin-right:10px;
-    cursor: pointer;
-    border: 2px solid transparent;
-=======
     margin-right: 10px;
-    border: none;
+    border: 2px solid transparent;
     cursor: pointer;
 }
 
@@ -112,7 +153,11 @@ body {
 .size-option button:hover {
     background: white;
     color: black;
->>>>>>> 694fa108299251785959d74f17d4c946bb6eeb56
+}
+
+.size-option button.selected {
+    border: 2px solid white;
+    background: #444;
 }
 
 .Add-to-basket {

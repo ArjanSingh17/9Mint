@@ -99,7 +99,11 @@
             <span>£{{ number_format($subtotal, 2) }}</span>
           </div>
 
-          <a href="/checkout"><button class="checkout-button">Proceed to Checkout</button></a>
+          @if(!empty($cart))
+            <a href="/checkout"><button class="checkout-button">Proceed to Checkout</button></a>
+          @else
+            <a href="/products"><button class="checkout-button">Browse Products</button></a>
+          @endif
         </div>
       </div>
     </div>

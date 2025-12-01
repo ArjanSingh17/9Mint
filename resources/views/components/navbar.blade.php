@@ -16,7 +16,13 @@
         <div class="nav-auth"><a href="/cart">
           <button class="basket-btn">
             <span class="basket-icon">🛒</span>
-            <span class="basket-badge">1</span>
+            @php
+              $cart = session()->get('cart', []);
+              $totalItems = array_sum(array_column($cart, 'quantity'));
+            @endphp
+            @if($totalItems > 0)
+              <span class="basket-badge">{{ $totalItems }}</span>
+            @endif
           </button></a>
 
     @auth
