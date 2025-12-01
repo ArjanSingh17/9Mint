@@ -125,3 +125,20 @@ nav ul li a:hover {
     font-size: 2rem;
     margin: 0;
 }
+collection-image-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.collection-preview {
+    width: 130px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    transition: transform 0.2s ease-in-out;
+}
+
+.collection-preview:hover {
+    transform: scale(1.07);
+}

@@ -1,3 +1,4 @@
+/* NAVBAR (unchanged) */
 .navbar {
     width: 100%;
     background-color: white;
@@ -33,47 +34,28 @@
 
 .nav-right .account-link {
     text-decoration: none;
-    color: black;
+    color: grey;
+    display: flex;
+    gap: 15px;
     font-weight: 600;
     font-size: 16px;
 }
 
-.nav-right .account-link {
-    color: grey;
-    display: flex;
-    gap: 15px;
-}
-
-.nav-links a {
-    margin: 0 15px;
-    text-decoration: none;
-    font-size: 16px;
-    font-weight: 500;
-    color: black;
-}
-
 body {
-
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color : rgb(4, 4, 87);
+    background-color: rgb(4, 4, 87);
 }
 
-.NFT1,
-.NFT2,
-.NFT2A,
-.NFT3,
-.NFT4,
-.NFT5,
-.NFT6,
-.NFT7 {
+/* UNIFORM CARD STYLE (same as Glossy page) */
+.NFT-Card {
     display: flex;
     color: white;
     align-items: flex-start;
     background: black;
     padding: 25px;
-    border-radius:12px;
+    border-radius: 12px;
     margin: 30px auto;
     width: 90%;
     max-width: 800px;
@@ -108,12 +90,23 @@ body {
 
 .small-size,
 .medium-size,
-.large-size {
+.large-size,
+.size-option button {
     color: white;
     background: #222;
     padding: 8px 16px;
     border-radius: 5px;
-    margin-right:10px;
+    margin-right: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+.small-size:hover,
+.medium-size:hover,
+.large-size:hover,
+.size-option button:hover {
+    background: white;
+    color: black;
 }
 
 .Add-to-basket {
@@ -123,15 +116,18 @@ body {
     padding: 12px 20px;
     background: #307ea8;
     border-radius: 8px;
-}
-
-.small-size:hover,
-.medium-size:hover,
-.large-size:hover {
-    color: black;
-    background: white;
+    cursor: pointer;
+    display: inline-block;
 }
 
 .Add-to-basket:hover {
     background: #2180b3;
+}
+
+/* Page Title */
+.collection-title {
+    text-align: center;
+    color: white;
+    font-size: 3rem;
+    margin-top: 20px;
 }
