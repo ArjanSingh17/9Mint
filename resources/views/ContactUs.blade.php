@@ -20,7 +20,8 @@
       <main class="contactUs-section">
         <h2>Contact Us</h2>
 
-        <form class="contactUs-form">
+        <form class="contactUs-form" action="{{route('send.email')}}" method="post">
+          @csrf
           <label htmlFor="name">Name:</label>
           <input type="text" name="name" placeholder="Name" required />
 
