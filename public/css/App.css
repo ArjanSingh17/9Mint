@@ -15,6 +15,7 @@ body {
   color: white;
 }
 
+/* NAVBAR */
 .navbar {
   width: 100%;
   background-color: white;
@@ -28,26 +29,34 @@ body {
   z-index: 100;
 }
 
+.logo-container .logo-image,
 .logo-image {
-  width: 55px;
-  height: auto;
+  height: 50px;
+  width: auto;
 }
 
 .nav-links {
   display: flex;
-  gap: 20px;
+  gap: 30px;
+  align-items: center;
 }
 
 .nav-links a {
-  color: black;
-  font-size: 16px;
-  font-weight: 500;
   text-decoration: none;
+  color: black;
+  font-weight: 500;
+  font-size: 16px;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: #307ea8;
 }
 
 .nav-auth {
   display: flex;
   gap: 12px;
+  align-items: center;
 }
 
 .basket-btn {
@@ -59,6 +68,10 @@ body {
   padding: 4px;
 }
 
+.basket-icon {
+  display: inline-block;
+}
+
 .basket-badge {
   position: absolute;
   top: -4px;
@@ -66,17 +79,30 @@ body {
   background: #ff4d4f;
   color: white;
   font-size: 10px;
-  padding: 1px 4px;
+  padding: 2px 5px;
   border-radius: 50%;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
 }
 
 .nav-btn {
-  padding: 6px 14px;
+  padding: 8px 16px;
   background: black;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.nav-btn:hover {
+  background: #333;
 }
 
 .auth-section {
@@ -170,6 +196,25 @@ body {
   width: 80px;
   text-align: right;
   font-weight: 600;
+}
+
+.basket-item-remove {
+  margin-left: 10px;
+}
+
+.remove-button {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s ease;
+}
+
+.remove-button:hover {
+  background: #d32f2f;
 }
 
 .basket-summary {
