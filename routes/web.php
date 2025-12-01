@@ -1,23 +1,24 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\V1\AuthController;
-use App\Http\Controllers\UserProfileController;
-use Illuminate\Http\Request;
-
-// FRONTEND NFT CONTROLLERS
-use App\Http\Controllers\Web\CollectionController as WebCollection;
-use App\Http\Controllers\Web\NftController as WebNft;
-use App\Http\Controllers\Web\HomeController;
-use App\Http\Controllers\AboutUsController;
-use App\Http\Controllers\ProductsController;
-use App\Http\Controllers\CollectionPageController;
-
-// MODELS
+use App\Models\Nft;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Nft;
 use App\Models\Collection;
+
+// FRONTEND NFT CONTROLLERS
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AboutUsController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\Web\HomeController;
+
+// MODELS
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\CollectionPageController;
+use App\Http\Controllers\Web\NftController as WebNft;
+use App\Http\Controllers\Web\CollectionController as WebCollection;
 
 
 // ------------------------------
