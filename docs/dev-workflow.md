@@ -124,11 +124,14 @@ echo ok> storage/app/public/ping.txt
 
 
 
-## Protected endpoints during dev (no login UI yet)
+## Protected endpoints during dev
 
 
+The API still uses **Laravel Sanctum**.  
+You can either:
 
-Use a Sanctum personal access token.
+- log in via the **web UI** (`/login`) and use the browser cookie for calls from the frontend, or  
+- use a **personal access token** when calling the API from tools like Postman.
 
 
 

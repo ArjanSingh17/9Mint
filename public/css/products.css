@@ -1,107 +1,7 @@
-/* NAVBAR */
-.navbar {
-    width: 100%;
-    background-color: white;
-    padding: 15px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.logo-container .logo-image {
-    height: 50px;
-    width: auto;
-}
-
-.nav-links {
-    display: flex;
-    gap: 30px;
-    align-items: center;
-}
-
-.nav-links a {
-    text-decoration: none;
-    color: black;
-    font-weight: 500;
-    font-size: 16px;
-    transition: color 0.3s;
-}
-
-.nav-links a:hover {
-    color: #307ea8;
-}
-
-.nav-auth {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-}
-
-.basket-btn {
-    position: relative;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    font-size: 22px;
-    padding: 4px;
-}
-
-.basket-icon {
-    display: inline-block;
-}
-
-.basket-badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    background: #ff4d4f;
-    color: white;
-    font-size: 10px;
-    padding: 2px 5px;
-    border-radius: 50%;
-    min-width: 18px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
-
-.nav-btn {
-    padding: 8px 16px;
-    background: black;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: 14px;
-    transition: background 0.3s;
-}
-
-.nav-btn:hover {
-    background: #333;
-}
-
 body {
-
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
     background-color : rgb(4, 4, 87);
 }
 
-.logo-image {
-    height: auto;
-    width: 55px;
-    padding: 20px;
-}
-
- 
   h1{
     text-align: center;
     color: white;
@@ -125,9 +25,8 @@ nav ul li a:hover {
 }
 
 #NFT_collections {
-    text-align:center;
+    text-align: center;
     padding: 40px 20px;
-
 }
 
 #NFT_collections h2 {
@@ -138,10 +37,10 @@ nav ul li a:hover {
     color: white;
 }
 
-.Glossy-collection,
-.Superhero-collection {
+/* Single card style used for all collections, similar to old Glossy/Superhero boxes */
+.collection-card {
     background-color: black;
-    color:white;
+    color: white;
     text-align: center;
     padding: 20px;
     border-radius: 10px;
@@ -150,25 +49,16 @@ nav ul li a:hover {
     margin: 20px auto;
 }
 
-.Glossy-collection h3,
-.Superhero-collection h3 {
+.collection-card h3 {
     text-decoration: underline;
 }
 
-.stock {
-    background-color:black;
-    display: inline-block;
-    border-radius: 8px;
-    padding: 10px;
-    margin-top: 15px;
+.collection-stock {
+    margin-top: 8px;
+    font-size: 0.95rem;
 }
 
-.stock p {
-    color: white;
-    font-size: 2rem;
-    margin: 0;
-}
-collection-image-wrapper {
+.collection-image-wrapper {
     display: flex;
     justify-content: center;
     margin-top: 15px;

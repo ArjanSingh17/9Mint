@@ -9,21 +9,18 @@ class CollectionPageController extends Controller
 {
     public function show($slug)
     {
-        // Find collection by slug
+        // If the collection itself doesn't exist, 404 is appropriate
         $collection = Collection::where('slug', $slug)->firstOrFail();
 
-        // Load NFTs inside this collection
+        // Load active NFTs inside this collection (can be empty)
         $nfts = $collection->nfts()->where('is_active', true)->get();
 
-        // Determine which Blade to load
-        if ($slug === 'glossy-collection') {
-            return view('Glossy-collection', compact('collection', 'nfts'));
+        // For now we special-case known slugs, but all use the same template
+        if (in_array($slug, ['glossy-collection', 'superhero-collection'], true)) {
+            return view('collections.show', compact('collection', 'nfts'));
         }
 
-        if ($slug === 'superhero-collection') {
-            return view('SuperheroCollection', compact('collection', 'nfts'));
-        }
-
-        abort(404); // fallback if needed
+        // Unknown collection slug
+        abort(404);
     }
 }
