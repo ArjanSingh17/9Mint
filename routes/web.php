@@ -36,13 +36,13 @@ Route::middleware('guest')->group(function () {
 // ------------------------------
 // STATIC PAGES
 // ------------------------------
-Route::get('/', fn() => view('login-register'));
+Route::get('/', [HomeController::class, 'index'])->name('root');
 Route::get('/cart', fn() => view('cart'));
 Route::get('/checkout', fn() => view('checkout'));
-Route::get('/pricing', fn() => view('Pricing'));
-Route::get('/contactUs', fn() => view('ContactUs'));
-Route::get('/contactUs/terms', fn() => view('TermsAndConditions'));
-Route::get('/contactUs/faqs', fn() => view('Faqs'));
+Route::get('/pricing', fn() => view('pricing'));
+Route::get('/contactUs', fn() => view('contact-us'));
+Route::get('/contactUs/terms', fn() => view('terms-and-conditions'));
+Route::get('/contactUs/faqs', fn() => view('faqs'));
 
 
 // ------------------------------
@@ -83,6 +83,21 @@ Route::get('/products/{slug}', [CollectionPageController::class, 'show'])
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
+
+    Route::patch('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
+    Route::patch('/profile/password', [AuthController::class, 'updatePassword'])->name('password.update');
+
+    Route::get('/orders', function (Request $r) {
+        $user = $r->user();
+
+        $orders = Order::with(['items.nft'])
+            ->where('user_id', $user->id)
+            ->orderByDesc('placed_at')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('orders.index', compact('orders'));
+    })->name('orders.index');
 
     Route::post('/cart', function (Request $r) {
             $nftSlug = $r->input('nft_slug');
@@ -144,6 +159,21 @@ Route::middleware('auth')->group(function () {
         return back()->with('error', 'Your cart is empty');
     }
 
+    $defaultEditionsForNewNft = 5;
+
+    $slugs = array_column($cart, 'nft_slug');
+    $nftsBySlug = Nft::whereIn('slug', $slugs)->get()->keyBy('slug');
+
+    foreach ($cart as $item) {
+        $nft = $nftsBySlug[$item['nft_slug']] ?? null;
+        $available = $nft?->editions_remaining ?? $defaultEditionsForNewNft;
+
+        if ($available < $item['quantity']) {
+            $name = $nft?->name ?? ucwords(str_replace('-', ' ', $item['nft_slug']));
+            return back()->with('error', 'Out of stock: ' . $name);
+        }
+    }
+
     $totalGbp = 0;
     foreach ($cart as $item) {
         $totalGbp += $item['price'] * $item['quantity'];
@@ -151,20 +181,20 @@ Route::middleware('auth')->group(function () {
 
     if ($r->has('full_name')) {
         session()->put('shipping_info', [
-            'full_name'   => $r->input('full_name'),
-            'address'     => $r->input('address'),
-            'city'        => $r->input('city'),
+            'full_name' => $r->input('full_name'),
+            'address' => $r->input('address'),
+            'city' => $r->input('city'),
             'postal_code' => $r->input('postal_code'),
         ]);
     }
 
     $order = Order::create([
-        'user_id'      => auth()->id(),
-        'status'       => 'pending',
+        'user_id' => auth()->id(),
+        'status' => 'pending',
         'currency_code'=> 'GBP',
         'total_crypto' => 0,
-        'total_gbp'    => $totalGbp,
-        'placed_at'    => now(),
+        'total_gbp' => $totalGbp,
+        'placed_at' => now(),
     ]);
 
     foreach ($cart as $item) {
@@ -176,26 +206,31 @@ Route::middleware('auth')->group(function () {
         $nft = Nft::firstOrCreate(
             ['slug' => $item['nft_slug']],
             [
-                'collection_id'      => $collection->id,
-                'name'               => ucwords(str_replace('-', ' ', $item['nft_slug'])),
-                'description'        => 'NFT: ' . $item['nft_slug'],
-                'image_url'          => '/images/placeholder.png',
-                'currency_code'      => 'GBP',
-                'price_crypto'       => 0,
-                'editions_total'     => 1000,
-                'editions_remaining' => 1000,
-                'is_active'          => true,
+                'collection_id' => $collection->id,
+                'name' => ucwords(str_replace('-', ' ', $item['nft_slug'])),
+                'description' => 'NFT: ' . $item['nft_slug'],
+                'image_url' => '/images/placeholder.png',
+                'currency_code' => 'GBP',
+                'price_crypto' => 0,
+                'editions_total' => $defaultEditionsForNewNft,
+                'editions_remaining' => $defaultEditionsForNewNft,
+                'is_active' => true,
             ]
         );
 
-        OrderItem::create([
-          'order_id'  => $order->id,
-    'nft_id' => $nft->id,
-        'quantity'        => $item['quantity'],
-            'unit_price_crypto'=> 0,
-            'unit_price_gbp'  => $item['price'],
-                    ]);
+        if ($nft) {
+            $nft->decrement('editions_remaining', $item['quantity']);
         }
+
+        OrderItem::create([
+            'order_id' => $order->id,
+            'nft_id' => $nft->id,
+            'quantity' => $item['quantity'],
+            'unit_price_crypto' => 0,
+            'unit_price_gbp' => $item['price'],
+        ]);
+    }
+
     session()->forget('cart');
     return redirect('/cart')
         ->with('status', 'Order placed successfully! Order #' . $order->id);

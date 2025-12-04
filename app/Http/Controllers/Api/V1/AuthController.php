@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Http\Requests\RegisterRequest;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
@@ -77,6 +78,45 @@ class AuthController extends Controller
 
     public function profile(Request $r)
     {
-        return view('Homepage');
+        return view('profile.customer-profile', [
+            'user' => $r->user(),
+        ]);
+    }
+
+    public function updateProfile(Request $r)
+    {
+        /** @var \App\Models\User $user */
+        $user = $r->user();
+
+        $data = $r->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+            'wallet_address' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $user->update($data);
+
+        return back()->with('status', 'Profile updated successfully.');
+    }
+
+    public function updatePassword(Request $r)
+    {
+        /** @var \App\Models\User $user */
+        $user = $r->user();
+
+        $r->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user->password = $r->input('password');
+        $user->save();
+
+        return back()->with('status', 'Password updated successfully.');
     }
 }

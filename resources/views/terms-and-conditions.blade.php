@@ -1,20 +1,14 @@
 
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
- <link rel="stylesheet" href="{{ asset('css/contactUs.css') }}">
-</head>
-<body>
- 
-    <div>
-      
-      <x-navbar />
+@extends('layouts.app')
 
+@section('title', 'Terms and Conditions')
+
+@push('styles')
+ <link rel="stylesheet" href="{{ asset('css/contactUs.css') }}">
+@endpush
+
+@section('content')
       <main class="terms-section">
         <h2>Terms and Conditions</h2>
         <p>
@@ -53,12 +47,10 @@
 
         <p>
           If you have more questions, click
-          <Link to="/faqs" class="FAQs">
+            <a href="/contactUs/faqs" class="FAQs">
             here
-          </Link>
+            </a>
           to view the FAQs.
         </p>
       </main>
-    </div> 
-</body>
-</html>
+@endsection

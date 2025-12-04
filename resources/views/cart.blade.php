@@ -1,16 +1,13 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
-  <link rel="stylesheet" href="{{ asset('css/App.css') }}">
-</head>
-<body>
-<x-navbar />
+@extends('layouts.app')
 
+@section('title', 'Your Basket')
+
+@push('styles')
+  <link rel="stylesheet" href="{{ asset('css/App.css') }}">
+@endpush
+
+@section('content')
     <div class="basket-page">
       <h1 class="basket-title">Your Basket</h1>
 
@@ -43,14 +40,17 @@
 
                 // Format the NFT name from slug
                 $nftName = ucwords(str_replace('-', ' ', $item['nft_slug']));
+
+                // Try to load the NFT from the database to get the real image URL
+                $nft = \App\Models\Nft::where('slug', $item['nft_slug'])->first();
+                $imageUrl = $nft?->image_url ?? '/images/robotman.webp';
               @endphp
 
               <div class="basket-item">
                 <img
-                  src="/{{ str_replace('-', '', ucfirst($item['nft_slug'])) }}.png"
+                  src="{{ asset(ltrim($imageUrl, '/')) }}"
                   class="basket-item-thumbnail"
                   alt="{{ $nftName }}"
-                  onerror="this.src='/images/robotman.webp'"
                 />
 
                 <div class="basket-item-info">
@@ -107,5 +107,5 @@
         </div>
       </div>
     </div>
-</body>
-</html>
+@endsection
+

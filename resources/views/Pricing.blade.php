@@ -1,18 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFT Pricing</title>
+@extends('layouts.app')
+
+@section('title', 'Pricing')
+
+@push('styles')
     <link rel="stylesheet" href="{{ asset('css/pricing.css') }}">
-</head>
+@endpush
 
-<body>
-
-<div>
-    <x-navbar />
-
-    <!-- Intro Section -->
+@section('content')
     <section class="Pricing-info">
         <p>
             Here at 9Mint, we value the hard work and creativity put in by our NFT designers.
@@ -22,14 +16,11 @@
         </p>
     </section>
 
-    <!-- Pricing Grid Section -->
     <main>
         <section id="Pricing_sizes" class="Org">
             <h3>In general:</h3>
 
             <div class="pricing-grid">
-
-                <!-- SMALL -->
                 <div class="pricing-item pricing-small">
                     <div class="pricing-content">
                         <div class="diagram">
@@ -43,7 +34,6 @@
                     </div>
                 </div>
 
-                <!-- MEDIUM -->
                 <div class="pricing-item pricing-medium">
                     <div class="pricing-content">
                         <div class="diagram">
@@ -57,7 +47,6 @@
                     </div>
                 </div>
 
-                <!-- LARGE -->
                 <div class="pricing-item pricing-large">
                     <div class="pricing-content">
                         <div class="diagram">
@@ -74,8 +63,5 @@
             </div>
         </section>
     </main>
+@endsection
 
-</div>
-
-</body>
-</html>

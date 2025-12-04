@@ -1,66 +1,81 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Products</title>
+@extends('layouts.app')
+
+@section('title', 'Products')
+
+@push('styles')
     <link rel="stylesheet" href="{{ asset('css/products.css') }}">
-</head>
-<body>
+@endpush
 
-    <x-navbar />
-
+@section('content')
     <section id="NFT_collections">
         <h2>Our Collections</h2>
 
-        <!-- GLOSSY COLLECTION -->
-        <div class="Glossy-collection">
-            <h3>
-                <a href="/products/Glossy-collection">Glossy Collection</a>
-            </h3>
+        @if ($collections->isEmpty())
+            <p class="no-collections">
+                No collections have been added yet. Please check back later.
+            </p>
+        @else
+            @foreach ($collections as $collection)
+                @php
+                    $imageUrls = $collection->nfts->pluck('image_url')->values();
+                    $totalEditions = $collection->nfts->sum('editions_total');
+                    $remainingEditions = $collection->nfts->sum('editions_remaining');
+                @endphp
+                <div class="collection-card">
+                    <h3>
+                        <a href="{{ route('collections.show', ['slug' => $collection->slug]) }}">
+                            {{ $collection->name }}
+                        </a>
+                    </h3>
 
-            <p>This collection contains Glossy Animal NFTs.</p>
-            <p>Click to find more about each individual NFT.</p>
+                    @if ($collection->description)
+                        <p>{{ $collection->description }}</p>
+                    @endif
 
-            <!-- NFT PREVIEW IMAGE INSIDE BOX -->
-            <div class="collection-image-wrapper">
-                <img 
-                    src="{{ asset('images/nfts/glossy/GlossyDuckNFT.png') }}"
-                    alt="Glossy Collection Preview"
-                    class="collection-preview"
-                >
-            </div>
+                    @if($totalEditions > 0)
+                        <p class="collection-stock">
+                            Stock: {{ $remainingEditions }} NFTs available (out of {{ $totalEditions }})
+                        </p>
+                    @endif
 
-            <div class="Glossy-Stock">
-                <p>Stock: 27</p>
-            </div>
-        </div>
+                    <p>Click to find more about each individual NFT.</p>
 
-        <!-- SUPERHERO COLLECTION -->
-        <div class="Superhero-collection">
-            <h3>
-                <a href="/products/SuperheroCollection">Superhero Collection</a>
-            </h3>
-
-            <p>This collection contains Superhero NFTs.</p>
-            <p>Click to find more about each individual NFT.</p>
-
-            <!-- NFT PREVIEW IMAGE INSIDE BOX -->
-            <div class="collection-image-wrapper">
-                <img 
-                    src="{{ asset('images/nfts/superhero/Superman.png') }}"
-                    alt="Superhero Collection Preview"
-                    class="collection-preview"
-                >
-            </div>
-
-            <div class="Superhero-Stock">
-                <p>Stock: 35</p>
-            </div>
-        </div>
-
+                    @if ($imageUrls->isNotEmpty())
+                        <div class="collection-image-wrapper">
+                            <img
+                                src="{{ asset(ltrim($imageUrls[0], '/')) }}"
+                                alt="{{ $collection->name }} Preview"
+                                class="collection-preview"
+                                data-images='@json($imageUrls)'
+                            >
+                        </div>
+                    @endif
+                </div>
+            @endforeach
+        @endif
     </section>
+@endsection
 
-</body>
-</html>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.collection-preview[data-images]').forEach(function (img) {
+        let images;
+        try {
+            images = JSON.parse(img.dataset.images || '[]');
+        } catch (e) {
+            images = [];
+        }
+        if (!Array.isArray(images) || images.length <= 1) return;
+
+        let index = 0;
+        setInterval(function () {
+            index = (index + 1) % images.length;
+            img.src = images[index];
+        }, 3000); // 3 seconds
+    });
+});
+</script>
+@endpush
+
+

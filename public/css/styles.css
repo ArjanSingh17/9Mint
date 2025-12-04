@@ -2,10 +2,11 @@
 .navbar {
     width: 100%;
     background-color: white;
-    padding: 15px 40px;
+    padding: 10px 16px;
+    box-sizing: border-box;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     position: sticky;
     top: 0;
@@ -20,8 +21,10 @@
 
 .nav-links {
     display: flex;
-    gap: 30px;
+    gap: 24px;
     align-items: center;
+    flex-wrap: wrap;
+    margin-left: 32px; /* add space between logo and navigation tabs */
 }
 
 .nav-links a {
@@ -40,6 +43,7 @@
     display: flex;
     gap: 12px;
     align-items: center;
+    margin-left: auto; /* keep auth buttons stuck to the right */
 }
 
 .basket-btn {
@@ -97,8 +101,8 @@ body {
 
 .logo-image {
     height: auto;
-    width: 55px;
-    padding: 20px;
+    width: 80px;
+    padding: 10px;
 }
 
  

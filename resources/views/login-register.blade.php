@@ -1,14 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login / Register</title>
-  <link rel="stylesheet" href="{{ asset('css/App.css') }}">
-</head>
-<body>
-  <x-navbar />
+@extends('layouts.app')
 
+@section('title', 'Login / Register')
+
+@push('styles')
+  <link rel="stylesheet" href="{{ asset('css/App.css') }}">
+@endpush
+
+@section('content')
   <div class="auth-section">
 
     {{-- LOGIN --}}
@@ -63,5 +61,5 @@
     </div>
 
   </div>
-</body>
-</html>
+@endsection
+

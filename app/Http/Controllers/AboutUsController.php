@@ -8,9 +8,8 @@ class AboutUsController extends Controller
 {
     public function index()
     {
-        // load 4 random NFTs for display
-        $nfts = Nft::where('is_active', true)->inRandomOrder()->limit(4)->get();
+        $nfts = Nft::where('is_active', true)->get();
 
-        return view('AboutUs', compact('nfts'));
+        return view('about-us', compact('nfts'));
     }
 }

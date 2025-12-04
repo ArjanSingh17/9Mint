@@ -3,26 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>9Mint NFT Shop - @yield('title', 'Profile')</title>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>9Mint - @yield('title', 'Page')</title>
+
+    {{-- Global stylesheet for the whole site --}}
+    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f4; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .page-container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 16px;
+            box-sizing: border-box;
+            flex: 1 0 auto;
+        }
+        .site-footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #ccc;
+            font-size: 0.9rem;
+            color: #555;
+            background-color: #ffffff;
+            width: 100%;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+        .site-footer a {
+            color: inherit;
+            text-decoration: underline;
+            margin: 0 6px;
+        }
     </style>
+
+    @stack('styles')
 </head>
 <body>
-    <header style="background-color: #312e81; color: white; padding: 15px;">
-        <nav class="container flex justify-between">
-            <a href="/" style="font-size: 1.5em; font-weight: bold;">9Mint NFT E-Commerce</a>
-            <a href="{{ route('profile.show') }}">My Profile</a>
-        </nav>
+    {{-- Shared top navigation bar --}}
+    <header>
+        <x-navbar />
     </header>
 
-    <main class="container">
+    {{-- Main content area --}}
+    <main class="page-container">
         @yield('content') 
     </main>
 
-    <footer style="text-align: center; margin-top: 50px; padding: 20px; border-top: 1px solid #ccc;">
-        &copy; 2025 9Mint. Handle customer data securely.
+    {{-- Shared footer --}}
+    <footer class="site-footer">
+        &copy; {{ date('Y') }} 9Mint. All rights reserved.
+        <span>|</span>
+        <a href="/contactUs/terms">Terms &amp; Conditions</a>
+        <span>|</span>
+        <a href="/contactUs/faqs">FAQs</a>
+        <span>|</span>
+        <a href="/contactUs">Contact Us</a>
     </footer>
+
+    @stack('scripts')
 </body>
 </html>

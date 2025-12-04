@@ -8,9 +8,14 @@ class ProductsController extends Controller
 {
     public function index()
     {
-        // Load all collections
-        $collections = Collection::whereNull('deleted_at')->get();
+        $collections = Collection::whereHas('nfts', function ($q) {
+            $q->where('is_active', true);
+        })
+        ->with(['nfts' => function ($q) {
+            $q->where('is_active', true)->orderBy('id');
+        }])
+        ->get();
 
-        return view('Products', compact('collections'));
+        return view('products', compact('collections'));
     }
 }

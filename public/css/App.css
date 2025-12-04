@@ -15,95 +15,182 @@ body {
   color: white;
 }
 
-/* NAVBAR */
-.navbar {
-  width: 100%;
-  background-color: white;
-  padding: 15px 40px;
+.profile-page {
+  padding: 50px 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.profile-title {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 30px;
+}
+
+.profile-status {
+  background: #4CAF50;
+  color: white;
+  padding: 15px;
+  margin: 0 auto 20px;
+  max-width: 800px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.profile-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-card {
+  background: white;
+  color: #20065c;
+  padding: 24px 28px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.profile-card h2 {
+  margin-bottom: 10px;
+}
+
+.profile-card p {
+  color: #444;
+}
+
+.profile-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-card label {
+  font-weight: 500;
+}
+
+.profile-card input[type="text"],
+.profile-card input[type="email"],
+.profile-card input[type="password"] {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.profile-card button {
+  margin-top: 8px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.profile-card button[type="submit"] {
+  background: #20065c;
+  color: white;
+}
+
+.profile-card button[type="submit"]:hover {
+  background: #32138a;
+}
+
+.profile-activity a {
+  color: #20065c;
+  text-decoration: none;
+  margin-right: 20px;
+}
+
+.profile-activity a:hover {
+  text-decoration: underline;
+}
+
+/* ORDERS PAGE */
+.orders-page {
+  padding: 50px 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.orders-title {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 30px;
+}
+
+.orders-status {
+  background: #4CAF50;
+  color: white;
+  padding: 15px;
+  margin: 0 auto 20px;
+  max-width: 800px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.orders-empty {
+  text-align: center;
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.orders-card {
+  background: white;
+  color: #20065c;
+  padding: 24px 28px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.orders-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  align-items: flex-start;
+  margin-bottom: 10px;
 }
 
-.logo-container .logo-image,
-.logo-image {
-  height: 50px;
-  width: auto;
+.orders-card-header h2 {
+  margin: 0 0 4px;
 }
 
-.nav-links {
-  display: flex;
-  gap: 30px;
-  align-items: center;
+.orders-meta {
+  font-size: 0.9rem;
+  color: #555;
 }
 
-.nav-links a {
-  text-decoration: none;
-  color: black;
-  font-weight: 500;
-  font-size: 16px;
-  transition: color 0.3s;
+.orders-summary {
+  text-align: right;
 }
 
-.nav-links a:hover {
-  color: #307ea8;
+.orders-total {
+  font-weight: 600;
+  margin-bottom: 4px;
 }
 
-.nav-auth {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+.orders-items-table {
+  width: 100%;
+  margin-top: 10px;
+  border-collapse: collapse;
+  font-size: 0.95rem;
 }
 
-.basket-btn {
-  position: relative;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 22px;
-  padding: 4px;
+.orders-items-table th,
+.orders-items-table td {
+  padding: 6px 4px;
+  text-align: left;
 }
 
-.basket-icon {
-  display: inline-block;
+.orders-items-table th {
+  border-bottom: 1px solid #ddd;
 }
 
-.basket-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  background: #ff4d4f;
-  color: white;
-  font-size: 10px;
-  padding: 2px 5px;
-  border-radius: 50%;
-  min-width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
+.orders-items-table tr + tr td {
+  border-top: 1px solid #f0f0f0;
 }
 
-.nav-btn {
-  padding: 8px 16px;
-  background: black;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  text-decoration: none;
-  font-size: 14px;
-  transition: background 0.3s;
-}
-
-.nav-btn:hover {
-  background: #333;
-}
 
 .auth-section {
   display: flex;
