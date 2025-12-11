@@ -37,8 +37,8 @@ This doc describes the **Blade-based web experience** wired up in `routes/web.ph
 - **Guest-only routes**  
   - `GET /login` → login/register Blade (`AuthController@showLogin`)  
   - `GET /register` → same view (`AuthController@showRegister`)  
-  - `POST /login` → `AuthController@loginWeb`  
-  - `POST /register` → `AuthController@registerWeb`
+  - `POST /login` → `AuthController@loginWeb` (uses **username + password**)  
+  - `POST /register` → `AuthController@registerWeb` (collects **username, email, password**)
 
 - **Authenticated routes** (wrapped in `Route::middleware('auth')`)  
   - Logout: `POST /logout` → `AuthController@logout`  
@@ -47,8 +47,8 @@ This doc describes the **Blade-based web experience** wired up in `routes/web.ph
   - Password update: `PATCH /profile/password` → `AuthController@updatePassword`
 
 - **User model fields**  
-  - `name`, `email`, `password`, `role`, and **`wallet_address`** (nullable) are mass assignable.  
-  - `wallet_address` is added by migration `2025_12_04_000000_add_wallet_address_to_users_table.php` and surfaced on the profile form.
+  - `name` (used as **username**), `email`, `password`, `role`, and **`wallet_address`** (nullable) are mass assignable.  
+  - `wallet_address` is added by a later migration and surfaced on the profile form as the NFT wallet address.
 
 ---
 
@@ -85,10 +85,10 @@ All of the following routes live inside the `auth` middleware group so only logg
 
 ## Relationship to the API
 
-- The **API** under `/api/v1/**` exposes collections, NFTs, cart, favourites, checkout, and admin NFT creation for SPA or external clients.
-- The **Blade web flows** described here use the same underlying models (`Collection`, `Nft`, `Order`, `OrderItem`, `CartItem`, `User`) but operate via standard web routes and session-based cart storage.
+- The **API** under `/api/v1/**` exposes collections, NFTs, a **DB-backed cart**, favourites, checkout/order endpoints, and admin NFT creation for SPA or external clients.
+- The **Blade web flows** described here use the same underlying models (`Collection`, `Nft`, `Order`, `OrderItem`, `User`) but operate via standard web routes and a **session-based cart** (the `CartItem` model is used only by the API cart).
 - During development you can:
   - Use the Blade UI only, or  
-  - Mix Blade for pages and `/api/v1` for richer SPA-like interactions.
+  - Mix Blade for pages and `/api/v1` for richer SPA-like interactions (e.g. crypto checkout and API cart).
 
 

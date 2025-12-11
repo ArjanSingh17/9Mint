@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\StoreNftRequest;
 use App\Models\Nft;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AdminNftController extends Controller
 {
@@ -19,25 +19,43 @@ class AdminNftController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created NFT in storage.
      */
-    public function store(Request $request)
+    public function store(StoreNftRequest $request)
     {
+        $user = $request->user();
+
+        if (! $user || ! $user->hasRole('admin')) {
+            abort(403, 'Forbidden');
+        }
+
         $data = $request->validated();
 
-        $path = $request->file('image')->store('nfts','public');
-        $data['image_url'] = Storage::url($path);
+        $path = $request->file('image')->store('nfts', 'public');
+        $imageUrl = Storage::url($path);
+
+        $baseSlug = Str::slug($data['name']);
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (Nft::where('slug', $slug)->exists()) {
+            $slug = $baseSlug.'-'.$counter;
+            $counter++;
+        }
 
         $nft = Nft::create([
             'name' => $data['name'],
+            'slug' => $slug,
             'collection_id' => $data['collection_id'],
             'price_crypto' => $data['price_crypto'],
+            'currency_code' => 'ETH',
             'editions_total' => $data['editions_total'],
             'editions_remaining' => $data['editions_total'],
-            'image_url' => $data['image_url'],
-         ]);
+            'image_url' => $imageUrl,
+            'is_active' => true,
+        ]);
 
-         return response()->json(['data' => $nft], 201);
+        return response()->json(['data' => $nft], 201);
     }
 
     /**
