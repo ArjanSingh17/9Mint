@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Nft;
+use App\Http\Resources\NftResource;
 
 class FavouriteController extends Controller
 {
@@ -13,7 +14,10 @@ class FavouriteController extends Controller
      */
     public function index()
     {
-        $nfts = request()->user()->belongsToMany(Nft::class, 'favourites')->paginate(12);
+        $user = request()->user();
+
+        $nfts = $user->favourites()->paginate(12);
+
         return NftResource::collection($nfts);
     }
 

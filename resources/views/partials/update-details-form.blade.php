@@ -1,15 +1,15 @@
 <section>
     <h2 class="text-2xl font-semibold mb-4">Account Details</h2>
-    <p class="text-gray-600 mb-6">Update your name, email, and NFT wallet information.</p>
+    <p class="text-gray-600 mb-6">Update your username, email, and NFT wallet information.</p>
 
     {{-- : POST method with PATCH directive --}}
     <form method="POST" action="{{ route('profile.update') }}" class="space-y-4">
         @csrf
         @method('patch') 
         
-        {{-- Name Field --}}
+        {{-- Username Field --}}
         <div>
-            <label for="name" class="block font-medium text-gray-700">Name</label>
+            <label for="name" class="block font-medium text-gray-700">Username</label>
             <input id="name" name="name" type="text" value="{{ old('name', Auth::user()->name) }}" required autofocus 
                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
             @error('name') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror

@@ -4,7 +4,7 @@
 
 **API base:** `/api/v1`  
 
-**Auth right now:** public endpoints only, or use a dev **Bearer token** for protected routes.
+**Auth right now:** public endpoints, plus protected ones using **Laravel Sanctum** – during dev you typically use a **Bearer token** (personal access token) for protected routes.
 
 
 
@@ -16,6 +16,8 @@
 
 
 
+- **Health check** → `GET /health` (simple `{ "ok": true }`)
+
 - **Collections list\*\* → `GET /collections` (paginated)
 
 - **Collection detail*\* → `GET /collections/{slug}`
@@ -25,6 +27,8 @@
 - **NFT detail** → `GET /nfts/{slug}`
 
 - **(Optional)** price helper → `GET /price/convert?amount=0.08`
+
+- **Register (API)** → `POST /register` (creates a new user; see `docs/dev-workflow.md` for how to create a dev token)
 
 
 
@@ -105,28 +109,29 @@ JSON fields (per item):
 
 
 ```
-
 GET    /api/v1/me
 
 GET    /api/v1/me/favourites
-
-POST   /api/v1/nfts/{id}/favourite
+POST   /api/v1/nfts/{nft}/favourite
 
 GET    /api/v1/cart
+POST   /api/v1/cart                  (upsert: nft_id, optional quantity)
+GET    /api/v1/cart/{id}
+PUT    /api/v1/cart/{id}             (update quantity)
+DELETE /api/v1/cart/{nft}            (remove all lines for a given NFT)
 
-POST   /api/v1/cart              (nft\_id, quantity?)
+GET    /api/v1/checkout              (list orders for current user)
+GET    /api/v1/checkout/{id}         (get a single order)
+POST   /api/v1/checkout              (create a crypto order from DB cart, optional checkout_token)
+PUT    /api/v1/checkout/{id}         (update order items / quantities)
+DELETE /api/v1/checkout/{id}         (delete order and restore stock)
 
-DELETE /api/v1/cart/{nftId}
-
-POST   /api/v1/checkout
-
-POST   /api/v1/admin/nfts        (multipart: image + fields)
-
+POST   /api/v1/admin/nfts            (multipart: image + fields, admin role required)
 ```
 
 
 
-**Auth header for dev:**
+**Auth header for dev (Sanctum personal access token):**
 
 ```
 

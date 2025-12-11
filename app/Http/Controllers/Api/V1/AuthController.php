@@ -47,16 +47,18 @@ class AuthController extends Controller
 
     public function loginWeb(Request $r)
     {
-        $r->validateWithBag('login', ['email' => ['required','email'],'password' => ['required'],
+        $r->validateWithBag('login', [
+            'name' => ['required','string'],
+            'password' => ['required'],
         ]);
 
         if (! \Illuminate\Support\Facades\Auth::attempt(
-            $r->only('email','password'),
+            $r->only('name','password'),
             $r->boolean('remember')
         )){
             return back()
-                ->withErrors(['email' => 'Invalid credentials'], 'login')
-                ->withinput();
+                ->withErrors(['name' => 'Invalid credentials'], 'login')
+                ->withInput();
         }
 
         $r->session()->regenerate();
@@ -89,7 +91,13 @@ class AuthController extends Controller
         $user = $r->user();
 
         $data = $r->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => [
+                'required',
+                'string',
+                'max:80',
+                'regex:/^[A-Za-z0-9\-]+$/',
+                Rule::unique('users', 'name')->ignore($user->id),
+            ],
             'email' => [
                 'required',
                 'email',

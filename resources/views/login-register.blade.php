@@ -25,7 +25,7 @@
 
       <form method="POST" action="{{ url('/login') }}">
         @csrf
-        <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" required autocomplete="email">
+        <input type="text" name="name" placeholder="Username" value="{{ old('name') }}" required autocomplete="username">
         <input type="password" name="password" placeholder="Password" required autocomplete="current-password">
         <label class="remember">
           <input type="checkbox" name="remember" value="1"> Remember me
@@ -52,7 +52,7 @@
 
       <form method="POST" action="{{ url('/register') }}">
         @csrf
-        <input type="text" name="name" placeholder="Full Name" value="{{ old('name') }}" required maxlength="80" autocomplete="name">
+        <input type="text" name="name" placeholder="Username" value="{{ old('name') }}" required maxlength="80" autocomplete="username" pattern="[A-Za-z0-9\-]+">
         <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" required autocomplete="email">
         <input type="password" name="password" placeholder="Password" required minlength="8" autocomplete="new-password">
         <input type="password" name="password_confirmation" placeholder="Confirm Password" required autocomplete="new-password">
