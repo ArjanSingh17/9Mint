@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images/9mint.png" alt="9Mint logo" width="180">
+  <img src="public/images/9mint.png" alt="9Mint logo" width="180">
 </p>
 
 ---
