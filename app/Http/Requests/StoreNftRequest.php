@@ -25,6 +25,9 @@ class StoreNftRequest extends FormRequest
             'name' => ['required','string','max:160'],
             'collection_id' => ['required','integer','exists:collections,id'],
             'price_crypto' => ['required','numeric'],
+            'price_small_gbp' => ['required','numeric','min:0'],
+            'price_medium_gbp' => ['required','numeric','min:0'],
+            'price_large_gbp' => ['required','numeric','min:0'],
             'editions_total' => ['required','integer','min:1'],
             'image' => ['required','image','mimes:jpeg,png,webp','max:4096','dimensions:max_width=6000,max_height=6000'],
             //

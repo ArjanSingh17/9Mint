@@ -12,52 +12,20 @@
 @endpush
 
 @push('scripts')
-    {{-- Shared size-selection JS for all collections --}}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.size-option').forEach(sizeContainer => {
-                const sizeButtons = sizeContainer.querySelectorAll('button');
-                const nftInfo = sizeContainer.closest('.nft-info');
-                const form = nftInfo ? nftInfo.querySelector('form') : null;
-
-                if (form) {
-                    let sizeInput = form.querySelector('input[name="size"]');
-                    if (!sizeInput) {
-                        sizeInput = document.createElement('input');
-                        sizeInput.type = 'hidden';
-                        sizeInput.name = 'size';
-                        form.appendChild(sizeInput);
-                    }
-
-                    sizeButtons.forEach(button => {
-                        button.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            sizeButtons.forEach(btn => btn.classList.remove('selected'));
-                            this.classList.add('selected');
-                            sizeInput.value = this.textContent.trim().toLowerCase();
-                        });
-                    });
-
-                    form.addEventListener('submit', function(e) {
-                        if (!sizeInput.value) {
-                            e.preventDefault();
-                            alert('Please select a size before adding to basket');
-                        }
-                    });
-                }
-            });
-        });
-    </script>
+    @vite('resources/js/page-scripts/collections-size-selection.js')
 @endpush
 
 @section('content')
+    {{-- Title --}}
     <h1 class="collection-title">{{ $collection->name }}</h1>
 
+    {{-- Items --}}
     @if ($nfts->isEmpty())
         <p class="no-nfts">
             No NFTs have been added to this collection yet.
         </p>
     @else
+        {{-- Cards --}}
         @foreach ($nfts as $nft)
             <x-nft-card
                 :image="$nft->image_url"

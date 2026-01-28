@@ -7,15 +7,18 @@
 @endpush
        
 @section('content')
+    {{-- Checkout --}}
     <div class="checkoutContainer">
       <h1>Checkout</h1>
 
+      {{-- Success --}}
       @if(session('status'))
         <div style="background: #4CAF50; color: white; padding: 15px; margin: 20px auto; max-width: 800px; border-radius: 8px; text-align: center;">
             {{ session('status') }}
         </div>
       @endif
 
+      {{-- Error --}}
       @if(session('error'))
         <div style="background: #f44336; color: white; padding: 15px; margin: 20px auto; max-width: 800px; border-radius: 8px; text-align: center;">
             {{ session('error') }}
@@ -27,12 +30,14 @@
         $subtotal = 0;
       @endphp
 
+      {{-- Empty --}}
       @if(empty($cart))
         <p style="text-align: center; padding: 40px;">Your cart is empty. <a href="/products">Browse products</a></p>
       @else
         <form method="POST" action="{{ route('orders.store') }}">
           @csrf
 
+          {{-- Shipping --}}
           <section class="checkoutSection">
             <h2>Shipping Information</h2>
             <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -43,6 +48,7 @@
             </div>
           </section>
 
+          {{-- Summary --}}
           <section class="checkoutSection">
             <h2>Your Order</h2>
 

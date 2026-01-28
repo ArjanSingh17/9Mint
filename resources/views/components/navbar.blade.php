@@ -1,10 +1,12 @@
 <nav class="navbar">
+  {{-- Logo --}}
   <div class="logo-container">
     <a href="/homepage">
       <img src="{{ asset('images/logo.png') }}" alt="9 Mint Logo" class="logo-image" />
     </a>
   </div>
 
+  {{-- Links --}}
   <div class="nav-links">
     <a href="/homepage">Homepage</a>
     <a href="/aboutUs">About Us</a>
@@ -13,6 +15,7 @@
     <a href="/contactUs">Contact Us</a>
   </div>
 
+  {{-- Cart/auth --}}
         <div class="nav-auth"><a href="/cart">
           <button class="basket-btn">
             <span class="basket-icon">🛒</span>

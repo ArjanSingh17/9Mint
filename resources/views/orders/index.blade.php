@@ -7,18 +7,22 @@
 @endpush
 
 @section('content')
+  {{-- Header --}}
   <div class="orders-page">
     <h1 class="orders-title">My Purchased NFTs (Order History)</h1>
 
+    {{-- Status --}}
     @if (session('status'))
       <div class="orders-status">
         {{ session('status') }}
       </div>
     @endif
 
+    {{-- Empty --}}
     @if ($orders->isEmpty())
       <p class="orders-empty">You have not placed any orders yet.</p>
     @else
+      {{-- List --}}
       <div class="orders-list">
         @foreach ($orders as $order)
           <div class="orders-card">
@@ -39,6 +43,7 @@
               </div>
             </div>
 
+            {{-- Items --}}
             @if ($order->items->isNotEmpty())
               <table class="orders-items-table">
                 <thead>

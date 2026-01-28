@@ -1,4 +1,5 @@
 <section>
+    {{-- Header --}}
     <h2 class="text-2xl font-semibold mb-4">Account Details</h2>
     <p class="text-gray-600 mb-6">Update your username, email, and NFT wallet information.</p>
 
@@ -33,6 +34,7 @@
             @error('wallet_address') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
         </div>
 
+        {{-- Submit --}}
         <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md">
             Save Changes
         </button>

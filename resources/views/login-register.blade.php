@@ -9,7 +9,7 @@
 @section('content')
   <div class="auth-section">
 
-    {{-- LOGIN --}}
+    {{-- Login --}}
     <div class="auth-form">
       <h2>Login</h2>
 
@@ -25,6 +25,7 @@
 
       <form method="POST" action="{{ url('/login') }}">
         @csrf
+        {{-- Credentials --}}
         <input type="text" name="name" placeholder="Username" value="{{ old('name') }}" required autocomplete="username">
         <input type="password" name="password" placeholder="Password" required autocomplete="current-password">
         <label class="remember">
@@ -36,7 +37,7 @@
       <a class="forgot-password" href="#">Forgot Password?</a>
     </div>
 
-    {{-- REGISTER --}}
+    {{-- Register --}}
     <div class="auth-form">
       <h2>Register</h2>
 
@@ -52,9 +53,10 @@
 
       <form method="POST" action="{{ url('/register') }}">
         @csrf
+        {{-- Fields --}}
         <input type="text" name="name" placeholder="Username" value="{{ old('name') }}" required maxlength="80" autocomplete="username" pattern="[A-Za-z0-9\-]+">
         <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" required autocomplete="email">
-        <input type="password" name="password" placeholder="Password" required minlength="8" autocomplete="new-password">
+        <input type="password" name="password" placeholder="Password" required minlength="8" autocomplete="new-password"> {{-- min length --}}
         <input type="password" name="password_confirmation" placeholder="Confirm Password" required autocomplete="new-password">
         <button type="submit">Register</button>
       </form>

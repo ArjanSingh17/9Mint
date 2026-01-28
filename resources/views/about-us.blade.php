@@ -7,22 +7,24 @@
 @endpush
 
 @section('content')
+      {{-- Hero --}}
       <section class="Groupname">
         <h1>9 MINT</h1>
         <p>All about art and creativity</p>
       </section>
 
-    {{-- Dynamic NFT Grid: show 5 at a time, rotate through all NFTs --}}
+    {{-- NFT grid --}}
       @php
           $imageUrls = $nfts->pluck('image_url')->values();
-          $initialCount = min(5, $imageUrls->count());
+          $initialCount = min(5, $imageUrls->count()); // initial count
       @endphp
-      <section class="nft-grid">
+      <section class="nft-grid" data-images='@json($imageUrls)'>
         @for ($i = 0; $i < $initialCount; $i++)
             <img src="{{ $imageUrls[$i] }}" alt="NFT {{ $i + 1 }}" />
         @endfor
       </section>
 
+      {{-- About --}}
       <section class="about-section">
         <h2>Who Are We?</h2>
         <p>
@@ -44,6 +46,7 @@
         </p>
       </section>
 
+      {{-- Team --}}
       <section class="team-section">
         <h2>Meet the Team</h2>
 
@@ -73,59 +76,6 @@
 @endsection
 
 @push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const grid = document.querySelector('.nft-grid');
-    if (!grid) return;
-
-    const slots = Array.from(grid.querySelectorAll('img'));
-    const allImages = @json($imageUrls);
-
-    if (slots.length === 0 || !Array.isArray(allImages) || allImages.length === 0) {
-        return;
-    }
-
-    const total = allImages.length;
-
-    function pickUniqueIndices(count, totalCount) {
-        const available = [];
-        for (let i = 0; i < totalCount; i++) {
-            available.push(i);
-        }
-
-        const result = [];
-        const picks = Math.min(count, totalCount);
-        for (let i = 0; i < picks; i++) {
-            const idx = Math.floor(Math.random() * available.length);
-            result.push(available[idx]);
-            available.splice(idx, 1);
-        }
-        return result;
-    }
-
-    function applyIndices(indices) {
-        indices.forEach((imgIdx, slotIdx) => {
-            if (slots[slotIdx] && allImages[imgIdx]) {
-                slots[slotIdx].src = allImages[imgIdx];
-            }
-        });
-    }
-
-    // Initial random set
-    let currentIndices = pickUniqueIndices(slots.length, total);
-    applyIndices(currentIndices);
-
-    setInterval(function () {
-        if (total <= slots.length) {
-            // Not enough NFTs to rotate a new set
-            return;
-        }
-
-        // Pick a new random set of unique indices for all slots
-        currentIndices = pickUniqueIndices(slots.length, total);
-        applyIndices(currentIndices); // all 5 change at once
-    }, 3000); // 3 seconds
-});
-</script>
+    @vite('resources/js/page-scripts/about-us-nft-grid-rotator.js')
 @endpush
 

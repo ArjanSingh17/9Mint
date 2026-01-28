@@ -1,0 +1,3 @@
+// App bootstrap
+import './bootstrap';
+

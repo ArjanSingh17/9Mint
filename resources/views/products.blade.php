@@ -7,14 +7,17 @@
 @endpush
 
 @section('content')
+    {{-- Collections --}}
     <section id="NFT_collections">
         <h2>Our Collections</h2>
 
+        {{-- Empty --}}
         @if ($collections->isEmpty())
             <p class="no-collections">
                 No collections have been added yet. Please check back later.
             </p>
         @else
+            {{-- Cards --}}
             @foreach ($collections as $collection)
                 @php
                     $imageUrls = $collection->nfts->pluck('image_url')->values();
@@ -57,25 +60,7 @@
 @endsection
 
 @push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.collection-preview[data-images]').forEach(function (img) {
-        let images;
-        try {
-            images = JSON.parse(img.dataset.images || '[]');
-        } catch (e) {
-            images = [];
-        }
-        if (!Array.isArray(images) || images.length <= 1) return;
-
-        let index = 0;
-        setInterval(function () {
-            index = (index + 1) % images.length;
-            img.src = images[index];
-        }, 3000); // 3 seconds
-    });
-});
-</script>
+    @vite('resources/js/page-scripts/products-collection-preview-rotator.js')
 @endpush
 
 

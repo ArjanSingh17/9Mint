@@ -11,7 +11,8 @@ class Nft extends Model
 {
     protected $fillable = [
         'slug','name','description','image_url','currency_code',
-        'price_crypto','editions_total','editions_remaining',
+        'price_crypto','price_small_gbp','price_medium_gbp','price_large_gbp',
+        'editions_total','editions_remaining',
         'is_active','collection_id',
     ];
 
