@@ -63,6 +63,21 @@ $defaultCurrency = 'GBP';
 $defaultPrice    = 0.00;    // crypto price (you can adjust later)
 $editionsTotal   = 5;
 
+/**
+ * Generate deterministic per-NFT size prices in GBP.
+ * This keeps local/dev data stable across runs while ensuring prices differ per NFT.
+ */
+function sizePricesGbp(string $slug): array
+{
+    $seed = abs(crc32($slug));
+    // Base between 18.00 and 58.00 (GBP)
+    $base = 18 + (($seed % 4000) / 100);
+    $medium = round($base, 2);
+    $small = round($medium * 0.75, 2);
+    $large = round($medium * 1.25, 2);
+    return [$small, $medium, $large];
+}
+
 // --- Glossy NFTs (matching Glossy-collection.blade.php) ---
 $glossyNfts = [
     [
@@ -110,6 +125,7 @@ $glossyNfts = [
 ];
 
 foreach ($glossyNfts as $data) {
+    [$small, $medium, $large] = sizePricesGbp($data['slug']);
     $nft = Nft::updateOrCreate(
         ['slug' => $data['slug']],
         [
@@ -119,6 +135,9 @@ foreach ($glossyNfts as $data) {
             'image_url'          => $data['image_url'],
             'currency_code'      => $defaultCurrency,
             'price_crypto'       => $defaultPrice,
+            'price_small_gbp'    => $small,
+            'price_medium_gbp'   => $medium,
+            'price_large_gbp'    => $large,
             'editions_total'     => $editionsTotal,
             'editions_remaining' => $editionsTotal,
             'is_active'          => true,
@@ -181,6 +200,7 @@ $superheroNfts = [
 ];
 
 foreach ($superheroNfts as $data) {
+    [$small, $medium, $large] = sizePricesGbp($data['slug']);
     $nft = Nft::updateOrCreate(
         ['slug' => $data['slug']],
         [
@@ -190,6 +210,9 @@ foreach ($superheroNfts as $data) {
             'image_url'          => $data['image_url'],
             'currency_code'      => $defaultCurrency,
             'price_crypto'       => $defaultPrice,
+            'price_small_gbp'    => $small,
+            'price_medium_gbp'   => $medium,
+            'price_large_gbp'    => $large,
             'editions_total'     => $editionsTotal,
             'editions_remaining' => $editionsTotal,
             'is_active'          => true,

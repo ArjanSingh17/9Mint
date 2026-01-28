@@ -10,6 +10,7 @@
 @endpush
 
 @section('content')
+      {{-- Intro --}}
       <main class="apology-section">
         <h2>Sorry for any inconvenience caused</h2>
         <p>
@@ -18,6 +19,7 @@
         </p>
         <p>Below are some frequently asked questions that might help you:</p>
 
+        {{-- FAQs --}}
         <h2>Frequently Asked Questions (FAQs)</h2>
 
         <h3>1. How can I reset my password?</h3>

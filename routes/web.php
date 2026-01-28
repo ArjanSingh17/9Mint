@@ -113,13 +113,26 @@ Route::middleware('auth')->group(function () {
             // Create a unique key for this item (nft + size combination)
             $cartKey = $nftSlug . '_' . $size;
 
-            // Determine price based on size
-            $prices = [
+            // Determine price based on size (per-NFT GBP pricing)
+            $fallbackPrices = [
                 'small' => 29.99,
                 'medium' => 39.99,
-                'large' => 49.99
+                'large' => 49.99,
             ];
-            $price = $prices[$size] ?? 39.99;
+            $nft = Nft::where('slug', $nftSlug)->first();
+            if ($nft) {
+                $price = match ($size) {
+                    'small' => (float) $nft->price_small_gbp,
+                    'medium' => (float) $nft->price_medium_gbp,
+                    'large' => (float) $nft->price_large_gbp,
+                    default => (float) $nft->price_medium_gbp,
+                };
+                if (!is_finite($price) || $price <= 0) {
+                    $price = $fallbackPrices[$size] ?? $fallbackPrices['medium'];
+                }
+            } else {
+                $price = $fallbackPrices[$size] ?? $fallbackPrices['medium'];
+            }
 
             // If item already exists, increase quantity
             if (isset($cart[$cartKey])) {

@@ -1,4 +1,5 @@
 <section>
+    {{-- Links --}}
     <h2 class="text-2xl font-semibold mb-4">My Activity</h2>
     <div class="flex space-x-4">
         {{-- Links to secured areas (Policy protected) --}}

@@ -19,8 +19,10 @@
   php artisan config:clear && php artisan migrate
   ```
 
-### Unstyled page / "Vite manifest not found"
-- Run `npm ci` and keep `npm run dev` running.
+### Unstyled page / "Vite manifest not found" / React components not loading
+- Run `npm ci` (or `npm install`) to install React and all dependencies
+- Keep `npm run dev` running for development, or run `npm run build` for production
+- Ensure Node.js 20 LTS is installed: `node -v`
 
 ### Port already in use
 - PHP server: `php artisan serve --port=8001`  
@@ -56,3 +58,11 @@ php artisan config:clear && php artisan migrate
 
 ### Add [slug] to fillable / MassAssignmentException
 - Add the field to `$fillable` (or use `$guarded=[]` in dev). Then retry the create.
+
+### NFT Discovery Board not showing up
+- **No NFTs in database:** Run `php "dev tools/seed-collections-and-nfts.php"` to populate initial data
+- **Missing price columns:** Run `php artisan migrate` to apply pending migrations (especially `2026_01_21_000001_add_size_prices_to_nfts_table.php`)
+- **Vite assets not loading:** 
+  - Development: Ensure `npm run dev` is running in a separate terminal
+  - Production: Run `npm run build` to compile assets
+- **Check NFT count:** `php artisan tinker --execute="echo App\Models\Nft::where('is_active', true)->where('editions_remaining', '>', 0)->count();"`

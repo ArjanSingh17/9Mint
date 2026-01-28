@@ -7,6 +7,7 @@
 @endpush
 
 @section('content')
+    {{-- Intro --}}
     <section class="Pricing-info">
         <p>
             Here at 9Mint, we value the hard work and creativity put in by our NFT designers.
@@ -17,9 +18,11 @@
     </section>
 
     <main>
+        {{-- Price ranges --}}
         <section id="Pricing_sizes" class="Org">
             <h3>In general:</h3>
 
+            {{-- Grid --}}
             <div class="pricing-grid">
                 <div class="pricing-item pricing-small">
                     <div class="pricing-content">

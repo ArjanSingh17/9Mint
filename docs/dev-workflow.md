@@ -40,6 +40,8 @@ php artisan migrate
 
 php artisan storage:link
 
+php "dev tools/seed-collections-and-nfts.php"
+
 ```
 
 

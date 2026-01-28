@@ -7,43 +7,9 @@
 
     <title>9Mint - @yield('title', 'Page')</title>
 
-    {{-- Global stylesheet for the whole site --}}
-    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-
-    <style>
-        body {
-            font-family: sans-serif;
-            margin: 0;
-            overflow-x: hidden;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .page-container {
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 16px;
-            box-sizing: border-box;
-            flex: 1 0 auto;
-        }
-        .site-footer {
-            text-align: center;
-            padding: 20px;
-            border-top: 1px solid #ccc;
-            font-size: 0.9rem;
-            color: #555;
-            background-color: #ffffff;
-            width: 100%;
-            box-sizing: border-box;
-            flex-shrink: 0;
-        }
-        .site-footer a {
-            color: inherit;
-            text-decoration: underline;
-            margin: 0 6px;
-        }
-    </style>
+    {{-- Enables React Fast Refresh when running Vite dev server (no-op in production) --}}
+    @viteReactRefresh
+    @vite(['resources/css/app.css', 'resources/css/layout.css', 'resources/js/app.js'])
 
     @stack('styles')
 </head>

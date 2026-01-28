@@ -1,30 +1,32 @@
-/* NAVBAR */
+/* Navbar */
 .navbar {
     width: 100%;
     background-color: white;
-    padding: 10px 16px;
+    padding: 10px 16px; /* tweak spacing */
     box-sizing: border-box;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 100; /* tweak stacking */
 }
 
+/* Logo */
 .logo-container .logo-image,
 .logo-image {
-    height: 50px;
+    height: 50px; /* tweak size */
     width: auto;
 }
 
+/* Links */
 .nav-links {
     display: flex;
-    gap: 24px;
+    gap: 24px; /* tweak spacing */
     align-items: center;
     flex-wrap: wrap;
-    margin-left: 32px; /* add space between logo and navigation tabs */
+    margin-left: 32px;
 }
 
 .nav-links a {
@@ -41,9 +43,9 @@
 
 .nav-auth {
     display: flex;
-    gap: 12px;
+    gap: 12px; /* tweak spacing */
     align-items: center;
-    margin-left: auto; /* keep auth buttons stuck to the right */
+    margin-left: auto;
 }
 
 .basket-btn {
@@ -65,11 +67,11 @@
     right: -4px;
     background: #ff4d4f;
     color: white;
-    font-size: 10px;
+    font-size: 10px; /* tweak size */
     padding: 2px 5px;
     border-radius: 50%;
-    min-width: 18px;
-    height: 18px;
+    min-width: 18px; /* tweak size */
+    height: 18px; /* tweak size */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -77,7 +79,7 @@
 }
 
 .nav-btn {
-    padding: 8px 16px;
+    padding: 8px 16px; /* tweak size */
     background: black;
     color: white;
     border: none;
@@ -91,27 +93,27 @@
 .nav-btn:hover {
     background: #333;
 }
-body {
 
+/* Base */
+body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color : rgb(4, 4, 87);
+    background-color: rgb(4, 4, 87); /* tweak bg */
 }
 
+/* Legacy logo */
 .logo-image {
     height: auto;
-    width: 80px;
-    padding: 10px;
+    width: 80px; /* tweak size */
+    padding: 10px; /* tweak padding */
 }
 
- 
-  h1{
+h1 {
     text-align: center;
     color: white;
-  }  
+}
 
- 
 nav ul {
     list-style: none;
     display: flex;
@@ -128,20 +130,20 @@ nav ul li a:hover {
     color: grey;
 }
 
-
-p{
+p {
     margin-top: 10px;
     font-size: 14px;
     color: white;
     text-align: center;
 }
 
+/* Info layout */
 #Information {
     display: flex;
-    height: 50vh;
+    height: 50vh; /* tweak height */
     align-items: center;
-    justify-content:center;
-    gap: 40px;
+    justify-content: center;
+    gap: 40px; /* tweak gap */
     width: 100%;
     padding: 0 20px;
     box-sizing: border-box;
@@ -149,10 +151,10 @@ p{
 
 .Informationstyle {
     background-color: black;
-    padding: 40px 60px;
+    padding: 40px 60px; /* tweak padding */
     border-radius: 12px;
-    width: fit-content;        
-    max-width: 500px;          
+    width: fit-content;
+    max-width: 500px;
     text-align: center;
 }
 
@@ -164,10 +166,10 @@ p{
 
 .image-left img,
 .image-right img {
-    width: 200px !important;
-    height: 200px !important;
-    max-width: 200px !important;
-    max-height: 200px !important;
+    width: 200px !important; /* tweak size */
+    height: 200px !important; /* tweak size */
+    max-width: 200px !important; /* tweak size */
+    max-height: 200px !important; /* tweak size */
     object-fit: cover;
     border-radius: 12px;
 }
@@ -179,24 +181,23 @@ p{
 }
 
 #Pricings {
-    padding: 40px;
+    padding: 40px; /* tweak padding */
     text-align: center;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 100px;
-    background-color:white;
+    margin-top: 100px; /* tweak spacing */
+    background-color: white;
     border-radius: 10px;
-    width: 80%;
-    max-width: 300px;
-    
+    width: 80%; /* tweak width */
+    max-width: 300px; /* tweak max */
 }
 
 .blockquote {
-    color:black;
+    color: black;
     background-color: rgb(217, 42, 165);
 }
 
-#Pricings p, 
+#Pricings p,
 #Pricings h3 {
     color: black !important;
 }

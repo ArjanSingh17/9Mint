@@ -9,14 +9,17 @@
 ])
 
 <div class="NFT-Card">
+    {{-- Image --}}
     <img src="{{ asset($image) }}" alt="{{ $title }}" class="nft-image" />
 
+    {{-- Details --}}
     <div class="nft-info">
         <h2>{{ $title }}</h2>
         <p class="nf-description">
             {{ $description }}
         </p>
 
+        {{-- Editions --}}
         @if(!is_null($editionsRemaining) && !is_null($editionsTotal))
             <p class="nft-editions">
                 @if($editionsRemaining > 0)
@@ -27,6 +30,7 @@
             </p>
         @endif
 
+        {{-- Size --}}
         <div class="size-option">
             <p>Select your size:</p>
             <button>Small</button>
@@ -38,6 +42,7 @@
             $hasEditionsInfo = !is_null($editionsRemaining) && !is_null($editionsTotal);
         @endphp
 
+        {{-- CTA --}}
         @if(!$hasEditionsInfo || $editionsRemaining > 0)
             @auth
                 <form method="POST" action="{{ route('cart.store') }}" class="inline">

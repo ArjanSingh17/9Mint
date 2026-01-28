@@ -7,6 +7,7 @@
 @endpush
 
 @section('content')
+  {{-- Dashboard --}}
   <div class="profile-page">
     <h1 class="profile-title">My Account Dashboard</h1>
 
@@ -17,6 +18,7 @@
       </div>
     @endif
 
+    {{-- Sections --}}
     <div class="profile-sections">
       {{-- Account Details Form --}}
       <div class="profile-card">

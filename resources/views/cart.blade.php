@@ -8,15 +8,18 @@
 @endpush
 
 @section('content')
+    {{-- Header --}}
     <div class="basket-page">
       <h1 class="basket-title">Your Basket</h1>
 
+      {{-- Success --}}
       @if(session('status'))
         <div style="background: #4CAF50; color: white; padding: 15px; margin: 20px auto; max-width: 1200px; border-radius: 8px; text-align: center;">
             {{ session('status') }}
         </div>
       @endif
 
+      {{-- Error --}}
       @if(session('error'))
         <div style="background: #f44336; color: white; padding: 15px; margin: 20px auto; max-width: 1200px; border-radius: 8px; text-align: center;">
             {{ session('error') }}
@@ -24,6 +27,7 @@
       @endif
 
       <div class="basket-content">
+        {{-- Items --}}
         <div class="basket-items">
           @php
             $cart = session()->get('cart', []);
@@ -33,6 +37,7 @@
           @if(empty($cart))
             <p style="padding: 20px; text-align: center;">Your basket is empty. <a href="/products">Browse our collections</a></p>
           @else
+            {{-- Cards --}}
             @foreach($cart as $key => $item)
               @php
                 $itemTotal = $item['price'] * $item['quantity'];
@@ -76,6 +81,7 @@
           @endif
         </div>
 
+        {{-- Summary --}}
         <div class="basket-summary">
           <h2>Order Summary</h2>
 

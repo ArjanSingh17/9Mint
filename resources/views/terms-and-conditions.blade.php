@@ -9,6 +9,7 @@
 @endpush
 
 @section('content')
+      {{-- Terms --}}
       <main class="terms-section">
         <h2>Terms and Conditions</h2>
         <p>
@@ -45,6 +46,7 @@
           authority of those courts.
         </p>
 
+        {{-- FAQ link --}}
         <p>
           If you have more questions, click
             <a href="/contactUs/faqs" class="FAQs">

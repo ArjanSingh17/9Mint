@@ -11,11 +11,13 @@
 @endpush
 
 @section('content')
+      {{-- Form --}}
       <main class="contactUs-section">
         <h2>Contact Us</h2>
 
         <form class="contactUs-form" action="{{ route('send.email') }}" method="post">
           @csrf
+            {{-- Fields --}}
             <label for="name">Name:</label>
             <input type="text" id="name" name="name" placeholder="Name" required />
 
@@ -26,7 +28,7 @@
           <textarea
             id="message"
             name="message"
-            rows="5"
+            rows="5" {{-- rows --}}
             placeholder="Message"
             required
           ></textarea>
