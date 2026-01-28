@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <title>9Mint - @yield('title', 'Page')</title>
+    <link rel="icon" href="{{ asset('images/9mint.png') }}">
 
     {{-- Enables React Fast Refresh when running Vite dev server (no-op in production) --}}
     @viteReactRefresh
