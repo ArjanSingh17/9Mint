@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <title>9Mint - @yield('title', 'Page')</title>
+    <link rel="icon" href="{{ asset('images/9mint.png') }}">
 
     {{-- Global stylesheet for the whole site --}}
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
