@@ -15,7 +15,8 @@
     {{-- Details --}}
     <div class="nft-info">
         <h2>{{ $title }}</h2>
-        <p class="nf-description">
+        {{-- Changed to nft-description to match standard naming --}}
+        <p class="nft-description">
             {{ $description }}
         </p>
 
@@ -33,9 +34,10 @@
         {{-- Size --}}
         <div class="size-option">
             <p>Select your size:</p>
-            <button>Small</button>
-            <button>Medium</button>
-            <button>Large</button>
+            {{-- Added classes so your CSS hover/selected effects work --}}
+            <button class="small-size">Small</button>
+            <button class="medium-size">Medium</button>
+            <button class="large-size">Large</button>
         </div>
 
         @php

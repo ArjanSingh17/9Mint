@@ -3,11 +3,12 @@
 @section('title', $collection->name)
 
 @push('styles')
-    {{-- Per-collection styles if needed --}}
-    @if ($collection->slug === 'glossy-collection')
-        <link rel="stylesheet" href="{{ asset('css/Glossy-collection.css') }}">
-    @elseif ($collection->slug === 'superhero-collection')
-        <link rel="stylesheet" href="{{ asset('css/Superhero.css?v=' . time()) }}">
+    {{-- Using Vite instead of asset --}}
+    @vite(['resources/css/collections-main.css'])
+
+    {{-- Keep the extra logic if you want --}}
+    @if (file_exists(public_path("css/{$collection->slug}-extra.css")))
+        <link rel="stylesheet" href="{{ asset('css/' . $collection->slug . '-extra.css') }}">
     @endif
 @endpush
 
