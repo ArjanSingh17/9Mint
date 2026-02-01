@@ -35,9 +35,6 @@
 
           <button type="submit">Submit</button>
         </form>
-        <div class="">
-      Tailwind works
-    </div>
       </main>
 @endsection
 
