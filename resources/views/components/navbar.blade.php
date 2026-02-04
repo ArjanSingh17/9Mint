@@ -29,6 +29,9 @@
           </button></a>
 
     @auth
+      <a href="{{ route('favourites.index') }}" class="nav-btn">
+      Favourites
+      </a>
       <a href="{{ route('profile') }}" class="nav-btn account">
         Account
       </a>

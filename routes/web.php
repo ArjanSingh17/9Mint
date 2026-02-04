@@ -12,6 +12,8 @@ use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\AboutUsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CollectionPageController;
+use App\Http\Controllers\Web\FavouritePageController;
+use App\Http\Controllers\Api\V1\FavouriteController;
 
 
 // MODELS
@@ -51,6 +53,7 @@ Route::get('/contactUs/faqs', fn() => view('faqs'));
 Route::get('/homepage', [HomeController::class, 'index'])->name('homepage');
 Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
 Route::get('/aboutUs', [AboutUsController::class, 'index'])->name('about');
+Route::get('/my-favourites', [FavouritePageController::class, 'index'])->name('favourites.index');
 
 
 // ------------------------------
@@ -83,6 +86,8 @@ Route::get('/products/{slug}', [CollectionPageController::class, 'show'])
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
+    Route::get('/my-favourites', [FavouritePageController::class, 'index'])->name('favourites.index');
+    Route::post('/nfts/{nft}/toggle-like', [FavouriteController::class, 'toggle'])->name('nfts.toggle');
 
     Route::patch('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
     Route::patch('/profile/password', [AuthController::class, 'updatePassword'])->name('password.update');
