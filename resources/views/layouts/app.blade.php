@@ -11,7 +11,7 @@
     {{-- Enables React Fast Refresh when running Vite dev server (no-op in production) --}}
     @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/css/layout.css', 'resources/js/app.js'])
-    @livewireStyles
+   
     @stack('styles')
 </head>
 <body>
@@ -37,6 +37,6 @@
     </footer>
 
     @stack('scripts')
-    @livewireScripts
+    
 </body>
 </html>
