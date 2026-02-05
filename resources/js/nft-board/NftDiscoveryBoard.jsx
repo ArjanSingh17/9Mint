@@ -1,5 +1,5 @@
 import '../../css/nft-board.css';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import {
     PRESETS,
@@ -21,7 +21,7 @@ const MAX_WHEEL_SPEED = 5; // max wheel speed
 const ACCEL_FACTOR = 0.08; // ease factor
 const FRICTION = 0.98; // damping
 
-export default function NftDiscoveryBoard({ nfts }) {
+export default function NftDiscoveryBoard({ nfts, currencies = [], csrfToken, isAuthed, loginUrl }) {
     const containerRef = useRef(null);
     const rafRef = useRef(null);
     const laneRef = useRef(null);
@@ -34,6 +34,7 @@ export default function NftDiscoveryBoard({ nfts }) {
     const viewportWidthRef = useRef(0);
 
     const uniqueNftsRef = useRef([]);
+    const [displayNfts, setDisplayNfts] = useState(nfts || []);
 
     // Pause/hover state
     const isPointerInsideRef = useRef(false);
@@ -84,22 +85,144 @@ export default function NftDiscoveryBoard({ nfts }) {
         hoveredNftRef.current = hoveredNft;
     }, [hoveredNft]);
 
+    const activeFlyoutNft = useMemo(() => {
+        if (!hoveredNft) return null;
+        return displayNfts.find((nft) => nft.id === hoveredNft.id) || hoveredNft;
+    }, [displayNfts, hoveredNft]);
+
     // Track syncHoverRectNow in a ref so animation loop can call it
     const syncHoverRectNowRef = useRef(syncHoverRectNow);
     useEffect(() => {
         syncHoverRectNowRef.current = syncHoverRectNow;
     }, [syncHoverRectNow]);
 
-    // Initialize unique NFTs when NFTs change
     useEffect(() => {
-        if (!nfts || nfts.length === 0) {
+        const mapped = (nfts || []).map((nft) => ({
+            ...nft,
+            isLiked: nft.isLiked ?? nft.is_liked ?? false,
+        }));
+        setDisplayNfts(mapped);
+    }, [nfts]);
+
+    // Initialize unique NFTs when display NFTs change
+    useEffect(() => {
+        if (!displayNfts || displayNfts.length === 0) {
             uniqueNftsRef.current = [];
             return;
         }
 
-        const uniqueNfts = uniqueByKey(nfts);
+        const uniqueNfts = uniqueByKey(displayNfts);
         uniqueNftsRef.current = uniqueNfts;
-    }, [nfts]);
+    }, [displayNfts]);
+
+    useEffect(() => {
+        if (!nfts || nfts.length === 0) return;
+
+        let cancelled = false;
+
+        const refreshQuotes = async () => {
+            const preferredCurrency = localStorage.getItem('walletCurrency');
+            const currencyList = currencies.length ? currencies : ['GBP'];
+            const listings = nfts
+                .map((nft) => ({
+                    id: nft.listing_id,
+                    currency: preferredCurrency || nft.currency || 'GBP',
+                }))
+                .filter((entry) => entry.id);
+
+            if (listings.length === 0) return;
+
+            try {
+                const items = listings.flatMap((entry) =>
+                    currencyList.map((currency) => ({
+                        listing_id: entry.id,
+                        currency,
+                    }))
+                );
+
+                const res = await fetch('/api/v1/quotes/bulk', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        items,
+                    }),
+                });
+
+                if (cancelled) return;
+
+                const quoteMap = new Map();
+                if (res.ok) {
+                    const payload = await res.json();
+                    const data = payload?.data || [];
+                    data.forEach((quote) => {
+                        if (!quote?.listing_id) return;
+                        if (!quoteMap.has(quote.listing_id)) {
+                            quoteMap.set(quote.listing_id, {});
+                        }
+                        const entryMap = quoteMap.get(quote.listing_id);
+                        entryMap[quote.display_currency] = quote.display_amount;
+                    });
+                }
+
+                setDisplayNfts((prev) => prev.map((nft) => {
+                    const quoteMapForListing = quoteMap.get(nft.listing_id);
+                    if (!quoteMapForListing) return nft;
+                    const preferred = preferredCurrency || nft.currency || 'GBP';
+                    const preferredAmount = quoteMapForListing[preferred];
+                    return {
+                        ...nft,
+                        price: preferredAmount ?? nft.price,
+                        currency: preferredAmount !== undefined ? preferred : nft.currency,
+                        pricesByCurrency: quoteMapForListing,
+                        priceCurrencies: currencyList.filter((cur) => quoteMapForListing[cur] !== undefined),
+                    };
+                }));
+            } catch (e) {
+
+            }
+        };
+
+        const handleWalletChange = () => refreshQuotes();
+        refreshQuotes();
+        const interval = setInterval(refreshQuotes, 60000);
+        window.addEventListener('walletCurrencyChange', handleWalletChange);
+        return () => {
+            cancelled = true;
+            clearInterval(interval);
+            window.removeEventListener('walletCurrencyChange', handleWalletChange);
+        };
+    }, [nfts, currencies]);
+
+    const handleToggleLike = useCallback(async (nftId, currentLiked) => {
+        if (!isAuthed) {
+            window.location.href = loginUrl || '/login';
+            return;
+        }
+
+        setDisplayNfts((prev) => prev.map((nft) => (
+            nft.id === nftId ? { ...nft, isLiked: !currentLiked } : nft
+        )));
+
+        try {
+            const res = await fetch(`/nfts/${nftId}/toggle-like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken || '',
+                },
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to toggle favourite');
+            }
+        } catch (e) {
+            setDisplayNfts((prev) => prev.map((nft) => (
+                nft.id === nftId ? { ...nft, isLiked: currentLiked } : nft
+            )));
+        }
+    }, [csrfToken, isAuthed, loginUrl]);
 
     // Update preset on resize
     useEffect(() => {
@@ -167,8 +290,6 @@ export default function NftDiscoveryBoard({ nfts }) {
     }, [preset]);
 
     useEffect(() => {
-        if (!nfts || nfts.length === 0) return;
-
         const animate = () => {
             const diff = targetVelocityRef.current - velocityRef.current;
             velocityRef.current += diff * ACCEL_FACTOR;
@@ -214,7 +335,7 @@ export default function NftDiscoveryBoard({ nfts }) {
         return () => {
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
         };
-    }, [nfts]);
+    }, [displayNfts]);
 
     const handleBoardMouseEnter = useCallback(() => {
         isPointerInsideRef.current = true;
@@ -257,14 +378,6 @@ export default function NftDiscoveryBoard({ nfts }) {
         seed: 1337, // shuffle seed
         colsPerCycle: Math.max(8, preset.cols + BUFFER_COLS * 2), // cycle width
     });
-
-    if (!nfts || nfts.length === 0) {
-        return (
-            <div className="nft-board__empty">
-                <p>No NFTs available at the moment. Check back soon!</p>
-            </div>
-        );
-    }
 
     return (
         <>
@@ -315,7 +428,7 @@ export default function NftDiscoveryBoard({ nfts }) {
             </div>
 
             <NftFlyout
-                nft={hoveredNft}
+                nft={activeFlyoutNft}
                 hoverRect={hoverRect}
                 hoverSide={hoverSide}
                 hoverCardSize={hoverCardSize}
@@ -323,6 +436,7 @@ export default function NftDiscoveryBoard({ nfts }) {
                 presetTiltDeg={presetTiltDeg}
                 onMouseEnter={handleFlyoutMouseEnter}
                 onMouseLeave={handleFlyoutMouseLeave}
+                onToggleLike={handleToggleLike}
             />
         </>
     );

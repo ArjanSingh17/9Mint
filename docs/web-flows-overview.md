@@ -52,34 +52,34 @@ This doc describes the **Blade-based web experience** wired up in `routes/web.ph
 
 ---
 
-## Cart & orders (session → DB)
+## Cart & orders (listings → DB)
 
 All of the following routes live inside the `auth` middleware group so only logged-in users can place orders.
 
 - **Add to cart**  
   - `POST /cart`  
-  - Reads `nft_slug` and `size` from the form.  
-  - Stores items in the **session** under the `cart` key, keyed by `"<slug>_<size>"` with fields: `nft_slug`, `size`, `price`, `quantity`.  
+  - Reads `listing_id` from the form.  
+  - Stores items in the **DB-backed cart** (`cart_items`) keyed by user + listing.  
   - Returns back with flash status messages for success / validation errors.
 
 - **Remove from cart**  
-  - `DELETE /cart/{key}`  
-  - Removes the given item key from the session `cart` and flashes a status message.
+  - `DELETE /cart/{id}`  
+  - Removes the cart row and flashes a status message.
 
 - **View orders**  
   - `GET /orders` → Blade view `orders.index`.  
-  - Loads current user's `orders` with their `items.nft` relation, ordered by `placed_at` then `created_at`.
+  - Loads current user's `orders` with their `items.listing.token.nft` relation, ordered by `placed_at` then `created_at`.
+
+- **Checkout**  
+  - `GET /checkout` creates a pending order with a **locked quote** and expiry timestamp.  
+  - The order stores pay/ref totals and FX metadata.  
+  - If the checkout expires, the user must return to the cart.
 
 - **Place order**  
   - `POST /orders`  
-  - Reads the current session `cart`.  
-  - For each cart line:  
-    - Looks up `Nft` by `slug` (or creates a placeholder NFT inside a “General” collection if not present).  
-    - Decrements `editions_remaining` for the NFT.  
-    - Creates an `OrderItem` row with quantities and GBP unit price.  
-  - Creates an `Order` row with: `user_id`, `status='pending'`, `currency_code='GBP'`, `total_gbp`, `total_crypto=0`, and `placed_at=now()`.  
-  - Optionally stores shipping info (`full_name`, `address`, `city`, `postal_code`) in the session under `shipping_info`.  
-  - Clears the `cart` session and redirects back to `/cart` with a success message that includes the order ID.
+  - Uses the existing pending order and completes payment (mock providers).  
+  - Listing is marked sold and token ownership is transferred to the buyer.  
+  - Clears the checkout session key and redirects back to `/cart` with a success message that includes the order ID.
 
 ---
 

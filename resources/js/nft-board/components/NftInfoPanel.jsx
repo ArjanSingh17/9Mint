@@ -1,22 +1,32 @@
 export default function NftInfoPanel({ nft }) {
-    const prices = nft?.prices || {};
     const currency = nft?.currency || 'GBP'; // default currency
+    const price = nft?.price;
+    const pricesByCurrency = nft?.pricesByCurrency || null;
+    const priceOrder = nft?.priceCurrencies || (pricesByCurrency ? Object.keys(pricesByCurrency) : []);
 
     // Price format
-    const formatMoney = (value) => {
+    const formatMoney = (value, formatCurrency = currency) => {
         if (value === null || value === undefined) return '--';
         const normalized = typeof value === 'string'
             ? value.trim().replace(',', '.').replace(/[^0-9.\-]/g, '')
             : String(value);
         const amount = Number(normalized);
         if (Number.isNaN(amount)) return '--';
-        if (currency === 'GBP') return `£${amount.toFixed(2)}`;
-        return `${amount} ${currency}`;
+        const isCrypto = ['BTC', 'ETH'].includes(formatCurrency);
+        const decimals = isCrypto ? 8 : 2;
+        const symbols = {
+            GBP: '£',
+            USD: '$',
+            EUR: '€',
+            BTC: '₿',
+            ETH: 'Ξ',
+        };
+        const symbol = symbols[formatCurrency];
+        if (symbol) return `${symbol}${amount.toFixed(decimals)}`;
+        return `${amount.toFixed(decimals)} ${formatCurrency}`;
     };
 
-    const small = formatMoney(prices.small);
-    const medium = formatMoney(prices.medium);
-    const large = formatMoney(prices.large);
+    const displayPrice = formatMoney(price);
     const stockText = (nft?.editions_remaining === null || nft?.editions_remaining === undefined)
         ? '--'
         : String(nft.editions_remaining);
@@ -36,20 +46,21 @@ export default function NftInfoPanel({ nft }) {
             </div>
 
             <div className="nft-board__info-mid">
-                <div className="nft-board__info-price-sizes" aria-label="Prices by size">
-                    <div className="nft-board__info-price-size">
-                        <span>Small</span>
-                        <strong>{small}</strong>
+                {pricesByCurrency && priceOrder.length ? (
+                    <div className="nft-board__info-price-sizes" aria-label="Prices by currency">
+                        {priceOrder.map((cur) => (
+                            <div key={cur} className="nft-board__info-price-size">
+                                <span>{cur}</span>
+                                <strong>{formatMoney(pricesByCurrency[cur], cur)}</strong>
+                            </div>
+                        ))}
                     </div>
-                    <div className="nft-board__info-price-size">
-                        <span>Medium</span>
-                        <strong>{medium}</strong>
+                ) : (
+                    <div className="nft-board__info-price-single" aria-label="Price">
+                        <span>Price</span>
+                        <strong>{displayPrice}</strong>
                     </div>
-                    <div className="nft-board__info-price-size">
-                        <span>Large</span>
-                        <strong>{large}</strong>
-                    </div>
-                </div>
+                )}
             </div>
 
             <div className="nft-board__info-cta">

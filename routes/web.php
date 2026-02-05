@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Web\CollectionController as WebCollection;
 use App\Http\Controllers\Web\NftController as WebNft;
 use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\Web\CartController as WebCartController;
+use App\Http\Controllers\Web\CheckoutController as WebCheckoutController;
+use App\Http\Controllers\Web\InventoryController;
 use App\Http\Controllers\AboutUsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CollectionPageController;
@@ -18,9 +21,6 @@ use App\Http\Controllers\Api\V1\FavouriteController;
 
 // MODELS
 use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Nft;
-use App\Models\Collection;
 use App\Http\Controllers\ContactController;
 
 
@@ -39,8 +39,8 @@ Route::middleware('guest')->group(function () {
 // STATIC PAGES
 // ------------------------------
 Route::get('/', [HomeController::class, 'index'])->name('root');
-Route::get('/cart', fn() => view('cart'));
-Route::get('/checkout', fn() => view('checkout'));
+Route::get('/cart', [WebCartController::class, 'index'])->middleware('auth')->name('cart.index');
+Route::get('/checkout', [WebCheckoutController::class, 'index'])->middleware('auth')->name('checkout.index');
 Route::get('/pricing', fn() => view('pricing'));
 Route::get('/contactUs', fn() => view('contact-us'));
 Route::get('/contactUs/terms', fn() => view('terms-and-conditions'));
@@ -53,7 +53,7 @@ Route::get('/contactUs/faqs', fn() => view('faqs'));
 Route::get('/homepage', [HomeController::class, 'index'])->name('homepage');
 Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
 Route::get('/aboutUs', [AboutUsController::class, 'index'])->name('about');
-Route::get('/my-favourites', [FavouritePageController::class, 'index'])->name('favourites.index');
+Route::get('/nft/{slug}', [WebNft::class, 'show'])->name('nfts.show');
 
 
 // ------------------------------
@@ -95,165 +95,28 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders', function (Request $r) {
         $user = $r->user();
 
-        $orders = Order::with(['items.nft'])
+        $orders = Order::with(['items.listing.token.nft'])
             ->where('user_id', $user->id)
             ->orderByDesc('placed_at')
             ->orderByDesc('created_at')
             ->get();
 
-        return view('orders.index', compact('orders'));
+        $sales = \App\Models\SalesHistory::with(['listing.token.nft', 'order'])
+            ->whereHas('listing', function ($q) use ($user) {
+                $q->where('seller_user_id', $user->id);
+            })
+            ->orderByDesc('sold_at')
+            ->get();
+
+        return view('orders.index', compact('orders', 'sales'));
     })->name('orders.index');
 
-    Route::post('/cart', function (Request $r) {
-            $nftSlug = $r->input('nft_slug');
-            $size = $r->input('size');
-
-            if (!$size) {
-                return back()->with('error', 'Please select a size before adding to basket');
-            }
-
-            // Get the cart from session or create empty array
-            $cart = session()->get('cart', []);
-
-            // Create a unique key for this item (nft + size combination)
-            $cartKey = $nftSlug . '_' . $size;
-
-            // Determine price based on size (per-NFT GBP pricing)
-            $fallbackPrices = [
-                'small' => 29.99,
-                'medium' => 39.99,
-                'large' => 49.99,
-            ];
-            $nft = Nft::where('slug', $nftSlug)->first();
-            if ($nft) {
-                $price = match ($size) {
-                    'small' => (float) $nft->price_small_gbp,
-                    'medium' => (float) $nft->price_medium_gbp,
-                    'large' => (float) $nft->price_large_gbp,
-                    default => (float) $nft->price_medium_gbp,
-                };
-                if (!is_finite($price) || $price <= 0) {
-                    $price = $fallbackPrices[$size] ?? $fallbackPrices['medium'];
-                }
-            } else {
-                $price = $fallbackPrices[$size] ?? $fallbackPrices['medium'];
-            }
-
-            // If item already exists, increase quantity
-            if (isset($cart[$cartKey])) {
-                $cart[$cartKey]['quantity']++;
-            } else {
-                // Add new item to cart
-                $cart[$cartKey] = [
-                    'nft_slug' => $nftSlug,
-                    'size' => $size,
-                    'price' => $price,
-                    'quantity' => 1
-                ];
-            }
-
-            // Save cart back to session
-            session()->put('cart', $cart);
-
-            return back()->with('status', 'Added to basket successfully!');
-        })->name('cart.store');
-
-    Route::delete('/cart/{key}', function ($key) {
-            $cart = session()->get('cart', []);
-
-            if (isset($cart[$key])) {
-                unset($cart[$key]);
-                session()->put('cart', $cart);
-                return back()->with('status', 'Item removed from basket');
-            }
-
-            return back()->with('error', 'Item not found in basket');
-        })->name('cart.destroy');
-
- Route::post('/orders', function (Request $r) {
-
-    $cart = session()->get('cart', []);
-    if (empty($cart)) {
-        return back()->with('error', 'Your cart is empty');
-    }
-
-    $defaultEditionsForNewNft = 5;
-
-    $slugs = array_column($cart, 'nft_slug');
-    $nftsBySlug = Nft::whereIn('slug', $slugs)->get()->keyBy('slug');
-
-    foreach ($cart as $item) {
-        $nft = $nftsBySlug[$item['nft_slug']] ?? null;
-        $available = $nft?->editions_remaining ?? $defaultEditionsForNewNft;
-
-        if ($available < $item['quantity']) {
-            $name = $nft?->name ?? ucwords(str_replace('-', ' ', $item['nft_slug']));
-            return back()->with('error', 'Out of stock: ' . $name);
-        }
-    }
-
-    $totalGbp = 0;
-    foreach ($cart as $item) {
-        $totalGbp += $item['price'] * $item['quantity'];
-    }
-
-    if ($r->has('full_name')) {
-        session()->put('shipping_info', [
-            'full_name' => $r->input('full_name'),
-            'address' => $r->input('address'),
-            'city' => $r->input('city'),
-            'postal_code' => $r->input('postal_code'),
-        ]);
-    }
-
-    $order = Order::create([
-        'user_id' => auth()->id(),
-        'status' => 'pending',
-        'currency_code'=> 'GBP',
-        'total_crypto' => 0,
-        'total_gbp' => $totalGbp,
-        'placed_at' => now(),
-    ]);
-
-    foreach ($cart as $item) {
-        $collection = Collection::firstOrCreate(
-            ['slug' => 'general'],
-            ['name' => 'General Collection', 'description' => 'General NFTs']
-        );
-
-        $nft = Nft::firstOrCreate(
-            ['slug' => $item['nft_slug']],
-            [
-                'collection_id' => $collection->id,
-                'name' => ucwords(str_replace('-', ' ', $item['nft_slug'])),
-                'description' => 'NFT: ' . $item['nft_slug'],
-                'image_url' => '/images/placeholder.png',
-                'currency_code' => 'GBP',
-                'price_crypto' => 0,
-                'editions_total' => $defaultEditionsForNewNft,
-                'editions_remaining' => $defaultEditionsForNewNft,
-                'is_active' => true,
-            ]
-        );
-
-        if ($nft) {
-            $nft->decrement('editions_remaining', $item['quantity']);
-        }
-
-        OrderItem::create([
-            'order_id' => $order->id,
-            'nft_id' => $nft->id,
-            'quantity' => $item['quantity'],
-            'unit_price_crypto' => 0,
-            'unit_price_gbp' => $item['price'],
-        ]);
-    }
-
-    session()->forget('cart');
-    return redirect('/cart')
-        ->with('status', 'Order placed successfully! Order #' . $order->id);
-
-})->name('orders.store');
+    Route::post('/cart', [WebCartController::class, 'store'])->name('cart.store');
+    Route::delete('/cart/{id}', [WebCartController::class, 'destroy'])->name('cart.destroy');
+    Route::post('/orders', [WebCheckoutController::class, 'store'])->name('orders.store');
+    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+    Route::post('/inventory/listings', [InventoryController::class, 'store'])->name('inventory.listing.store');
+    Route::delete('/inventory/listings/{listing}', [InventoryController::class, 'destroy'])->name('inventory.listing.destroy');
 
     // view and update details
   //  Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');

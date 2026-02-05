@@ -276,6 +276,39 @@
     gap: 0.5rem;
 }
 
+.nft-board__flyout-heart {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    border: none;
+    background: rgba(15, 23, 42, 0.7);
+    color: #fff;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease;
+    font-size: 0.75rem;
+}
+
+.nft-board__flyout-heart[data-liked="1"] {
+    color: #ff4d4d;
+}
+
+.nft-board__flyout-heart:hover {
+    transform: scale(1.05);
+}
+
+.nft-board__flyout-image-wrap {
+    position: relative;
+    flex: 0 0 auto;
+    display: flex;
+}
+
 .nft-board__info-titles {
     min-width: 0;
 }
@@ -328,6 +361,22 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 0.2rem;
+}
+
+.nft-board__info-price-single {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.64rem;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.nft-board__info-price-single strong {
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 800;
+    white-space: nowrap;
 }
 
 .nft-board__info-price-size {
