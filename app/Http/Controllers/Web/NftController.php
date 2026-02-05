@@ -3,15 +3,69 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\Listing;
 use App\Models\Nft;
+use App\Models\OrderItem;
+use App\Models\NftToken;
+use App\Services\Pricing\CurrencyCatalogInterface;
+use App\Services\Pricing\PricingService;
 
 class NftController extends Controller
 {
-    public function show($collectionSlug, $nftSlug)
+    public function show($slug)
     {
-        $nft = Nft::where('slug', $nftSlug)->where('is_active', 1)->firstOrFail();
+        $nft = Nft::where('slug', $slug)->where('is_active', 1)->firstOrFail();
         $collection = $nft->collection;
 
-        return view('nfts.show', compact('nft', 'collection'));
+        $listing = Listing::with('seller')->whereHas('token', function ($query) use ($nft) {
+            $query->where('nft_id', $nft->id);
+        })
+            ->where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('reserved_until')
+                    ->orWhere('reserved_until', '<', now());
+            })
+            ->orderBy('ref_amount', 'asc')
+            ->first();
+
+        $quotes = [];
+        $currencies = [];
+        if ($listing) {
+            $currencyCatalog = app(CurrencyCatalogInterface::class);
+            $currencies = $currencyCatalog->listEnabledCurrencies();
+            $pricing = app(PricingService::class);
+            foreach ($currencies as $currency) {
+                try {
+                    $quotes[$currency] = $pricing->quote($listing, $currency);
+                } catch (\Throwable $e) {
+                    // Skip unsupported currencies or provider errors.
+                }
+            }
+        }
+
+        if (empty($currencies)) {
+            $currencies = [app(CurrencyCatalogInterface::class)->defaultDisplayCurrency()];
+        }
+
+        $ownedTokens = collect();
+        $eligibleTokenIds = [];
+        if (auth()->check()) {
+            $user = auth()->user();
+            $ownedTokens = NftToken::with('listing')
+                ->where('nft_id', $nft->id)
+                ->where('owner_user_id', $user->id)
+                ->get();
+
+            $eligibleTokenIds = OrderItem::whereIn('token_id', $ownedTokens->pluck('id'))
+                ->whereHas('order', function ($q) use ($user) {
+                    $q->where('status', 'paid')
+                        ->where('user_id', $user->id);
+                })
+                ->pluck('token_id')
+                ->unique()
+                ->all();
+        }
+
+        return view('nfts.show', compact('nft', 'collection', 'listing', 'quotes', 'currencies', 'ownedTokens', 'eligibleTokenIds'));
     }
 }

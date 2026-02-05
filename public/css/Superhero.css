@@ -1,5 +1,4 @@
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: rgb(4, 4, 87);
@@ -93,7 +92,6 @@ body {
     background: #307ea8;
     border-radius: 8px;
     cursor: pointer;
-<<<<<<< HEAD
     text-decoration: none;
     display: inline-block;
 }
@@ -103,9 +101,6 @@ body {
 .large-size:hover {
     color: black;
     background: white;
-=======
-    display: inline-block;
->>>>>>> 694fa108299251785959d74f17d4c946bb6eeb56
 }
 
 .small-size.selected,
@@ -124,6 +119,5 @@ body {
 .collection-title {
     text-align: center;
     color: white;
-    font-size: 3rem;
     margin-top: 20px;
 }

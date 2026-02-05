@@ -70,4 +70,9 @@ ray<string, string>
         return $this->belongsToMany(Nft::class, 'favourites');
 
     }
+
+    public function wallets(): HasMany
+    {
+        return $this->hasMany(Wallet::class);
+    }
 }

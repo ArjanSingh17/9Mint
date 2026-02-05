@@ -100,14 +100,29 @@ body {
   background: #32138a;
 }
 
-.profile-activity a {
-  color: #20065c;
-  text-decoration: none;
-  margin-right: 20px;
+.profile-activity-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
 }
 
-.profile-activity a:hover {
-  text-decoration: underline;
+.profile-activity-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #20065c;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.profile-activity-btn:hover {
+  background: #32138a;
+  transform: translateY(-1px);
 }
 
 /* ORDERS PAGE */

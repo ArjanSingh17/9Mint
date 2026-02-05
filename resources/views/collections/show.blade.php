@@ -12,7 +12,7 @@
 @endpush
 
 @push('scripts')
-    @vite('resources/js/page-scripts/collections-size-selection.js')
+    @vite('resources/js/page-scripts/quote-refresh.js')
 @endpush
 
 @section('content')
@@ -25,18 +25,48 @@
             No NFTs have been added to this collection yet.
         </p>
     @else
-        {{-- Cards --}}
-        @foreach ($nfts as $nft)
-            <x-nft-card
-                :image="$nft->image_url"
-                :title="$nft->name"
-                :description="$nft->description"
-                :slug="$nft->slug"
-                :editions-total="$nft->editions_total"
-                :editions-remaining="$nft->editions_remaining"
-                :id="$nft->id"                                      :isLiked="Auth::user() ? Auth::user()->favourites->contains($nft->id) : false"  />
-            />
-        @endforeach
+        <div class="nft-collection-grid">
+            @foreach ($nfts as $nft)
+                @php
+                    $listing = $nft->active_listing ?? null;
+                    $price = $listing?->ref_amount;
+                    $currency = $listing?->ref_currency ?? 'GBP';
+                    $currencySymbol = $currencySymbols[$currency] ?? null;
+                    $isLiked = Auth::check() ? Auth::user()->favourites->contains($nft->id) : false;
+                @endphp
+                <div class="nft-collection-card">
+                    <button
+                        type="button"
+                        class="nft-collection-heart"
+                        onclick="toggleLike({{ $nft->id }}, this)"
+                        aria-label="Toggle favourite"
+                        data-liked="{{ $isLiked ? '1' : '0' }}"
+                    >
+                        {{ $isLiked ? '♥' : '♡' }}
+                    </button>
+                    <a href="{{ route('nfts.show', ['slug' => $nft->slug]) }}">
+                        <div class="nft-collection-thumb">
+                            <img src="{{ asset(ltrim($nft->image_url, '/')) }}" alt="{{ $nft->name }}" />
+                        </div>
+                        <div class="nft-collection-meta">
+                            <h3>{{ $nft->name }}</h3>
+                            <p
+                                class="nft-collection-price"
+                                data-quote-listing="{{ $listing?->id }}"
+                                data-currency="{{ $currency }}"
+                            >
+                                {{ $price !== null
+                                    ? ($currencySymbol ? $currencySymbol . number_format($price, 2) : number_format($price, 2) . ' ' . $currency)
+                                    : 'Unavailable' }}
+                            </p>
+                            <p class="nft-collection-stock">
+                                Editions remaining: {{ $nft->editions_remaining }} / {{ $nft->editions_total }}
+                            </p>
+                        </div>
+                    </a>
+                </div>
+            @endforeach
+        </div>
     @endif
 @endsection
 @push('scripts')
