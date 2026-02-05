@@ -6,9 +6,22 @@
     // Editions information for this NFT (optional; if null, editions are not shown)
     'editionsTotal' => null,
     'editionsRemaining' => null,
+    'id',
+    'isLiked' => false
 ])
 
-<div class="NFT-Card">
+<div class="NFT-Card" style="position: relative;">
+    <button
+        onclick="toggleLike({{ $id }}, this)"
+        class="like-btn"
+        style="position: absolute; top: 10px; right: 10px; z-index: 10; background: rgba(0,0,0,0.6); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; color: {{ $isLiked ? '#ff4d4d' : 'white' }}; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;"
+        onmouseover="this.style.transform='scale(1.1)'"
+        onmouseout="this.style.transform='scale(1)'"
+    >
+        {{ $isLiked ? '♥' : '♡' }}
+    </button>
+
+   
     {{-- Image --}}
     <img src="{{ asset($image) }}" alt="{{ $title }}" class="nft-image" />
 
