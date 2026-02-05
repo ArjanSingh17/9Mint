@@ -16,15 +16,42 @@
   </div>
 
   {{-- Cart/auth --}}
-        <div class="nav-auth"><a href="/cart">
+        <div class="nav-auth">
+          @php
+            $cartCount = 0;
+            $walletBalances = collect();
+            if (auth()->check()) {
+              $cartCount = \App\Models\CartItem::where('user_id', auth()->id())->sum('quantity');
+              if (\Illuminate\Support\Facades\Schema::hasTable('wallets')) {
+                $walletBalances = \App\Models\Wallet::query()
+                  ->where('user_id', auth()->id())
+                  ->where('balance', '>', 0)
+                  ->orderBy('currency')
+                  ->get();
+              }
+            }
+          @endphp
+          @auth
+            @if($walletBalances->isNotEmpty())
+              <div class="wallet-switcher" data-wallet-switcher>
+                <span class="wallet-label">Wallet</span>
+                <select class="wallet-select" data-wallet-currency>
+                  @foreach($walletBalances as $balance)
+                    <option value="{{ $balance->currency }}" data-net="{{ (float) $balance->balance }}">
+                      {{ $balance->currency }}
+                    </option>
+                  @endforeach
+                </select>
+                <span class="wallet-balance" data-wallet-balance></span>
+              </div>
+            @endif
+          @endauth
+
+          <a href="/cart">
           <button class="basket-btn">
             <span class="basket-icon">🛒</span>
-            @php
-              $cart = session()->get('cart', []);
-              $totalItems = array_sum(array_column($cart, 'quantity'));
-            @endphp
-            @if($totalItems > 0)
-              <span class="basket-badge">{{ $totalItems }}</span>
+            @if($cartCount > 0)
+              <span class="basket-badge">{{ $cartCount }}</span>
             @endif
           </button></a>
 

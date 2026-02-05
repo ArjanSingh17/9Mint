@@ -2,6 +2,20 @@
 
 use Illuminate\Support\Str;
 
+$sessionDriver = env('SESSION_DRIVER', 'file');
+if ($sessionDriver === 'array' && env('APP_ENV') !== 'testing') {
+    $sessionDriver = 'file';
+}
+
+$secureCookie = env('SESSION_SECURE_COOKIE');
+if ($secureCookie === null) {
+    $appUrl = (string) env('APP_URL', '');
+    $secureCookie = str_starts_with($appUrl, 'https://');
+}
+if (env('APP_ENV') === 'local') {
+    $secureCookie = false;
+}
+
 return [
 
     /*
@@ -18,7 +32,7 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'database'),
+    'driver' => $sessionDriver,
 
     /*
     |--------------------------------------------------------------------------
@@ -169,7 +183,7 @@ return [
     |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    'secure' => $secureCookie,
 
     /*
     |--------------------------------------------------------------------------

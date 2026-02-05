@@ -22,47 +22,19 @@
         <section id="Pricing_sizes" class="Org">
             <h3>In general:</h3>
 
-            {{-- Grid --}}
             <div class="pricing-grid">
-                <div class="pricing-item pricing-small">
-                    <div class="pricing-content">
-                        <div class="diagram">
-                            <img src="{{ asset('images/nfts/NFT-small.png') }}" alt="Small NFT" />
-                        </div>
-
-                        <div class="pricing-text">
-                            <h4>Small:</h4>
-                            <p>Ranges from £45 to £70</p>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="pricing-item pricing-medium">
                     <div class="pricing-content">
                         <div class="diagram">
-                            <img src="{{ asset('images/nfts/NFT-medium.png') }}" alt="Medium NFT" />
+                            <img src="{{ asset('images/nfts/NFT-medium.png') }}" alt="NFT pricing" />
                         </div>
 
                         <div class="pricing-text">
-                            <h4>Medium:</h4>
-                            <p>Ranges from £70 to £200</p>
+                            <h4>Single Listing Price</h4>
+                            <p>Each listing has one reference price, and you can view or pay in your chosen currency.</p>
                         </div>
                     </div>
                 </div>
-
-                <div class="pricing-item pricing-large">
-                    <div class="pricing-content">
-                        <div class="diagram">
-                            <img src="{{ asset('images/nfts/NFT-large.png') }}" alt="Large NFT" />
-                        </div>
-
-                        <div class="pricing-text">
-                            <h4>Large:</h4>
-                            <p>Ranges from £250 to £500</p>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </section>
     </main>

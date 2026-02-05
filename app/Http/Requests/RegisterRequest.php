@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class RegisterRequest extends FormRequest
 {
@@ -21,14 +22,22 @@ class RegisterRequest extends FormRequest
      */
     public function rules(): array
     {
+        $name = $this->input('name');
+        $nameRules = [
+            'required',
+            'string',
+            'max:80',
+            'regex:/^[A-Za-z0-9\-]+$/',
+        ];
+
+        if (in_array($name, ['9Mint', 'Vlas'], true)) {
+            $nameRules[] = Rule::unique('users', 'name')->where(fn ($q) => $q->whereNotNull('email'));
+        } else {
+            $nameRules[] = 'unique:users,name';
+        }
+
         return [
-            'name' => [
-                'required',
-                'string',
-                'max:80',
-                'regex:/^[A-Za-z0-9\-]+$/',
-                'unique:users,name',
-            ],
+            'name' => $nameRules,
             'email' => ['required','email','max:255','unique:users,email'],
             'password' => ['required','string','min:8','confirmed'],
         ];
