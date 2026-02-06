@@ -40,6 +40,9 @@ new class extends Component {
 
     public function createTicket()
     {
+       if (!auth()->check()) {
+        return redirect('login');
+    }
         $this->validate([
             'title' => 'required|max:255',
             'message' => 'required|max:5000',

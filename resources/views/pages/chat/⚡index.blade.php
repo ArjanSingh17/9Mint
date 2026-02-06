@@ -15,18 +15,41 @@ new class extends Component {
 
 
 
-    protected $listeners = ['refreshMessages' => '$refresh'];
+  protected $listeners = [
+    'refreshMessages' => '$refresh',
+    'messageRead' => 'handleMessageRead'
+];
     public $query;
     public $selectedConversation;
 
- 
+
+    public int $previousMessageCount = 0;
     public $body;
     public $loadedMessages = [];
 
     public $paginate_var = 999;
 
+    public function handleMessageRead($messageId)
+{
+    // Find and update the message in loaded messages
+    $messageIndex = $this->loadedMessages->search(function($msg) use ($messageId) {
+        return $msg->id == $messageId;
+    });
     
+    if ($messageIndex !== false) {
+        $this->loadedMessages[$messageIndex]->read_at = now();
+        $this->loadedMessages[$messageIndex]->refresh(); // Reload from DB
+    }
+}
     
+
+public function markAsRead()
+{
+    Message::where('conversation_id', $this->selectedConversation->id)
+        ->whereNull('read_at')
+        ->update(['read_at' => now()]);
+}
+
    public function deleteByUser($id) {
 
     $userId= auth()->id();
@@ -97,24 +120,19 @@ new class extends Component {
     public function broadcastedNotifications($event)
 {
     if ($event['type'] == MessageSent::class) {
-
         if ($event['conversation_id'] == $this->selectedConversation->id) {
-
             $newMessage = Message::find($event['message_id']);
 
-            # push message to array
             $this->loadedMessages->push($newMessage);
 
-            # mark as read
             $newMessage->read_at = now();
             $newMessage->save();
 
-            # broadcast "MessageRead" to receiver
             $this->selectedConversation->getReceiver()
                 ->notify(new MessageRead($this->selectedConversation->id));
 
-            // **Tell Livewire to re-render**
-            $this->emitSelf('refreshMessages');
+            // Use dispatch to trigger the browser event for the receiver
+            $this->dispatch('scroll-to-bottom');
         }
     }
 }
@@ -141,77 +159,75 @@ new class extends Component {
 
     
 
-    public function loadMessages()
+   public function loadMessages()
 {
     $userId = auth()->id();
-    
-    // Get total count of messages in this conversation
+
+    // Get total count of messages
     $count = Message::where('conversation_id', $this->selectedConversation->id)
         ->whereNull('sender_deleted_at')
         ->count();
 
-    // Load messages with pagination
-   $this->loadedMessages = Message::where('conversation_id', $this->selectedConversation->id)
-    ->whereNull('sender_deleted_at')
-    ->orderBy('created_at', 'asc') // oldest first
-    ->skip($count - $this->paginate_var)
-    ->take($this->paginate_var)
-    ->get();
+    // Load messages
+    $this->loadedMessages = Message::where('conversation_id', $this->selectedConversation->id)
+        ->whereNull('sender_deleted_at')
+        ->orderBy('created_at', 'asc')
+        ->skip(max(0, $count - $this->paginate_var))
+        ->take($this->paginate_var)
+        ->get();
 
+    // ✅ Detect NEW messages
+    if ($count > $this->previousMessageCount) {
+        $this->dispatch('scroll-to-bottom');
+    }
 
+    // ✅ Update stored count AFTER comparison
+    $this->previousMessageCount = $count;
+
+    // Mark unread messages as read
+    Message::where('conversation_id', $this->selectedConversation->id)
+        ->where('sender_id', '!=', $userId)
+        ->whereNull('read_at')
+        ->update(['read_at' => now()]);
 
     return $this->loadedMessages;
 }
 
 
-    public function sendMessage()
-    {
+   public function sendMessage()
+{
+    $this->validate(['body' => 'required|string']);
 
-        $this->validate(['body' => 'required|string']);
+    $createdMessage = Message::create([
+        'conversation_id' => $this->selectedConversation->id,
+        'sender_id' => auth()->id(),
+        'body' => $this->body
+    ]);
 
+    $this->reset('body');
+    $this->loadedMessages->push($createdMessage);
+    
+    $this->selectedConversation->updated_at = now();
+    $this->selectedConversation->save();
+    
+    // Force scroll to bottom
+    $this->dispatch('scroll-to-bottom');
+}
 
-        $createdMessage = Message::create([
-            'conversation_id' => $this->selectedConversation->id,
-            'sender_id' => auth()->id(),
-            'body' => $this->body
-
-        ]);
-
-
-        $this->reset('body');
-
-        #scroll to bottom
-        //$this->dispatchBrowserEvent('scroll-bottom');
-
-
-        #push the message
-        $this->loadedMessages->push($createdMessage);
-
-
-        #update conversation model
-        $this->selectedConversation->updated_at = now();
-        $this->selectedConversation->save();
-
-
-        #refresh chatlist
-       // $this->emitTo('chat.chat-list', 'refresh');
-
-        #broadcast
-
-        //$this->selectedConversation->getReceiver()
-          //  ->notify(new MessageSent(
-            //    Auth()->User(),
-              //  $createdMessage,
-                //$this->selectedConversation,
-            //));
-    }
-
+public function updatedLoadedMessages()
+{
+    // Automatically scroll to bottom when messages update
+    $this->dispatch('scroll-to-bottom');
+}
 
    public function mount()
 {
+    if (!auth()->check()) {
+        return redirect('contactUs');
+    }
+    
     $this->selectedConversation = Conversation::findOrFail($this->query);
     
-    // Get the ticket
     $ticket = $this->selectedConversation->ticket;
     
     // Authorization check
@@ -222,11 +238,18 @@ new class extends Component {
         abort(403, 'You do not have permission to view this ticket.');
     }
     
-    // Mark messages NOT sent by current user as read
-    Message::where('conversation_id', $this->selectedConversation->id)
+    // Mark messages as read and notify sender
+    $unreadMessages = Message::where('conversation_id', $this->selectedConversation->id)
         ->where('sender_id', '!=', auth()->id())
         ->whereNull('read_at')
-        ->update(['read_at' => now()]);
+        ->get();
+    
+    foreach ($unreadMessages as $message) {
+        $message->update(['read_at' => now()]);
+        
+        // Dispatch event to update sender's view
+        $this->dispatch('messageRead', messageId: $message->id)->to('chat.index');
+    }
         
     $this->loadMessages();
 }
@@ -295,7 +318,8 @@ new class extends Component {
              }); 
          } 
      }"
-     x-init="scrollToBottom()">
+     x-init="scrollToBottom(); $watch('$wire.loadedMessages', () => scrollToBottom())"
+     @scroll-to-bottom.window="scrollToBottom()">
     <div class="py-2 px-3">
 
         <div class="flex justify-center mb-2">
@@ -369,15 +393,27 @@ new class extends Component {
     </div>
 </div>
 <script>
-document.addEventListener('livewire:load', () => {
-    Livewire.hook('message.processed', () => {
-        setTimeout(() => {
-            const chat = document.getElementById('chat-container');
-            if (chat) {
-                chat.scrollTop = chat.scrollHeight;
+    document.addEventListener('livewire:init', () => {
+        const chatContainer = document.getElementById('chat-container');
+
+        // Renamed to match your other methods for consistency
+        const scrollToBottom = () => {
+            if (chatContainer) {
+                // Use a slight timeout to ensure the DOM has finished rendering 
+                // the new message before we calculate height
+                setTimeout(() => {
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }, 50);
             }
-        }, 50); 
+        };
+
+        // Listen for the dispatch('scroll-to-bottom') from your PHP/Livewire
+        Livewire.on('scroll-to-bottom', () => {
+            scrollToBottom();
+        });
+
+        // Initial scroll when the page first loads
+        scrollToBottom();
     });
-});
 </script>
 </div>
