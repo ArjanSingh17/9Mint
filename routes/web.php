@@ -42,7 +42,7 @@ Route::get('/', [HomeController::class, 'index'])->name('root');
 Route::get('/cart', [WebCartController::class, 'index'])->middleware('auth')->name('cart.index');
 Route::get('/checkout', [WebCheckoutController::class, 'index'])->middleware('auth')->name('checkout.index');
 Route::get('/pricing', fn() => view('pricing'));
-Route::get('/contactUs', fn() => view('contact-us'));
+Route::livewire('/contactUs', 'pages::contact-us');
 Route::get('/contactUs/terms', fn() => view('terms-and-conditions'));
 Route::get('/contactUs/faqs', fn() => view('faqs'));
 
@@ -128,3 +128,5 @@ Route::middleware('auth')->group(function () {
 });
 
  Route::post('send-email',[ContactController::class,'sendEmail'])->name('send.email');
+Route::livewire('/chat/{query}', 'pages::chat.index')
+    ->name('chat');

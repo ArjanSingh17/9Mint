@@ -12,15 +12,19 @@
     @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/css/layout.css', 'resources/js/app.js'])
     @stack('styles')
+     @livewireStyles
 </head>
 <body>
     {{-- Shared top navigation bar --}}
     <header>
         <x-navbar />
     </header>
-
+    
     {{-- Main content area --}}
     <main class="page-container">
+        @isset($slot)
+        {{ $slot }}
+    @endisset
         @yield('content') 
     </main>
 
@@ -36,5 +40,6 @@
     </footer>
 
     @stack('scripts')
+     @livewireScripts
 </body>
 </html>
