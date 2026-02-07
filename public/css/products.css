@@ -1,0 +1,77 @@
+body {
+    background-color : rgb(4, 4, 87);
+}
+
+  h1{
+    text-align: center;
+    color: white;
+  }  
+
+ 
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: black;
+    font-weight: 500;
+}
+
+nav ul li a:hover {
+    color: grey;
+}
+
+#NFT_collections {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+#NFT_collections h2 {
+    margin-bottom: 30px;
+    font-size: 3rem;
+    text-align: center;
+    width: 100%;
+    color: white;
+}
+
+/* Single card style used for all collections, similar to old Glossy/Superhero boxes */
+.collection-card {
+    background-color: black;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 400px;
+    margin: 20px auto;
+}
+
+.collection-card h3 {
+    text-decoration: underline;
+}
+
+.collection-stock {
+    margin-top: 8px;
+    font-size: 0.95rem;
+}
+
+.collection-image-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.collection-preview {
+    width: 130px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    transition: transform 0.2s ease-in-out;
+}
+
+.collection-preview:hover {
+    transform: scale(1.07);
+}
