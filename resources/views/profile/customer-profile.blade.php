@@ -34,6 +34,29 @@
       <div class="profile-card profile-activity">
         @include('partials.activity-links')
       </div>
+
+      {{-- Owned NFTs --}}
+      @php
+        $ownedTokens = \App\Models\NftToken::with('nft')
+            ->where('owner_user_id', $user->id)
+            ->get();
+      @endphp
+
+      <div class="profile-nfts-section">
+        <h2>My NFTs ({{ $ownedTokens->count() }})</h2>
+        @if($ownedTokens->isEmpty())
+          <p class="profile-nfts-empty">No NFTs owned yet.</p>
+        @else
+          <div class="profile-nfts-grid">
+            @foreach($ownedTokens as $token)
+              <a href="{{ route('nfts.show', $token->nft->slug) }}" class="profile-nft-card">
+                <img src="{{ $token->nft->image_url }}" alt="{{ $token->nft->name }}" loading="lazy">
+                <span>{{ $token->nft->name }}</span>
+              </a>
+            @endforeach
+          </div>
+        @endif
+      </div>
     </div>
   </div>
 @endsection
