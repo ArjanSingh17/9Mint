@@ -125,6 +125,54 @@ body {
   transform: translateY(-1px);
 }
 
+/* Profile owned NFTs section */
+.profile-nfts-section {
+  margin-top: 8px;
+}
+
+.profile-nfts-section h2 {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.profile-nfts-empty {
+  color: #888;
+  font-size: 14px;
+}
+
+.profile-nfts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.profile-nft-card {
+  background: #0f172a;
+  border-radius: 10px;
+  overflow: hidden;
+  text-decoration: none;
+  color: #fff;
+  transition: transform 0.2s ease;
+}
+
+.profile-nft-card:hover {
+  transform: translateY(-4px);
+}
+
+.profile-nft-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1.2;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-nft-card span {
+  display: block;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 /* ORDERS PAGE */
 .orders-page {
   padding: 50px 40px;

@@ -101,6 +101,14 @@
     background: #333;
 }
 
+.nav-btn.profile-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 50%;
+}
+
 /* Base */
 body {
     font-family: Arial, sans-serif;
