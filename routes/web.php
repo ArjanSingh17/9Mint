@@ -55,6 +55,13 @@ Route::get('/products', [ProductsController::class, 'index'])->name('products.in
 Route::get('/aboutUs', [AboutUsController::class, 'index'])->name('about');
 Route::get('/nft/{slug}', [WebNft::class, 'show'])->name('nfts.show');
 
+Route::get('/my-profile', function (Request $r) {
+    if (!auth()->check()) {
+        return redirect()->route('login')->with('status', 'Please log in to view your profile.');
+    }
+    return view('profile.show', ['user' => $r->user()]);
+})->name('profile.show');
+
 
 // ------------------------------
 // FRONTEND TEAM OLD URL SUPPORT
