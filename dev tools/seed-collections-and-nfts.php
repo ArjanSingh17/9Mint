@@ -14,12 +14,7 @@
  */
 
 use App\Models\Collection;
-use App\Models\Listing;
 use App\Models\Nft;
-use App\Models\NftToken;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -29,34 +24,6 @@ $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 $kernel->bootstrap();
 
 echo "Seeding collections and NFTs...\n";
-
-DB::listen(function ($query) {
-    $sql = $query->sql;
-    foreach ($query->bindings as $binding) {
-        $bindingValue = is_numeric($binding) ? $binding : "'".str_replace("'", "''", (string) $binding)."'";
-        $sql = preg_replace('/\?/', $bindingValue, $sql, 1);
-    }
-    echo "[DB] {$sql}\n";
-});
-
-$nineMintUser = User::updateOrCreate(
-    ['id' => 1],
-    ['name' => '9Mint', 'email' => null, 'password' => null, 'role' => 'admin']
-);
-
-$vlasUser = User::updateOrCreate(
-    ['id' => 2],
-    ['name' => 'Vlas', 'email' => null, 'password' => null, 'role' => 'user']
-);
-
-try {
-    $nineMintUser->assignRole('admin');
-} catch (\Throwable $e) {
-    // admin
-}
-
-$sellerUserId = $vlasUser->id;
-
 
 // --- Collections ---
 $collections = [
@@ -70,8 +37,21 @@ $collections = [
         'name'         => 'Superhero Collection',
         'description'  => 'Iconic superhero NFTs.',
         'cover_image_url' => '/images/nfts/superhero/Superman.png',
-        'creator_name' => 'Vlas',
+        'creator_name' => 'Team 9Mint',
     ],
+    'geotennis-collection' => [
+        'name'            => 'Geo Tennis',
+        'description'     => 'Playing tennis with squares',
+        'cover_image_url' => '/images/nfts/geotennis/t1.png',
+        'creator_name'    => 'Team 9Mint',
+    ],
+    'characters-collection' => [
+        'name'            => 'Characters',
+        'description'     => 'movie stars',
+        'cover_image_url' => '/images/nfts/characters/carl.png',
+        'creator_name'    => 'Team 9Mint',
+    ]
+
 ];
 
 foreach ($collections as $slug => $data) {
@@ -80,10 +60,14 @@ foreach ($collections as $slug => $data) {
         $data
     );
 
+    echo "Collection seeded: {$collection->slug}\n";
 }
 
 $glossy = Collection::where('slug', 'glossy-collection')->first();
 $superhero = Collection::where('slug', 'superhero-collection')->first();
+$geotennis = Collection::where('slug', 'geotennis-collection')->first();
+$characters = Collection::where('slug', 'characters-collection')->first();
+
 
 if (!$glossy || !$superhero) {
     echo "Error: collections not found after seeding. Aborting NFT creation.\n";
@@ -92,18 +76,22 @@ if (!$glossy || !$superhero) {
 
 // Common defaults
 $defaultCurrency = 'GBP';
+$defaultPrice    = 0.00;    // crypto price (you can adjust later)
 $editionsTotal   = 5;
 
 /**
- * Generate deterministic per-NFT reference price in GBP.
+ * Generate deterministic per-NFT size prices in GBP.
  * This keeps local/dev data stable across runs while ensuring prices differ per NFT.
  */
-function refPriceGbp(string $slug): float
+function sizePricesGbp(string $slug): array
 {
     $seed = abs(crc32($slug));
     // Base between 18.00 and 58.00 (GBP)
     $base = 18 + (($seed % 4000) / 100);
-    return round($base, 2);
+    $medium = round($base, 2);
+    $small = round($medium * 0.75, 2);
+    $large = round($medium * 1.25, 2);
+    return [$small, $medium, $large];
 }
 
 // --- Glossy NFTs (matching Glossy-collection.blade.php) ---
@@ -153,7 +141,7 @@ $glossyNfts = [
 ];
 
 foreach ($glossyNfts as $data) {
-    $refPrice = refPriceGbp($data['slug']);
+    [$small, $medium, $large] = sizePricesGbp($data['slug']);
     $nft = Nft::updateOrCreate(
         ['slug' => $data['slug']],
         [
@@ -161,32 +149,18 @@ foreach ($glossyNfts as $data) {
             'name'               => $data['name'],
             'description'        => $data['description'],
             'image_url'          => $data['image_url'],
+            'currency_code'      => $defaultCurrency,
+            'price_crypto'       => $defaultPrice,
+            'price_small_gbp'    => $small,
+            'price_medium_gbp'   => $medium,
+            'price_large_gbp'    => $large,
             'editions_total'     => $editionsTotal,
             'editions_remaining' => $editionsTotal,
             'is_active'          => true,
         ]
     );
 
-    $existingTokens = NftToken::where('nft_id', $nft->id)->count();
-    for ($i = $existingTokens + 1; $i <= $editionsTotal; $i++) {
-        $token = NftToken::create([
-            'nft_id' => $nft->id,
-            'serial_number' => $i,
-            'owner_user_id' => $vlasUser->id,
-            'status' => 'listed',
-        ]);
-
-        $listing = Listing::create([
-            'token_id' => $token->id,
-            'seller_user_id' => $sellerUserId,
-            'status' => 'active',
-            'ref_amount' => $refPrice,
-            'ref_currency' => $defaultCurrency,
-        ]);
-
-
-    }
-
+    echo "NFT seeded (glossy): {$nft->slug}\n";
 }
 
 // --- Superhero NFTs (matching SuperheroCollection.blade.php) ---
@@ -242,7 +216,7 @@ $superheroNfts = [
 ];
 
 foreach ($superheroNfts as $data) {
-    $refPrice = refPriceGbp($data['slug']);
+    [$small, $medium, $large] = sizePricesGbp($data['slug']);
     $nft = Nft::updateOrCreate(
         ['slug' => $data['slug']],
         [
@@ -250,34 +224,159 @@ foreach ($superheroNfts as $data) {
             'name'               => $data['name'],
             'description'        => $data['description'],
             'image_url'          => $data['image_url'],
+            'currency_code'      => $defaultCurrency,
+            'price_crypto'       => $defaultPrice,
+            'price_small_gbp'    => $small,
+            'price_medium_gbp'   => $medium,
+            'price_large_gbp'    => $large,
             'editions_total'     => $editionsTotal,
             'editions_remaining' => $editionsTotal,
             'is_active'          => true,
         ]
     );
 
-    $existingTokens = NftToken::where('nft_id', $nft->id)->count();
-    for ($i = $existingTokens + 1; $i <= $editionsTotal; $i++) {
-        $token = NftToken::create([
-            'nft_id' => $nft->id,
-            'serial_number' => $i,
-            'owner_user_id' => $vlasUser->id,
-            'status' => 'listed',
-        ]);
-
-        $listing = Listing::create([
-            'token_id' => $token->id,
-            'seller_user_id' => $sellerUserId,
-            'status' => 'active',
-            'ref_amount' => $refPrice,
-            'ref_currency' => $defaultCurrency,
-        ]);
+    echo "NFT seeded (superhero): {$nft->slug}\n";
+}
 
 
-    }
+// --- geotennis NFTs ---
+$geotennisNfts = [
+    [
+        'slug'        => 't1',
+        'name'        => 't1',
+        'description' => 'tennis court square',
+        'image_url'   => '/images/nfts/geotennis/t1.png',
+    ],
+    [
+        'slug'        => 't2',
+        'name'        => 't2',
+        'description' => 'light tennis court square',
+        'image_url'   => '/images/nfts/geotennis/t2.png',
+    ],
+        [
+        'slug'        => 't3',
+        'name'        => 't3',
+        'description' => 'nuclear tennis court square',
+        'image_url'   => '/images/nfts/geotennis/t3.png',
+    ],
+        [
+        'slug'        => 't4',
+        'name'        => 't4',
+        'description' => 'grass tennis court square',
+        'image_url'   => '/images/nfts/geotennis/t4.png',
+    ],
+        [
+        'slug'        => 't5',
+        'name'        => 't5',
+        'description' => 'white square',
+        'image_url'   => '/images/nfts/geotennis/t5.png',
+    ],
+        [
+        'slug'        => 't6',
+        'name'        => 't6',
+        'description' => 'sandpaper square',
+        'image_url'   => '/images/nfts/geotennis/t6.png',
+    ],
+        [
+        'slug'        => 't7',
+        'name'        => 't7',
+        'description' => 'covered square',
+        'image_url'   => '/images/nfts/geotennis/t7.png',
+    ],
+];
 
+foreach ($geotennisNfts as $data) {
+    [$small, $medium, $large] = sizePricesGbp($data['slug']);
+    $nft = Nft::updateOrCreate(
+        ['slug' => $data['slug']],
+        [
+            'collection_id'      => $geotennis->id, // Use the new collection ID
+            'name'               => $data['name'],
+            'description'        => $data['description'],
+            'image_url'          => $data['image_url'],
+            'currency_code'      => $defaultCurrency,
+            'price_crypto'       => $defaultPrice,
+            'price_small_gbp'    => $small,
+            'price_medium_gbp'   => $medium,
+            'price_large_gbp'    => $large,
+            'editions_total'     => $editionsTotal,
+            'editions_remaining' => $editionsTotal,
+            'is_active'          => true,
+        ]
+    );
+
+    echo "NFT seeded (geotennis): {$nft->slug}\n";
+}
+
+// --- Characters NFTs ---
+$charactersNfts = [
+    [
+        'slug'        => 'carl',
+        'name'        => 'carlos',
+        'description' => 'movie star and icons',
+        'image_url'   => '/images/nfts/characters/carl.png',
+    ],
+    [
+        'slug'        => 'him',
+        'name'        => 'Him',
+        'description' => 'Green G',
+        'image_url'   => '/images/nfts/characters/him.png',
+    ],
+    [
+        'slug'        => 'lee',
+        'name'        => 'Lee',
+        'description' => 'martial arts master',
+        'image_url'   => '/images/nfts/characters/lee.png',
+    ],
+    [
+        'slug'        => 'mads',
+        'name'        => 'Mads',
+        'description' => 'Has some distinctive appearance',
+        'image_url'   => '/images/nfts/characters/mads.png',
+    ],
+    [
+        'slug'        => 'mike',
+        'name'        => 'Mike',
+        'description' => 'peekaboo',
+        'image_url'   => '/images/nfts/characters/mike.png',
+    ],
+    [
+        'slug'        => 'qqq',
+        'name'        => 'QQQ',
+        'description' => 'faceless',
+        'image_url'   => '/images/nfts/characters/qqq.png',
+    ],
+    [
+        'slug'        => 'box',
+        'name'        => 'Box',
+        'description' => 'genetically mog',
+        'image_url'   => '/images/nfts/characters/box.png',
+    ],
+    
+];
+
+foreach ($charactersNfts as $data) {
+    [$small, $medium, $large] = sizePricesGbp($data['slug']);
+    $nft = Nft::updateOrCreate(
+        ['slug' => $data['slug']],
+        [
+            'collection_id'      => $characters->id, // Use the new collection ID
+            'name'               => $data['name'],
+            'description'        => $data['description'],
+            'image_url'          => $data['image_url'],
+            'currency_code'      => $defaultCurrency,
+            'price_crypto'       => $defaultPrice,
+            'price_small_gbp'    => $small,
+            'price_medium_gbp'   => $medium,
+            'price_large_gbp'    => $large,
+            'editions_total'     => $editionsTotal,
+            'editions_remaining' => $editionsTotal,
+            'is_active'          => true,
+        ]
+    );
+
+    echo "NFT seeded (characters): {$nft->slug}\n";
 }
 
 echo "Done.\n";
-
 
