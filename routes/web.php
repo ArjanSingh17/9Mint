@@ -145,6 +145,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Dashboard
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
 
+    //tickets
+    Route::livewire('/admin/tickets', 'pages::tickets');
+
     // Inventory
     Route::get('/admin/inventory', [AdminController::class, 'inventory'])->name('admin.inventory');
 

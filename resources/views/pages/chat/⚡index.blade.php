@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Chat;
  use App\Models\Conversation;
 use App\Models\Message;
 use Livewire\Component;
+use App\Models\User;
 
 
 new class extends Component {
@@ -38,7 +39,7 @@ new class extends Component {
     
     if ($messageIndex !== false) {
         $this->loadedMessages[$messageIndex]->read_at = now();
-        $this->loadedMessages[$messageIndex]->refresh(); // Reload from DB
+        $this->loadedMessages[$messageIndex]->refresh(); 
     }
 }
     
@@ -105,17 +106,7 @@ public function markAsRead()
 
 
 
-   public function getListeners()
-{
-    $auth_id = auth()->id();
-
-    return [
-        'loadMore',
-        "echo-private:users.{$auth_id},.Illuminate\\Notifications\\Events\\BroadcastNotificationCreated"
-            => 'broadcastedNotifications',
-        'refresh' => '$refresh',
-    ];
-}
+  
 
     public function broadcastedNotifications($event)
 {
@@ -131,33 +122,11 @@ public function markAsRead()
             $this->selectedConversation->getReceiver()
                 ->notify(new MessageRead($this->selectedConversation->id));
 
-            // Use dispatch to trigger the browser event for the receiver
             $this->dispatch('scroll-to-bottom');
         }
     }
 }
 
-
-
-
-    public function loadMore(): void
-    {
-
-
-        #increment 
-        $this->paginate_var += 10;
-
-        #call loadMessages()
-
-        $this->loadMessages();
-
-
-        #update the chat height 
-        //$this->dispatchBrowserEvent('update-chat-height');
-    }
-
-
-    
 
    public function loadMessages()
 {
@@ -254,15 +223,11 @@ public function updatedLoadedMessages()
     $this->loadMessages();
 }
 
-    public function save()
-    {
-        $this->validate([
-            'title' => 'required|max:255',
-            'content' => 'required',
-        ]);
- 
-        dd($this->title, $this->content);
-    }
+public function getUserNameById(int $id)
+{
+    return User::where('id', $id)->value('name');
+}   
+
 };
 ?>
  <div class="w-full overflow-hidden">
@@ -281,17 +246,27 @@ public function updatedLoadedMessages()
                         <div class="py-2 px-3 bg-grey-lighter flex flex-row justify-between items-center">
                             <div class="flex items-center">
                                 <div>
-                                    <img class="w-10 h-10 rounded-full" src="https://i.pinimg.com/474x/aa/dd/1a/aadd1a84088cfa777014394359482d9a.jpg?nii=t"/>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="text-grey-darkest">
-                                        {{$this->selectedConversation->ticket->title}}
-                                    </p>
-                                    <p class="text-grey-darker text-xs mt-1">
-                                        Administrator
-                                    </p>
-                                </div>
+                                    @if(auth()->user()->role === 'admin')
+                                   <img class="w-10 h-10 rounded-full" src="data:image/webp;base64,UklGRsgCAABXRUJQVlA4ILwCAABQJQCdASrfANgAPp1On0qlpSMhqjqYeLATiWlu3WBpKHuV0xkylbqMZZs9rmP+9/pdjkrMk697+NqDSmxpn+MsZGPMMAPeaQf1WSiFIsrtL0qz18OpgvbcLklqOnseCQwefgrmPWi+0RnS4sSKy5w1ENRrMncH1f9lxwMM+OGgWyFFE1uihPA96r4k/3r1NIiNwAJHSAVrSzZtPNetLlrvaTxf0HrqbBCNkCpBd9HtcmlsxUdLQIPMuqkudmZpo3fxds/ZhTFTsOLM5NeNWQ8xjrFYCsmHL8HFs6mTaNp2XvpIv/1ZgbcSNu48CTJixTNsdTPrBIpLhTc8gkKwv6sKFD9GqZBmM7d1JsqETt61cGAiJ42zk0V5A8ja5hYbPsZbavNFH8cugPMENT682rzRSLIAAP73HE3ZQEOVE0hugI0g35h9jckeDS7AJ+RcCMdhr58equ3QuC9GIzM0eAPHMRWQffpQ2sVt+nkxgL+YcTFsWHb7gbU2H73TbAF4zXDC1UBDZt7rWC6IuNaPEvODkaLTLL/Eup+5dAfrkF8p6BClRTyFZpQWJBzhtvyLfWtWQdZscAR2Jcl6wIhMeslYVPQTWAWLzirsFX2cDY6/t6c6iTdlmn9Fc3+QsGLmPxKv/X67gGF+AciaOE6e+KARSv0dmX1xLNr8OytSRDIIm8yVo58yOUO/Pb6z38L76o3VrCg4RHHjyjs76xHsU5IltFgxNz56h2X2Pm7O8clSTpR8jqJ6uFBtCK+08fm/IzP/S6qlXVS8SysrUj4ms3F0EAKOx2sleTK5DPT1bQpnhZtJ8Q5V7UiPc8TyoNslRbNXMB4ayW02ljfdAam6CdNybvoln/23ArDUU2zKSVs7/Wh2WuX5YOvWPunwKcxfsgcmhEW23bYH4Dp/V/3v3IDmhAhy89FVTdAAAAAA"/>
+                                        @else 
+                                         <img class="w-10 h-10 rounded-full" src="https://i.pinimg.com/474x/aa/dd/1a/aadd1a84088cfa777014394359482d9a.jpg?nii=t"/>
+                                @endif
                             </div>
+                                <div class="ml-4">
+                                    <p class="text-grey-darker text-xs mt-1 pb-2.5 ">
+                                         @if(auth()->user()->role === 'admin')
+                                        {{$this->getUserNameById($this->selectedConversation->sender_id)}}
+                                        @else 
+                                        Administrator
+                                        @endif
+                                    </p>
+                                   
+                                    
+                                </div>
+                            </div> 
+                            <p class="text-grey-darkest pt-2.5">
+                                       Title: {{$this->selectedConversation->ticket->title}}
+                                    </p>
 
                             <div class="flex">
                                 <div>
@@ -354,7 +329,7 @@ public function updatedLoadedMessages()
                     <div class="rounded py-2 px-3 max-w-[45%] break-words" style="background-color: #F2F2F2">
                         <p class="text-sm text-emerald-600">
                            @if(auth()->user()->role === 'admin')
-                            {{auth()->user()->name}}
+                             {{$this->getUserNameById($this->selectedConversation->sender_id)}}
                             @else 
                             Administrator
                             @endif
@@ -377,7 +352,7 @@ public function updatedLoadedMessages()
                             @csrf
                         <div class="bg-grey-lighter px-4 py-4 flex items-center">
                             <div class="flex-1 mx-4">
-                                <input class="w-full border rounded px-2 py-2" type="text" id="body" wire:model="body" placeholder="Write your Message..." required />
+                              <input class="w-full border rounded px-2 py-2" type="text" id="body" wire:model="body" placeholder="Write your Message..." required />
                             </div>
                             <div>
                                <button type="submit"
@@ -396,10 +371,9 @@ public function updatedLoadedMessages()
     document.addEventListener('livewire:init', () => {
         const chatContainer = document.getElementById('chat-container');
 
-        // Renamed to match your other methods for consistency
+      
         const scrollToBottom = () => {
             if (chatContainer) {
-                // Use a slight timeout to ensure the DOM has finished rendering 
                 // the new message before we calculate height
                 setTimeout(() => {
                     chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -407,7 +381,7 @@ public function updatedLoadedMessages()
             }
         };
 
-        // Listen for the dispatch('scroll-to-bottom') from your PHP/Livewire
+        // Listen for the dispatch('scroll-to-bottom') 
         Livewire.on('scroll-to-bottom', () => {
             scrollToBottom();
         });
