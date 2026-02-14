@@ -91,7 +91,7 @@ public function markAsRead()
     if ($receiverAlsoDeleted) {
 
         $conversation->forceDelete();
-        # code...
+        
     }
 
 
@@ -176,12 +176,12 @@ public function markAsRead()
         ->take($this->paginate_var)
         ->get();
 
-    // ✅ Detect NEW messages
+    // Detect new messages
     if ($count > $this->previousMessageCount) {
         $this->dispatch('scroll-to-bottom');
     }
 
-    // ✅ Update stored count AFTER comparison
+    //  Update stored count after comparison
     $this->previousMessageCount = $count;
 
     // Mark unread messages as read
