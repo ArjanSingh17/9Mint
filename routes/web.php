@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Http\Request;
+use App\Http\Controllers\AdminController;
 
 // FRONTEND NFT CONTROLLERS
 use App\Http\Controllers\Web\CollectionController as WebCollection;
@@ -126,7 +127,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/inventory/listings/{listing}', [InventoryController::class, 'destroy'])->name('inventory.listing.destroy');
 
     // view and update details
-  //  Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');
+    //  Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');
     // Handle the form submission to update the profile
     //Route::patch('/profile', [UserProfileController::class, 'updateSelf'])->name('profile.update');
 
@@ -134,6 +135,26 @@ Route::middleware('auth')->group(function () {
     //Route::patch('/profile/password', [UserProfileController::class, 'updatePassword'])->name('password.update');
 });
 
- Route::post('send-email',[ContactController::class,'sendEmail'])->name('send.email');
+Route::post('send-email', [ContactController::class, 'sendEmail'])->name('send.email');
 Route::livewire('/chat/{query}', 'pages::chat.index')
     ->name('chat');
+
+//ADMIN ROUTES 
+Route::middleware(['auth', 'admin'])->group(function () {
+
+    // Dashboard
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+
+    // Inventory
+    Route::get('/admin/inventory', [AdminController::class, 'inventory'])->name('admin.inventory');
+
+    // User Management
+    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+
+    //Show the edit form
+    Route::get('/admin/users/{id}/edit', [AdminController::class, 'editUser'])->name('admin.users.edit');
+    
+    // Save the changes
+    Route::put('/admin/users/{id}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+});
