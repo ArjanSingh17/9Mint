@@ -10,11 +10,11 @@ body {
     background-color: black;
     color: white;
     text-align: center;
-    padding: 30px 40px;
-    width: 60%;
-    max-width: 700px;
+    padding: 30px 20px;
+    width: 90%;
+    max-width: 900px;
     border-radius: 10px;
-    margin-left: 200px;
+    margin: 40px auto;
 }
 
 .Pricing-info p {
@@ -38,25 +38,28 @@ body {
 
 .pricing-grid {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     flex-wrap: wrap;
     margin-top: 30px;
     gap: 30px;
 }
 
-.pricing-item.pricing-small img {
-    width: 150px;  
+@media (min-width: 768px) {
+
+.pricing-item.pricing-small img {  
+    width: 100%;
     height: auto;
 }
 
-.pricing-item.pricing-medium img {
-    width: 250px;   
+.pricing-item.pricing-medium img { 
+    width: 100%;
     height: auto;
 }
 
-.pricing-item.pricing-large img {
-    width: 350px;  
+.pricing-item.pricing-large img { 
+    width: 100%;
     height: auto;
+}
 }
 
 .pricing-small, 
@@ -72,6 +75,9 @@ body {
 
 }
 
+@media (max-width: 768px) {
+
+
 .pricing-content {
     display: flex;
     gap: 20px;
@@ -86,4 +92,5 @@ body {
 .pricing-text p {
     margin: 0;
     color: #ccc;
+}
 }

@@ -44,6 +44,24 @@ export default function NftDiscoveryBoard({ nfts, currencies = [], csrfToken, is
     const [preset, setPreset] = useState(PRESETS[0]);
     const [range, setRange] = useState({ leftIndex: 0, rightIndex: 10 });
 
+    //light and dark mode toggle
+    const [darkMode, setDarkMode] = useState(false);
+
+    useEffect(() => {
+        const chosenTheme = localStorage.getItem('theme');
+        if (chosenTheme == 'dark') setDarkMode(true);
+    }, []);
+
+    useEffect(() => {
+        if (darkMode) {
+            document.body.classList.add('dark-mode');
+            localStorage.setItem('theme', 'dark');
+        }else {
+            document.body.classList.remove('dark-mode');
+            localStorage.setItem('theme', 'light');
+        }
+    }, [darkMode]);
+
     // keep DOM + RAF in sync (prevents snap on window advance)
     const renderedRangeRef = useRef(range);
     useLayoutEffect(() => {
@@ -384,6 +402,8 @@ export default function NftDiscoveryBoard({ nfts, currencies = [], csrfToken, is
             <div className="nft-board__header">
                 <h2 className="nft-board__title">Discover NFTs</h2>
                 <p className="nft-board__subtitle">Trending and hand-picked digital collectibles</p>
+
+                
             </div>
 
             <div

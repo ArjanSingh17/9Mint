@@ -1,3 +1,30 @@
+.contact-page-container {
+  --bg-main: #040457;
+  --card-bg: #f9f9f9f9;
+  --text-main: #ffffff;
+  --subtext-color: rgba(255,255,255,0.7);
+  --button-bg: #000000;
+  --button-text: #ffffff;
+
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.contact-page-container {
+  --bg-main: #0a0a14;
+  --card-bg: #1e1e2a;
+  --text-main: #f0f0f0;
+  --subtext-color: rgba(240,240,240,0.7);
+  --button-bg: #8b5cf6;
+  --button-text: #fff;
+
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}
+
 body {
     background-color : rgb(4, 4, 87);
 }
@@ -16,7 +43,8 @@ body {
 }
 
  .contactUs-form {
-    width: 320px;
+    width: 90%;
+    max-width: 400px;
     display: flex;  
     flex-direction: column;
     background-color: #f9f9f9;
@@ -34,7 +62,7 @@ body {
     }
     .contactUs-form input,
     .contactUs-form textarea {
-        width: 80%;
+        width: 100%;
         padding: 10px;
         margin-bottom: 15px;
         border: 1px solid #ccc;
@@ -158,7 +186,8 @@ p{
 <!--css for checkout page-->
 .checkout-container {
   max-width: 500px;
-  margin: 40px;
+  margin: 40px auto;
+  width: 90%;
   padding: 10px;
   background: #ffffff;
  font-family: Arial, sans-serif;
@@ -243,6 +272,59 @@ p{
   .checkout-container button {
     font-size: 16px;
     padding: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+    .team-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* adjusting sizes for mobile devices*/
+.contact-page-container > .flex{
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 30px;
+  
+}
+
+.tickets-section,
+.contactUs-section > .flex > div:first-child{
+  flex: 1 1 500px;
+  box-sizing: border-box;
+  max-width: 600px;
+}
+
+.contactUs-form {
+  padding: 20px;
+  width: 100%;
+  border-radius: 10px;
+  background-color: var(--card-bg);
+}
+
+.tickets-section .rounded {
+  padding: 20px;
+  overflow-x: auto;
+  border-radius: 10px;
+  background-color: var(--card-bg);
+}
+@media (max-width: 900px) {
+  .contact-page-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tickets-section,
+  .contactUs-section {
+    width: 90%;;
+    max-width: 600px;
+  }
+
+  .tickets-section .rounded, .contactUs-form {
+    width: 100%;
   }
 }
 

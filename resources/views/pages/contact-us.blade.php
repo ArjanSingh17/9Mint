@@ -111,10 +111,11 @@ new class extends Component {
   <title>9 Mint - Contact Page</title>
 </head>
 <body>
-  <main class="flex justify-evenly items-center gap-4">
+  <div class="contact-page-container">
+  <div class="flex justify-evenly items-center gap-4">
       <div class="flex-grow">
         <h1>Tickets</h1> 
-        <div class="bg-black border-white rounded border-10 h-screen">
+        <div class="rounded border-2 h-screen" style="background-color: var(--card-bg); border-color: var(--text-main);">
           <div class="overflow-x-auto m-5">
             <table class="min-w-full bg-white">
               <thead class="bg-gray-100 whitespace-nowrap">
@@ -130,7 +131,7 @@ new class extends Component {
               <tbody class="whitespace-nowrap">
                 @forelse ($tickets as $ticket)
                   <tr class="hover:bg-gray-50">
-                    <td class="p-4 text-[15px] text-slate-900 font-medium">
+                    <td class="p-4 text-[15px] font-medium" style="color: var(--text-main);">
                         {{ $ticket->title }}
                     </td>
 
@@ -190,6 +191,5 @@ new class extends Component {
           <button type="submit">Submit</button>
         </form>
       </div>
-  </main>
 </body>
 </div>

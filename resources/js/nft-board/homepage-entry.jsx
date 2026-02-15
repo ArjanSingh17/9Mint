@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import NftDiscoveryBoard from './NftDiscoveryBoard';
+import { useEffect, useState } from 'react';
 
 // Mount
 const mountEl = document.getElementById('nft-discovery-board');
