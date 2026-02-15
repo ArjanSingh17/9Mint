@@ -73,7 +73,7 @@ public function loadTickets()
         ]);
     }
 
-    $this->redirect(route('chat', ['query' => $conversation->id]));
+    $this->redirect(route('chat.ticket', ['query' => $conversation->id]));
 }
 
  public function render()

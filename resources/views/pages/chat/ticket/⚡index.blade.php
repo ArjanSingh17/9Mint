@@ -97,7 +97,7 @@ public function markAsRead()
 
 
 
-    return redirect(route('chat.index'));
+    return redirect(route('chat.ticket.index'));
 
     
     
@@ -217,7 +217,7 @@ public function updatedLoadedMessages()
         $message->update(['read_at' => now()]);
         
         // Dispatch event to update sender's view
-        $this->dispatch('messageRead', messageId: $message->id)->to('chat.index');
+        $this->dispatch('messageRead', messageId: $message->id)->to('chat.ticket.index');
     }
         
     $this->loadMessages();
@@ -247,7 +247,7 @@ public function getUserNameById(int $id)
                             <div class="flex items-center">
                                 <div>
                                     @if(auth()->user()->role === 'admin')
-                                   <img class="w-10 h-10 rounded-full" src="data:image/webp;base64,UklGRsgCAABXRUJQVlA4ILwCAABQJQCdASrfANgAPp1On0qlpSMhqjqYeLATiWlu3WBpKHuV0xkylbqMZZs9rmP+9/pdjkrMk697+NqDSmxpn+MsZGPMMAPeaQf1WSiFIsrtL0qz18OpgvbcLklqOnseCQwefgrmPWi+0RnS4sSKy5w1ENRrMncH1f9lxwMM+OGgWyFFE1uihPA96r4k/3r1NIiNwAJHSAVrSzZtPNetLlrvaTxf0HrqbBCNkCpBd9HtcmlsxUdLQIPMuqkudmZpo3fxds/ZhTFTsOLM5NeNWQ8xjrFYCsmHL8HFs6mTaNp2XvpIv/1ZgbcSNu48CTJixTNsdTPrBIpLhTc8gkKwv6sKFD9GqZBmM7d1JsqETt61cGAiJ42zk0V5A8ja5hYbPsZbavNFH8cugPMENT682rzRSLIAAP73HE3ZQEOVE0hugI0g35h9jckeDS7AJ+RcCMdhr58equ3QuC9GIzM0eAPHMRWQffpQ2sVt+nkxgL+YcTFsWHb7gbU2H73TbAF4zXDC1UBDZt7rWC6IuNaPEvODkaLTLL/Eup+5dAfrkF8p6BClRTyFZpQWJBzhtvyLfWtWQdZscAR2Jcl6wIhMeslYVPQTWAWLzirsFX2cDY6/t6c6iTdlmn9Fc3+QsGLmPxKv/X67gGF+AciaOE6e+KARSv0dmX1xLNr8OytSRDIIm8yVo58yOUO/Pb6z38L76o3VrCg4RHHjyjs76xHsU5IltFgxNz56h2X2Pm7O8clSTpR8jqJ6uFBtCK+08fm/IzP/S6qlXVS8SysrUj4ms3F0EAKOx2sleTK5DPT1bQpnhZtJ8Q5V7UiPc8TyoNslRbNXMB4ayW02ljfdAam6CdNybvoln/23ArDUU2zKSVs7/Wh2WuX5YOvWPunwKcxfsgcmhEW23bYH4Dp/V/3v3IDmhAhy89FVTdAAAAAA"/>
+                                   <img class="w-10 h-10 rounded-full" src="https://images.macrumors.com/t/n4CqVR2eujJL-GkUPhv1oao_PmI=/1600x/article-new/2019/04/guest-user-250x250.jpg"/>
                                         @else 
                                          <img class="w-10 h-10 rounded-full" src="https://i.pinimg.com/474x/aa/dd/1a/aadd1a84088cfa777014394359482d9a.jpg?nii=t"/>
                                 @endif
@@ -367,27 +367,4 @@ public function getUserNameById(int $id)
         </div>
     </div>
 </div>
-<script>
-    document.addEventListener('livewire:init', () => {
-        const chatContainer = document.getElementById('chat-container');
-
-      
-        const scrollToBottom = () => {
-            if (chatContainer) {
-                // the new message before we calculate height
-                setTimeout(() => {
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                }, 50);
-            }
-        };
-
-        // Listen for the dispatch('scroll-to-bottom') 
-        Livewire.on('scroll-to-bottom', () => {
-            scrollToBottom();
-        });
-
-        // Initial scroll when the page first loads
-        scrollToBottom();
-    });
-</script>
 </div>

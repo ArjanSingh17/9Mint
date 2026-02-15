@@ -13,6 +13,9 @@
     <a href="/products">Products</a>
     <a href="/pricing">Pricing</a>
     <a href="/contactUs">Contact Us</a>
+    @auth
+    <a href="{{ url('chat/user/index') }}">Chats</a>
+@endauth
   </div>
 
   {{-- Cart/auth --}}

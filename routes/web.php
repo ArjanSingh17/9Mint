@@ -136,8 +136,10 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::post('send-email', [ContactController::class, 'sendEmail'])->name('send.email');
-Route::livewire('/chat/{query}', 'pages::chat.index')
-    ->name('chat');
+Route::livewire('/chat/ticket/{query}', 'pages::chat.ticket.index')
+    ->name('chat.ticket');
+Route::livewire('/chat/user/index', 'pages::chat.user.index')
+    ->name('chat.user');
 
 //ADMIN ROUTES 
 Route::middleware(['auth', 'admin'])->group(function () {
@@ -147,6 +149,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     //tickets
     Route::livewire('/admin/tickets', 'pages::tickets');
+    
 
     // Inventory
     Route::get('/admin/inventory', [AdminController::class, 'inventory'])->name('admin.inventory');
