@@ -1,9 +1,5 @@
-Hello we can add information about our website here.
-Naomi 240229043
-
-Maliyka 240119641
 <p align="center">
-  <img src="9mint.png" alt="9Mint logo" width="180">
+  <img src="public/images/9mint.png" alt="9Mint logo" width="180">
 </p>
 
 ---
@@ -38,10 +34,10 @@ Maliyka 240119641
 
 **Scope**
 - developing a secure, fully functional online store with two user roles (Customer and Admin)
-- robust NFT inventory management
-- user account management (registration, login, profile updates)
-- order processing with a dummy payment gateway
-- a user-friendly interface for browsing, searching, and purchasing digital art
+- robust NFT inventory management (collections + NFTs with editions and stock tracking)
+- user account management (registration, login, profile updates, wallet address)
+- order lifecycle: cart → checkout → orders history (GBP, dummy payment flow)
+- a user-friendly interface for browsing, searching, and purchasing digital art (Blade web UI + JSON API)
 - the platform will also be securely hosted and maintain a reliable database for all critical information
 
 ---
@@ -49,8 +45,9 @@ Maliyka 240119641
 ## Full local setup & docs
 
 - **Local setup:** [docs/local-setup.md](docs/local-setup.md)
-- **Troubleshooting / common fixes:** [docs/Troubleshooting.md](docs/Troubleshooting.md)
+- **Troubleshooting / common fixes:** [docs/troubleshooting.md](docs/troubleshooting.md)
 - **Dev Workflow (pull/push):** [docs/dev-workflow.md](docs/dev-workflow.md)
-- **Frontend foundation (API & flows):** [docs/frontend-api-overview.md](docs/frontend-api-overview.md)
+- **API overview (/api/v1):** [docs/api-overview.md](docs/api-overview.md)
+- **Web flows (Blade pages, cart, orders, profile):** [docs/web-flows-overview.md](docs/web-flows-overview.md)
 
 > Keep `.env`, `vendor/`, `node_modules/`, dumps out of Git. Commit migrations/seeders instead.

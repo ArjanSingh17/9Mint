@@ -1,3 +1,4 @@
+// Axios defaults
 import axios from 'axios';
 window.axios = axios;
 

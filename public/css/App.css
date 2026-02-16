@@ -1,0 +1,406 @@
+@import "tailwindcss";
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  background-color: rgb(4, 4, 87);
+  color: white;
+}
+
+.profile-page {
+  padding: 50px 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.profile-title {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 30px;
+}
+
+.profile-status {
+  background: #4CAF50;
+  color: white;
+  padding: 15px;
+  margin: 0 auto 20px;
+  max-width: 800px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.profile-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-card {
+  background: white;
+  color: #20065c;
+  padding: 24px 28px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.profile-card h2 {
+  margin-bottom: 10px;
+}
+
+.profile-card p {
+  color: #444;
+}
+
+.profile-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-card label {
+  font-weight: 500;
+}
+
+.profile-card input[type="text"],
+.profile-card input[type="email"],
+.profile-card input[type="password"] {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.profile-card button {
+  margin-top: 8px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.profile-card button[type="submit"] {
+  background: #20065c;
+  color: white;
+}
+
+.profile-card button[type="submit"]:hover {
+  background: #32138a;
+}
+
+.profile-activity-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.profile-activity-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #20065c;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.profile-activity-btn:hover {
+  background: #32138a;
+  transform: translateY(-1px);
+}
+
+/* Profile owned NFTs section */
+.profile-nfts-section {
+  margin-top: 8px;
+}
+
+.profile-nfts-section h2 {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.profile-nfts-empty {
+  color: #888;
+  font-size: 14px;
+}
+
+.profile-nfts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.profile-nft-card {
+  background: #0f172a;
+  border-radius: 10px;
+  overflow: hidden;
+  text-decoration: none;
+  color: #fff;
+  transition: transform 0.2s ease;
+}
+
+.profile-nft-card:hover {
+  transform: translateY(-4px);
+}
+
+.profile-nft-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1.2;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-nft-card span {
+  display: block;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ORDERS PAGE */
+.orders-page {
+  padding: 50px 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.orders-title {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 30px;
+}
+
+.orders-status {
+  background: #4CAF50;
+  color: white;
+  padding: 15px;
+  margin: 0 auto 20px;
+  max-width: 800px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.orders-empty {
+  text-align: center;
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.orders-card {
+  background: white;
+  color: #20065c;
+  padding: 24px 28px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.orders-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.orders-card-header h2 {
+  margin: 0 0 4px;
+}
+
+.orders-meta {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.orders-summary {
+  text-align: right;
+}
+
+.orders-total {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.orders-items-table {
+  width: 100%;
+  margin-top: 10px;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.orders-items-table th,
+.orders-items-table td {
+  padding: 6px 4px;
+  text-align: left;
+}
+
+.orders-items-table th {
+  border-bottom: 1px solid #ddd;
+}
+
+.orders-items-table tr + tr td {
+  border-top: 1px solid #f0f0f0;
+}
+
+
+.auth-section {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  padding: 50px 20px;
+}
+
+.auth-form {
+  background: white;
+  color: #20065c;
+  padding: 30px;
+  min-width: 300px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.auth-form input {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.basket-page {
+  padding: 50px 40px;
+}
+
+.basket-title {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 30px;
+}
+
+.basket-content {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.basket-items {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.basket-item {
+  background: white;
+  color: #20065c;
+  padding: 15px 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.basket-item-thumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.basket-item-info h3 {
+  font-size: 18px;
+}
+
+.basket-item-qty {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qty-button {
+  width: 26px;
+  height: 26px;
+  background: #eee;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.basket-item-price {
+  width: 80px;
+  text-align: right;
+  font-weight: 600;
+}
+
+.basket-item-remove {
+  margin-left: 10px;
+}
+
+.remove-button {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s ease;
+}
+
+.remove-button:hover {
+  background: #d32f2f;
+}
+
+.basket-summary {
+  min-width: 260px;
+  background: white;
+  color: #20065c;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+}
+
+.basket-summary-row,
+.basket-summary-total {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.basket-summary-total {
+  font-weight: 600;
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+}
+
+.checkout-button {
+  width: 100%;
+  padding: 12px;
+  background: black;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}

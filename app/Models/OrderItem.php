@@ -7,14 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 class OrderItem extends Model
 {
     protected $fillable = [
-        'order_id','nft_id','quantity','unit_price_crypto','unit_price_gbp'
+        'order_id',
+        'listing_id',
+        'token_id',
+        'quantity',
+        'ref_unit_amount',
+        'ref_currency',
+        'pay_unit_amount',
+        'pay_currency',
     ];
 
     protected $casts = [
-        'unit_price_crypto' => 'decimal:8',
-        'unit_price_gbp'    => 'decimal:2',
+        'ref_unit_amount' => 'decimal:18',
+        'pay_unit_amount' => 'decimal:18',
     ];
 
     public function order() { return $this->belongsTo(Order::class); }
-    public function nft()   { return $this->belongsTo(Nft::class); }
+    public function listing() { return $this->belongsTo(Listing::class); }
+    public function token()   { return $this->belongsTo(NftToken::class, 'token_id'); }
 }

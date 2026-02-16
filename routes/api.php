@@ -9,7 +9,11 @@ use App\Http\Controllers\Api\V1\NftController;
 use App\Http\Controllers\Api\V1\FavouriteController;
 use App\Http\Controllers\Api\V1\CartController;
 use App\Http\Controllers\Api\V1\CheckoutController;
+use App\Http\Controllers\Api\V1\ListingsController;
+use App\Http\Controllers\Api\V1\MarketController;
+use App\Http\Controllers\Api\V1\QuotesController;
 use App\Http\Controllers\Api\V1\PriceController;
+use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\AdminNftController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -23,7 +27,14 @@ Route::prefix('v1')->group(function () {
     Route::get('collections/{slug}', [CollectionController::class, 'show']);
     Route::get('nfts', [NftController::class, 'index']);
     Route::get('nfts/{slug}', [NftController::class, 'show']);
-    Route::get('price/convert', [PriceController::class, 'convert']);
+    Route::get('nfts/{slug}/market', [MarketController::class, 'market']);
+    Route::get('nfts/{slug}/history', [MarketController::class, 'history']);
+    Route::get('listings', [ListingsController::class, 'index']);
+    Route::get('listings/{id}', [ListingsController::class, 'show']);
+    Route::get('quotes', [QuotesController::class, 'show']);
+    Route::post('quotes/bulk', [QuotesController::class, 'bulk']);
+    Route::get('convert', [PriceController::class, 'convert']);
+    Route::post('register', [AuthController::class, 'register']);
 
     // Authenticated
     Route::middleware('auth:sanctum')->group(function () {
@@ -35,16 +46,18 @@ Route::prefix('v1')->group(function () {
         // Cart routes
         Route::get('cart', [CartController::class, 'index']);
         Route::post('cart', [CartController::class, 'store']);
-        Route::get('cart/{id}', [CartController::class, 'show']);
-        Route::put('cart/{id}', [CartController::class, 'update']);
-        Route::delete('cart/{nft}', [CartController::class, 'destroy']);
+        Route::delete('cart/{id}', [CartController::class, 'destroy']);
 
         // Checkout routes
         Route::get('checkout', [CheckoutController::class, 'index']);
         Route::post('checkout', [CheckoutController::class, 'store']);
         Route::get('checkout/{id}', [CheckoutController::class, 'show']);
-        Route::put('checkout/{id}', [CheckoutController::class, 'update']);   
         Route::delete('checkout/{id}', [CheckoutController::class, 'destroy']);
+        Route::post('checkout/{id}/pay', [PaymentController::class, 'pay']);
+
+        // Listings (resale)
+        Route::post('listings', [ListingsController::class, 'store']);
+        Route::delete('listings/{id}', [ListingsController::class, 'destroy']);
 
         // Admin
         Route::prefix('admin')->group(function () {

@@ -3,107 +3,72 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\CartItem;
+use App\Models\Listing;
+use App\Services\Pricing\CurrencyCatalogInterface;
 use Illuminate\Http\Request;
-use App\Models\{CartItem, Nft};
-use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $items = CartItem::with('nft')->where('user_id', request()->user()->id)->get();
-        return response()->json(['data'=>$items]);
+        $user = $request->user();
+        $items = CartItem::with('listing.token.nft')
+            ->where('user_id', $user->id)
+            ->get();
+
+        return response()->json(['data' => $items]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
+        $user = $request->user();
         $data = $request->validate([
-            'nft_id' => 'required|exists:nfts,id',
-            'quantity' => 'nullable|integer|min:1'
+            'listing_id' => ['required', 'integer', 'exists:listings,id'],
+            'pay_currency' => ['nullable', 'string', 'max:10'],
         ]);
 
-        DB::transaction(function () use ($data, $request) {
-    $item = CartItem::where('user_id', $request->user()->id) 
-                ->where('nft_id', $data['nft_id'])
-                ->lockForUpdate()
-                ->first();
+        $listing = Listing::with('token')
+            ->where('id', $data['listing_id'])
+            ->where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('reserved_until')
+                    ->orWhere('reserved_until', '<', now());
+            })
+            ->firstOrFail();
 
-            if ($item) {
-                $item->update([
-                    'quantity' => $data['quantity'] ?? 1
-                ]);
-            } else {
-                CartItem::create([
-                    'user_id' => $request->user()->id,
-                    'nft_id' => $data['nft_id'],
-                    'quantity' => $data['quantity'] ?? 1
-                ]);
-            }
-        });
-
-        return response()->noContent();
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-         $item = CartItem::with('nft')
-        ->where('user_id', request()->user()->id)
-        ->where('id', $id)
-        ->first();
-
-    if (!$item) {
-        return response()->json(['message' => 'Item not found'], 404);
-    }
-
-    return response()->json(['data' => $item]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-      $data = $request->validate([
-            'quantity' => 'required|integer|min:1'
-        ]);
-
-        $item = CartItem::where('user_id', $request->user()->id)
-            ->where('id', $id)
-            ->lockForUpdate()
-            ->first();
-
-        if (!$item) {
-            return response()->json(['message' => 'Item not found'], 404);
+        if ($listing->seller_user_id === $user->id) {
+            return response()->json(['message' => 'You cannot purchase your own NFT.'], 403);
         }
 
-        $item->update([
-            'quantity' => $data['quantity']
-        ]);
+        $currencyCatalog = app(CurrencyCatalogInterface::class);
+        $payCurrency = $data['pay_currency'] ?? $currencyCatalog->defaultPayCurrency();
 
-        return response()->json(['data' => $item], 200);
+        $item = CartItem::firstOrCreate(
+            ['user_id' => $user->id, 'listing_id' => $listing->id],
+            [
+                'nft_id' => $listing->token?->nft_id,
+                'quantity' => 1,
+                'selected_pay_currency' => $payCurrency,
+            ]
+        );
+
+        if (! $item->wasRecentlyCreated) {
+            $item->update(['selected_pay_currency' => $payCurrency]);
+        }
+
+        return response()->json(['data' => $item->load('listing.token.nft')], 201);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Nft $nft)
+    public function destroy(Request $request, string $id)
     {
-          DB::transaction(function () use ($nft) {
-            CartItem::where('user_id', request()->user()->id)
-                ->where('nft_id', $nft->id)
-                ->lockForUpdate()
-                ->delete();
-        });
+        $user = $request->user();
+        $item = CartItem::where('id', $id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
 
-        return response()->noContent();
+        $item->delete();
+
+        return response()->json(['message' => 'Item removed']);
     }
 }

@@ -2,6 +2,11 @@
 
 You will install **PHP 8.x**, **Composer 2**, **Node.js 20 LTS**, and **MySQL 8**, then wire Laravel to your local DB.
 
+**Tech Stack:**
+- Backend: Laravel (PHP)
+- Frontend: React 19 (via Vite)
+- Database: MySQL 8
+
 ---
 
 ## 0) What you need (once per machine)
@@ -95,6 +100,8 @@ You will install **PHP 8.x**, **Composer 2**, **Node.js 20 LTS**, and **MySQL 8*
   npm -v
   ```
 
+> **Note:** This project uses **React 19** for the NFT Discovery Board feature. React and its dependencies are automatically installed when you run `npm ci` or `npm install` in step 6.
+
 ---
 
 ## 4) MySQL 8 (Server + Workbench via **MySQL Installer**)
@@ -169,11 +176,13 @@ APP_URL=http://127.0.0.1:8000
 php artisan config:clear
 php artisan key:generate
 php artisan migrate
+php "dev tools/seed-collections-and-nfts.php"
 ```
 
-**Front-end deps:**
+**Front-end deps (installs React 19, Vite, and other dependencies):**
 ```cmd
 npm ci   :: or npm install
+npm run build   :: Build production assets (or use npm run dev for development)
 ```
 
 **Run (two terminals, keep both open):**

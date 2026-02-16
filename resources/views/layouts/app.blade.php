@@ -3,26 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>9Mint NFT Shop - @yield('title', 'Profile')</title>
-    <style>
-        body { font-family: sans-serif; background-color: #f4f4f4; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-    </style>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>9Mint - @yield('title', 'Page')</title>
+    <link rel="icon" href="{{ asset('images/9mint.png') }}">
+
+    {{-- Enables React Fast Refresh when running Vite dev server (no-op in production) --}}
+    @viteReactRefresh
+    @vite(['resources/css/app.css', 'resources/css/layout.css', 'resources/js/app.js'])
+    @stack('styles')
+     @livewireStyles
 </head>
 <body>
-    <header style="background-color: #312e81; color: white; padding: 15px;">
-        <nav class="container flex justify-between">
-            <a href="/" style="font-size: 1.5em; font-weight: bold;">9Mint NFT E-Commerce</a>
-            <a href="{{ route('profile.show') }}">My Profile</a>
-        </nav>
+    {{-- Shared top navigation bar --}}
+    <header>
+        <x-navbar />
     </header>
-
-    <main class="container">
+    
+    {{-- Main content area --}}
+    <main class="page-container">
+        @isset($slot)
+        {{ $slot }}
+    @endisset
         @yield('content') 
     </main>
 
-    <footer style="text-align: center; margin-top: 50px; padding: 20px; border-top: 1px solid #ccc;">
-        &copy; 2025 9Mint. Handle customer data securely.
+    {{-- Shared footer --}}
+    <footer class="site-footer">
+        &copy; {{ date('Y') }} 9Mint. All rights reserved.
+        <span>|</span>
+        <a href="/contactUs/terms">Terms &amp; Conditions</a>
+        <span>|</span>
+        <a href="/contactUs/faqs">FAQs</a>
+        <span>|</span>
+        <a href="/contactUs">Contact Us</a>
     </footer>
+
+    @stack('scripts')
+     @livewireScripts
 </body>
 </html>
