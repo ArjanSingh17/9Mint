@@ -1,14 +1,215 @@
 <?php
 namespace App\Http\Livewire\Chat;
- use App\Models\Conversation;
-use App\Models\Message;
-use Livewire\Component;
-use App\Models\User;
 
+use Livewire\Component;
+use App\Models\Conversation;
+use App\Models\Message;
+use App\Models\User;
+use App\Events\MessageSent;
 
 new class extends Component {
-      
 
+    public string $title = '';
+    public string $content = '';
+
+    protected $listeners = [
+        'refreshMessages' => '$refresh',
+        'messageRead' => 'handleMessageRead'
+    ];
+
+    public $query;
+    public $selectedConversation;
+
+    public int $previousMessageCount = 0;
+    public $body;
+
+    /** @var \Illuminate\Support\Collection */
+    public $loadedMessages;
+
+    public $paginate_var = 999;
+
+    // INIT
+    public function mount($user, $conversation)
+    {
+        if (!auth()->check()) {
+            return redirect('contactUs');
+        }
+
+        $this->loadedMessages = collect();
+        $this->selectedConversation = Conversation::findOrFail($conversation);
+
+        $userId = auth()->id();
+
+        // permission check
+        if (
+            $this->selectedConversation->sender_id !== $userId &&
+            $this->selectedConversation->receiver_id !== $userId
+        ) {
+            abort(403, 'You do not have permission to view this conversation.');
+        }
+
+        // only mark as read when the chat is actually opened
+        $this->markConversationAsRead();
+
+        $this->loadMessages();
+    }
+
+    // HANDLE READ EVENT
+    public function handleMessageRead($messageId)
+    {
+        $messageIndex = $this->loadedMessages->search(
+            fn($msg) => $msg->id == $messageId
+        );
+
+        if ($messageIndex !== false) {
+            $this->loadedMessages[$messageIndex]->read_at = now();
+        }
+    }
+
+    // SAFE MARK AS READ
+    public function markConversationAsRead()
+    {
+        Message::where('conversation_id', $this->selectedConversation->id)
+            ->where('sender_id', '!=', auth()->id())
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+    }
+
+    // DELETE CONVERSATION PER USER
+    public function deleteByUser($id)
+    {
+        $userId = auth()->id();
+        $conversation = Conversation::findOrFail(decrypt($id));
+
+        $conversation->messages()->each(function ($message) use ($userId) {
+            if ($message->sender_id === $userId) {
+                $message->update(['sender_deleted_at' => now()]);
+            } elseif ($message->receiver_id === $userId) {
+                $message->update(['receiver_deleted_at' => now()]);
+            }
+        });
+
+        $receiverAlsoDeleted = $conversation->messages()
+            ->where(function ($query) use ($userId) {
+                $query->where('sender_id', $userId)
+                      ->orWhere('receiver_id', $userId);
+            })
+            ->where(function ($query) {
+                $query->whereNull('sender_deleted_at')
+                      ->orWhereNull('receiver_deleted_at');
+            })
+            ->doesntExist();
+
+        if ($receiverAlsoDeleted) {
+            $conversation->forceDelete();
+        }
+
+        return redirect(route('chat.ticket.index'));
+    }
+
+    // REALTIME BROADCAST HANDLER
+    public function broadcastedNotifications($event)
+    {
+        if ($event['type'] == MessageSent::class) {
+
+            // only process events for the open conversation
+            if ($event['conversation_id'] != $this->selectedConversation->id) {
+                return;
+            }
+
+            $newMessage = Message::find($event['message_id']);
+
+            if (!$newMessage) {
+                return;
+            }
+
+            $this->loadedMessages->push($newMessage);
+
+            // important: do not mark as read here
+            // read happens only in mount()
+
+            $this->dispatch('scroll-to-bottom');
+        }
+    }
+
+    // LOAD MESSAGES
+    public function loadMessages()
+    {
+        $userId = auth()->id();
+        $conversationId = $this->selectedConversation->id;
+
+        $baseQuery = Message::where('conversation_id', $conversationId)
+            ->where(function ($query) use ($userId) {
+                $query
+                    ->where(function ($q) use ($userId) {
+                        $q->where('sender_id', $userId)
+                          ->whereNull('sender_deleted_at');
+                    })
+                    ->orWhere(function ($q) use ($userId) {
+                        $q->where('receiver_id', $userId)
+                          ->whereNull('receiver_deleted_at');
+                    });
+            });
+
+        $count = $baseQuery->count();
+
+        $this->loadedMessages = $baseQuery
+            ->orderBy('created_at', 'asc')
+            ->skip(max(0, $count - $this->paginate_var))
+            ->take($this->paginate_var)
+            ->get();
+
+        if ($count > $this->previousMessageCount) {
+            $this->dispatch('scroll-to-bottom');
+        }
+
+        $this->previousMessageCount = $count;
+
+        return $this->loadedMessages;
+    }
+
+    // SEND MESSAGE
+    public function sendMessage()
+    {
+        $this->validate([
+            'body' => 'required|string'
+        ]);
+
+        $receiverId =
+            $this->selectedConversation->sender_id === auth()->id()
+                ? $this->selectedConversation->receiver_id
+                : $this->selectedConversation->sender_id;
+
+        $createdMessage = Message::create([
+            'conversation_id' => $this->selectedConversation->id,
+            'sender_id' => auth()->id(),
+            'receiver_id' => $receiverId,
+            'body' => $this->body,
+            
+        ]);
+
+        $this->reset('body');
+
+        $this->loadedMessages->push($createdMessage);
+
+        $this->selectedConversation->update([
+            'updated_at' => now()
+        ]);
+
+        $this->dispatch('scroll-to-bottom');
+    }
+
+    // AUTO SCROLL
+    public function updatedLoadedMessages()
+    {
+        $this->dispatch('scroll-to-bottom');
+    }
+
+    // helper
+    public function getUserNameById(int $id)
+    {
+        return User::where('id', $id)->value('name');
+    }
 };
 ?>
 
@@ -155,20 +356,26 @@ new class extends Component {
                     <div class="w-2/3 border flex flex-col">
 
                         <!-- Header -->
-                        <div class="py-2 px-3 bg-grey-lighter flex flex-row justify-between items-center">
+                         <div class="py-2 px-3 bg-grey-lighter flex flex-row justify-between items-center">
                             <div class="flex items-center">
                                 <div>
-                                    <img class="w-10 h-10 rounded-full" src="https://darrenjameseeley.files.wordpress.com/2014/09/expendables3.jpeg"/>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="text-grey-darkest">
-                                        New Movie! Expendables 4
-                                    </p>
-                                    <p class="text-grey-darker text-xs mt-1">
-                                        Andrés, Tom, Harrison, Arnold, Sylvester
-                                    </p>
-                                </div>
+                                    @if(auth()->user()->role === 'admin')
+                                   <img class="w-10 h-10 rounded-full" src="https://images.macrumors.com/t/n4CqVR2eujJL-GkUPhv1oao_PmI=/1600x/article-new/2019/04/guest-user-250x250.jpg"/>
+                                        @else 
+                                         <img class="w-10 h-10 rounded-full" src="https://images.macrumors.com/t/n4CqVR2eujJL-GkUPhv1oao_PmI=/1600x/article-new/2019/04/guest-user-250x250.jpg"/>
+                                @endif
                             </div>
+                                <div class="ml-4">
+                                   <p class="text-grey-darker text-xs mt-1 pb-2.5">
+                                     {{ $selectedConversation->sender_id === auth()->id()
+                                     ? $selectedConversation->receiver->name
+                                    : $selectedConversation->sender->name }}
+                                    </p>
+                                   
+                                    
+                                </div>
+                            </div> 
+                           
 
                             <div class="flex">
                                 <div>
@@ -184,144 +391,95 @@ new class extends Component {
                         </div>
 
                         <!-- Messages -->
-                        <div class="flex-1 overflow-auto" style="background-color: #DAD3CC">
-                            <div class="py-2 px-3">
+<div class="flex-1 overflow-auto"
+     style="background-color: #DAD3CC"
+     wire:poll.0.1s="loadMessages"
+     id="chat-container"
+     x-data="{
+         scrollToBottom() {
+             this.$nextTick(() => {
+                 this.$el.scrollTop = this.$el.scrollHeight;
+             });
+         }
+     }"
+     x-init="scrollToBottom(); $watch('$wire.loadedMessages', () => scrollToBottom())"
+     @scroll-to-bottom.window="scrollToBottom()">
 
-                                <div class="flex justify-center mb-2">
-                                    <div class="rounded py-2 px-4" style="background-color: #DDECF2">
-                                        <p class="text-sm uppercase">
-                                            February 20, 2018
-                                        </p>
-                                    </div>
-                                </div>
+    <div class="py-2 px-3">
 
-                                <div class="flex justify-center mb-4">
-                                    <div class="rounded py-2 px-4" style="background-color: #FCF4CB">
-                                        <p class="text-xs">
-                                            Messages to this chat and calls are now secured with end-to-end encryption. Tap for more info.
-                                        </p>
-                                    </div>
-                                </div>
+        {{-- Date banner --}}
+        <div class="flex justify-center mb-2">
+            <div class="rounded py-2 px-4" style="background-color: #DDECF2">
+                <p class="text-sm uppercase">
+                    {{ \Carbon\Carbon::parse(optional($this->selectedConversation->ticket)->created_at)->format('jS F Y') }}
+                </p>
+            </div>
+        </div>
 
-                                <div class="flex mb-2">
-                                    <div class="rounded py-2 px-3" style="background-color: #F2F2F2">
-                                        <p class="text-sm text-teal">
-                                            Sylverter Stallone
-                                        </p>
-                                        <p class="text-sm mt-1">
-                                            Hi everyone! Glad you could join! I am making a new movie.
-                                        </p>
-                                        <p class="text-right text-xs text-grey-dark mt-1">
-                                            12:45 pm
-                                        </p>
-                                    </div>
-                                </div>
+        @foreach($loadedMessages as $message)
 
-                                <div class="flex mb-2">
-                                    <div class="rounded py-2 px-3" style="background-color: #F2F2F2">
-                                        <p class="text-sm text-purple">
-                                            Tom Cruise
-                                        </p>
-                                        <p class="text-sm mt-1">
-                                            Hi all! I have one question for the movie
-                                        </p>
-                                        <p class="text-right text-xs text-grey-dark mt-1">
-                                            12:45 pm
-                                        </p>
-                                    </div>
-                                </div>
+            {{-- My message --}}
+            @if($message->sender_id === auth()->id())
+                <div class="flex justify-end mb-2">
+                    <div class="rounded py-2 px-3 max-w-[45%] break-words"
+                         style="background-color: #E2F7CB">
 
-                                <div class="flex mb-2">
-                                    <div class="rounded py-2 px-3" style="background-color: #F2F2F2">
-                                        <p class="text-sm text-orange">
-                                            Harrison Ford
-                                        </p>
-                                        <p class="text-sm mt-1">
-                                            Again?
-                                        </p>
-                                        <p class="text-right text-xs text-grey-dark mt-1">
-                                            12:45 pm
-                                        </p>
-                                    </div>
-                                </div>
+                        <p class="text-sm mt-1">
+                            {{ $message->body }}
+                        </p>
 
-                                <div class="flex mb-2">
-                                    <div class="rounded py-2 px-3" style="background-color: #F2F2F2">
-                                        <p class="text-sm text-orange">
-                                            Russell Crowe
-                                        </p>
-                                        <p class="text-sm mt-1">
-                                            Is Andrés coming for this one?
-                                        </p>
-                                        <p class="text-right text-xs text-grey-dark mt-1">
-                                            12:45 pm
-                                        </p>
-                                    </div>
-                                </div>
+                        <p class="text-right text-xs text-grey-dark mt-1">
+                            {{ \Carbon\Carbon::parse($message->created_at)->format('g:i a') }}
 
-                                <div class="flex mb-2">
-                                    <div class="rounded py-2 px-3" style="background-color: #F2F2F2">
-                                        <p class="text-sm text-teal">
-                                            Sylverter Stallone
-                                        </p>
-                                        <p class="text-sm mt-1">
-                                            He is. Just invited him to join.
-                                        </p>
-                                        <p class="text-right text-xs text-grey-dark mt-1">
-                                            12:45 pm
-                                        </p>
-                                    </div>
-                                </div>
+                            @if($message->read_at)
+                                <span class="text-blue-500">✓✓</span>
+                            @else
+                                <span class="text-gray-400">✓</span>
+                            @endif
+                        </p>
+                    </div>
+                </div>
 
-                                <div class="flex justify-end mb-2">
-                                    <div class="rounded py-2 px-3" style="background-color: #E2F7CB">
-                                        <p class="text-sm mt-1">
-                                            Hi guys.
-                                        </p>
-                                        <p class="text-right text-xs text-grey-dark mt-1">
-                                            12:45 pm
-                                        </p>
-                                    </div>
-                                </div>
+            {{-- Their message --}}
+            @else
+                <div class="flex mb-2">
+                    <div class="rounded py-2 px-3 max-w-[45%] break-words"
+                         style="background-color: #F2F2F2">
 
-                                <div class="flex justify-end mb-2">
-                                    <div class="rounded py-2 px-3" style="background-color: #E2F7CB">
-                                        <p class="text-sm mt-1">
-                                            Count me in
-                                        </p>
-                                        <p class="text-right text-xs text-grey-dark mt-1">
-                                            12:45 pm
-                                        </p>
-                                    </div>
-                                </div>
+                        <p class="text-sm text-emerald-600">
+                            {{ $selectedConversation->sender_id === auth()->id()
+                                     ? $selectedConversation->receiver->name
+                                    : $selectedConversation->sender->name }}
+                        </p>
 
-                                <div class="flex mb-2">
-                                    <div class="rounded py-2 px-3" style="background-color: #F2F2F2">
-                                        <p class="text-sm text-purple">
-                                            Tom Cruise
-                                        </p>
-                                        <p class="text-sm mt-1">
-                                            Get Andrés on this movie ASAP!
-                                        </p>
-                                        <p class="text-right text-xs text-grey-dark mt-1">
-                                            12:45 pm
-                                        </p>
-                                    </div>
-                                </div>
+                        <p class="text-sm mt-1">
+                            {{ $message->body }}
+                        </p>
 
-                            </div>
-                        </div>
+                        <p class="text-right text-xs text-grey-dark mt-1">
+                            {{ \Carbon\Carbon::parse($message->created_at)->format('g:i a') }}
+                        </p>
 
-                        <!-- Input -->
+                    </div>
+                </div>
+            @endif
+
+        @endforeach
+
+    </div>
+</div>
+
+                      <!-- Input -->
+                        <form wire:submit.prevent="sendMessage">
+                            @csrf
                         <div class="bg-grey-lighter px-4 py-4 flex items-center">
-                            <div>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path opacity=".45" fill="#263238" d="M9.153 11.603c.795 0 1.439-.879 1.439-1.962s-.644-1.962-1.439-1.962-1.439.879-1.439 1.962.644 1.962 1.439 1.962zm-3.204 1.362c-.026-.307-.131 5.218 6.063 5.551 6.066-.25 6.066-5.551 6.066-5.551-6.078 1.416-12.129 0-12.129 0zm11.363 1.108s-.669 1.959-5.051 1.959c-3.505 0-5.388-1.164-5.607-1.959 0 0 5.912 1.055 10.658 0zM11.804 1.011C5.609 1.011.978 6.033.978 12.228s4.826 10.761 11.021 10.761S23.02 18.423 23.02 12.228c.001-6.195-5.021-11.217-11.216-11.217zM12 21.354c-5.273 0-9.381-3.886-9.381-9.159s3.942-9.548 9.215-9.548 9.548 4.275 9.548 9.548c-.001 5.272-4.109 9.159-9.382 9.159zm3.108-9.751c.795 0 1.439-.879 1.439-1.962s-.644-1.962-1.439-1.962-1.439.879-1.439 1.962.644 1.962 1.439 1.962z"></path></svg>
-                            </div>
                             <div class="flex-1 mx-4">
-                                <input class="w-full border rounded px-2 py-2" type="text"/>
+                              <input class="w-full border rounded px-2 py-2" type="text" id="body" wire:model="body" placeholder="Write your Message..." required />
                             </div>
                             <div>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#263238" fill-opacity=".45" d="M11.999 14.942c2.001 0 3.531-1.53 3.531-3.531V4.35c0-2.001-1.53-3.531-3.531-3.531S8.469 2.35 8.469 4.35v7.061c0 2.001 1.53 3.531 3.53 3.531zm6.238-3.53c0 3.531-2.942 6.002-6.237 6.002s-6.237-2.471-6.237-6.002H3.761c0 4.001 3.178 7.297 7.061 7.885v3.884h2.354v-3.884c3.884-.588 7.061-3.884 7.061-7.885h-2z"></path></svg>
+                               <button type="submit"
+              class="px-6 py-2.5 min-w-[170px] rounded-full cursor-pointer text-white text-sm tracking-wider font-medium border-0 outline-0 bg-blue-700 hover:bg-blue-800">Send</button>
+            </form>
                             </div>
                         </div>
                     </div>
