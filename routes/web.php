@@ -1,28 +1,29 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\V1\AuthController;
-use App\Http\Controllers\UserProfileController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\AboutUsController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\FavouriteController;
+use App\Http\Controllers\CollectionPageController;
 
 // FRONTEND NFT CONTROLLERS
-use App\Http\Controllers\Web\CollectionController as WebCollection;
-use App\Http\Controllers\Web\NftController as WebNft;
-use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\Web\CartController as WebCartController;
 use App\Http\Controllers\Web\CheckoutController as WebCheckoutController;
-use App\Http\Controllers\Web\InventoryController;
-use App\Http\Controllers\AboutUsController;
-use App\Http\Controllers\ProductsController;
-use App\Http\Controllers\CollectionPageController;
+use App\Http\Controllers\Web\CollectionController as WebCollection;
 use App\Http\Controllers\Web\FavouritePageController;
-use App\Http\Controllers\Api\V1\FavouriteController;
+use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\Web\InventoryController;
+use App\Http\Controllers\Web\NftController as WebNft;
 
 
 // MODELS
 use App\Models\Order;
-use App\Http\Controllers\ContactController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 
 // ------------------------------
@@ -138,8 +139,13 @@ Route::middleware('auth')->group(function () {
 Route::post('send-email', [ContactController::class, 'sendEmail'])->name('send.email');
 Route::livewire('/chat/ticket/{query}', 'pages::chat.ticket.index')
     ->name('chat.ticket');
-Route::livewire('/chat/user/index', 'pages::chat.user.index')
+Route::livewire('/chat/user/{user}/{conversation}', 'pages::chat.user.index')
     ->name('chat.user');
+
+    Route::post('/conversations/start/{listing}', [ConversationController::class, 'start'])
+    ->middleware('auth')
+    ->name('conversations.start');
+
 
 //ADMIN ROUTES 
 Route::middleware(['auth', 'admin'])->group(function () {

@@ -14,7 +14,14 @@
     <a href="/pricing">Pricing</a>
     <a href="/contactUs">Contact Us</a>
     @auth
-    <a href="{{ url('chat/user/index') }}">Chats</a>
+    @php
+    $user = auth()->user();
+    $firstConversation = $user->conversations()->first();
+    $conversationId = $firstConversation?->id ?? 0; // fallback if none exist
+@endphp
+    <a href="{{ url("chat/user/{$user->id}/{$conversationId}") }}">
+    Chats
+</a>
 @endauth
   </div>
 
