@@ -15,7 +15,7 @@ use App\Http\Controllers\Api\V1\QuotesController;
 use App\Http\Controllers\Api\V1\PriceController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\AdminNftController;
-
+use App\Http\Controllers\Api\V1\ReviewController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -35,7 +35,9 @@ Route::prefix('v1')->group(function () {
     Route::post('quotes/bulk', [QuotesController::class, 'bulk']);
     Route::get('convert', [PriceController::class, 'convert']);
     Route::post('register', [AuthController::class, 'register']);
-
+    Route::post('/reviews', [ReviewController::class, 'store']);
+Route::get('/reviews/high', [ReviewController::class, 'highRated']);
+    
     // Authenticated
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
@@ -62,6 +64,11 @@ Route::prefix('v1')->group(function () {
         // Admin
         Route::prefix('admin')->group(function () {
             Route::post('nfts', [AdminNftController::class, 'store']);
+
+            Route::get('/reviewUs', function () {
+    return view('reviewUs');
+});
+
         });
     });
 });

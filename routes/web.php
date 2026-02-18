@@ -169,4 +169,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     
     // Save the changes
     Route::put('/admin/users/{id}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+
+});
+
+ // Reviews Management
+    Route::get('/reviewUs', function () {
+    return view('reviewUs');
 });
