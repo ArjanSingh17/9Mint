@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,7 +26,7 @@
         @isset($slot)
         {{ $slot }}
     @endisset
-        @yield('content') 
+    @yield('content') 
     </main>
 
     {{-- Shared footer --}}
@@ -41,5 +42,33 @@
 
     @stack('scripts')
      @livewireScripts
+<<<<<<< HEAD
+=======
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleButton = document.getElementById("theme-toggle");
+        const themeIcon = document.getElementById("theme-icon");
+        const savedTheme = localStorage.getItem("theme");
+
+        if (savedTheme === "light") {
+            document.documentElement.classList.add("light-mode");
+            if (themeIcon) themeIcon.textContent = "☀️";
+        }else {
+            document.documentElement.classList.remove("light-mode");
+            if (themeIcon) themeIcon.textContent = "🌙"
+        }
+
+        if (toggleButton) {
+            toggleButton.addEventListener("click", function () {
+                document.documentElement.classList.toggle("light-mode");
+                const isLight = document.documentElement.classList.contains("light-mode");
+                localStorage.setItem("theme", isLight ? "light" : "dark");
+                if (themeIcon) themeIcon.textContent = isLight ? "☀️" : "🌙";
+            });
+        }
+    });               
+    </script>
+>>>>>>> 80475b33 (Adding the final light and dark mode bits)
 </body>
 </html>
