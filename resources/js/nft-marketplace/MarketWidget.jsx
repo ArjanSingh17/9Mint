@@ -145,7 +145,14 @@ export default function MarketWidget({ slug, currencies = [], defaultCurrency = 
         return (
             <div className="nft-market__row" key={listing.listing_id}>
                 <div className="nft-market__cell name">
-                    <strong>{listing.seller}</strong>
+                   {listing.listing_id && (
+<form method="POST" action={`/conversations/start/${listing.listing_id}`}>
+    <input type="hidden" name="_token" value={csrfToken} />
+    <button type="submit" className="hover:text-blue-500 transition cursor-pointer">
+        <strong>{listing.seller}</strong>
+    </button>
+</form>
+)}
                     <span>Listing #{listing.listing_id}</span>
                 </div>
                 <div className="nft-market__cell price">{price}</div>

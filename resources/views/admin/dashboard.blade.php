@@ -11,6 +11,7 @@
         <li><a href="#">Manage Inventory (Coming Soon)</a></li>
         <li><a href="#">Manage Users (Coming Soon)</a></li>
         <li><a href="#">View Orders (Coming Soon)</a></li>
+        <li><a href="tickets">View Tickets</a></li>
     </ul>
 </body>
 </html>
