@@ -3,14 +3,9 @@
 use App\Http\Controllers\AboutUsController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\V1\AuthController;
-<<<<<<< HEAD
-use App\Http\Controllers\Api\V1\FavouriteController;
-use App\Http\Controllers\CollectionPageController;
-=======
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AdminController;
->>>>>>> 88fcb052 (feat(admin): Added Admin Middleware, Dashboard, and User Management)
 
 // FRONTEND NFT CONTROLLERS
 use App\Http\Controllers\ContactController;
