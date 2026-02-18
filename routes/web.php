@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\ProductsController;
-use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\Web\CartController as WebCartController;
 use App\Http\Controllers\Web\CheckoutController as WebCheckoutController;
 use App\Http\Controllers\Web\CollectionController as WebCollection;
