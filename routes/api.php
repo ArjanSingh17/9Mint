@@ -22,7 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::prefix('v1')->group(function () {
     // Public
-    Route::get('health', fn () => ['ok' => true]);
+    Route::get('health', fn() => ['ok' => true]);
     Route::get('collections', [CollectionController::class, 'index']);
     Route::get('collections/{slug}', [CollectionController::class, 'show']);
     Route::get('nfts', [NftController::class, 'index']);
@@ -60,8 +60,16 @@ Route::prefix('v1')->group(function () {
         Route::delete('listings/{id}', [ListingsController::class, 'destroy']);
 
         // Admin
-        Route::prefix('admin')->group(function () {
-            Route::post('nfts', [AdminNftController::class, 'store']);
+
+        // This checks if they are logged in
+        Route::middleware('auth:sanctum')->group(function () {
+
+            // This checks if they are ALSO an admin
+            Route::prefix('admin')
+                ->middleware('admin') // <--- This adds the second layer of security
+                ->group(function () {
+                    Route::post('nfts', [AdminNftController::class, 'store']);
+                });
         });
     });
 });
