@@ -27,8 +27,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
-        'wallet_address',
+
     ];
 
     /**
@@ -44,8 +43,7 @@ class User extends Authenticatable
     /**
      * Get the attributes that should be cast.
      *
-     * @return ar
-ray<string, string>
+     * @return array<string, string>
      */
     protected function casts(): array
     {
@@ -90,6 +88,6 @@ ray<string, string>
      */
     public function receivesBroadcastNotificationsOn(): string
     {
-        return 'users.'.$this->id;
+        return 'users.' . $this->id;
     }
 }

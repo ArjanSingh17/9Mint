@@ -29,11 +29,22 @@ use Illuminate\Support\Facades\Route;
 // ------------------------------
 // AUTH (GUEST)
 // ------------------------------
+/*
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/login', [AuthController::class, 'loginWeb']);
     Route::post('/register', [AuthController::class, 'registerWeb']);
+});
+*/
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    
+    // 'throttle:6,1' -> allows 6 tries per 1 minute
+    Route::post('/login', [AuthController::class, 'loginWeb'])->middleware('throttle:6,1');
+    
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'registerWeb']); // You can add it here too!
 });
 
 
