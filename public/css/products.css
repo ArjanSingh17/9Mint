@@ -1,10 +1,11 @@
 body {
-    background-color : rgb(4, 4, 87);
+    background-color : var(--bg-main);
+    color: var(--text-main);
 }
 
   h1{
     text-align: center;
-    color: white;
+    color: var(--text-main);
   }  
 
  
@@ -16,12 +17,12 @@ nav ul {
 
 nav ul li a {
     text-decoration: none;
-    color: black;
+    color: var(--nav-text, black);
     font-weight: 500;
 }
 
 nav ul li a:hover {
-    color: grey;
+    color: var(--link-hover, grey);
 }
 
 #NFT_collections {
@@ -34,13 +35,13 @@ nav ul li a:hover {
     font-size: 3rem;
     text-align: center;
     width: 100%;
-    color: white;
+    color: var(--text-main);
 }
 
 /* Single card style used for all collections, similar to old Glossy/Superhero boxes */
 .collection-card {
-    background-color: black;
-    color: white;
+    background-color: var(--card-bg, black);
+    color: var(--text-main, white);
     text-align: center;
     padding: 20px;
     border-radius: 10px;
@@ -56,6 +57,7 @@ nav ul li a:hover {
 .collection-stock {
     margin-top: 8px;
     font-size: 0.95rem;
+    color: var(--subtext-color, rgba(255, 255, 255, 0.7));
 }
 
 .collection-image-wrapper {
