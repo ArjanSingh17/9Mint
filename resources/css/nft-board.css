@@ -515,13 +515,4 @@ body.dark-mode {
     background: rgba(255, 255, 255, 0.10);
 }
 
-body.dark-mode .nft-board__title,
-body.dark-mode .nft-board__subtitle,
-body.dark-mode .nft-board__hint-text,
-body.dark-mode .nft-board__info-name,
-body.dark-mode .nft-board__info-collection,
-body.dark-mode .nft-board__info-stock,
-body.dark-mode .nft-board__info-price-single,
-body.dark-mode .nft-board__info-price-size {
-    color: #f0f0f0;
-}
+
