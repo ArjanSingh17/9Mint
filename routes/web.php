@@ -20,6 +20,7 @@ use App\Http\Controllers\Web\FavouritePageController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\InventoryController;
 use App\Http\Controllers\Web\NftController as WebNft;
+use App\Http\Controllers\Web\PasswordResetController;
 
 // MODELS
 use App\Models\Order;
@@ -36,6 +37,19 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     // Consider adding throttle here too if you're worried about bot registrations
     Route::post('/register', [AuthController::class, 'registerWeb']); 
+    // Forgot Password Routes
+    Route::get('/forgot-password', [PasswordResetController::class, 'showLinkRequestForm'])
+        ->name('password.request');
+
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])
+        ->name('password.email');
+
+    // Reset Password Routes
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])
+        ->name('password.reset');
+
+    Route::post('/reset-password', [PasswordResetController::class, 'reset'])
+        ->name('password.update');
 });
 
 

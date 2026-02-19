@@ -35,8 +35,9 @@
         <button type="submit">Login</button>
       </form>
 
-      <a class="forgot-password" href="#">Forgot Password?</a>
-    </div>
+     <a class="forgot-password" href="{{ route('password.request') }}" style="display: block; text-align: center; margin-top: 15px; color: #555; text-decoration: none; font-size: 0.9rem;">
+    Forgot Password?
+</a>
 
     {{-- Register --}}
     <div class="auth-form">
