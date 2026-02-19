@@ -1,12 +1,8 @@
-@props(['url'])
 <tr>
 <td class="header">
 <a href="{{ $url }}" style="display: inline-block;">
-@if (trim($slot) === 'Laravel')
-<img src="https://laravel.com/img/notification-logo-v2.1.png" class="logo" alt="Laravel Logo">
-@else
-{!! $slot !!}
-@endif
+    
+    <img src="https://raw.githubusercontent.com/ArjanSingh17/9Mint/main/public/images/9mint.png" alt="9Mint Logo" style="height: 70px; width: auto; max-width: 100%;">
 </a>
 </td>
 </tr>
