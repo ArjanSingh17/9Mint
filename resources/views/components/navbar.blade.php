@@ -27,6 +27,13 @@
 
   {{-- Cart/auth --}}
   <div class="nav-auth">
+    <button id="theme-toggle" type="button" class="nav-btn" style="margin-right:10px;">
+        <span id="theme-icon">🌙</span>
+    </button>
+
+    <a href="/cart">
+        <button class="basket-btn">
+
     @php
       $cartCount = 0;
       $walletBalances = collect();

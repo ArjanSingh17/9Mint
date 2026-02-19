@@ -39,7 +39,7 @@ html.light-mode {
 /* Navbar */
 .navbar {
     width: 100%;
-    background-color: white;
+    background-color: var(--nav-bg);
     padding: 10px 16px; /* tweak spacing */
     box-sizing: border-box;
     display: flex;
@@ -69,7 +69,7 @@ html.light-mode {
 
 .nav-links a {
     text-decoration: none;
-    color: black;
+    color: var(--nav-text);
     font-weight: 500;
     font-size: 16px;
     transition: color 0.3s;
@@ -118,8 +118,8 @@ html.light-mode {
 
 .nav-btn {
     padding: 8px 16px; /* tweak size */
-    background: black;
-    color: white;
+    background: var(--button-bg);
+    color: (--text-main);
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -129,7 +129,7 @@ html.light-mode {
 }
 
 .nav-btn:hover {
-    background: #333;
+    background: var(--button-hover-bg);
 }
 
 html {

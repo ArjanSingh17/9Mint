@@ -4,6 +4,7 @@ use App\Http\Controllers\AboutUsController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\CollectionPageController;
 use Illuminate\Http\Request;
 
 // FRONTEND NFT CONTROLLERS
@@ -21,7 +22,6 @@ use App\Http\Controllers\Web\NftController as WebNft;
 
 // MODELS
 use App\Models\Order;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 

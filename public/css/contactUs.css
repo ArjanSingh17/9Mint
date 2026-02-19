@@ -258,7 +258,7 @@ p{
   border: none;
   border-radius: 10px;
   font-size: 18px;
-  cursor: not-allowed;     /* because it's disabled for now */
+  cursor: not-allowed;     
   opacity: 0.6;
   margin-top: 10px;
 }
@@ -267,7 +267,6 @@ p{
   transform: scale(0.98);
 }
 
-/* Responsive styling */
 @media (max-width: 600px) {
   .checkout-container {
     padding: 15px;
@@ -290,7 +289,6 @@ p{
     }
 }
 
-/* adjusting sizes for mobile devices*/
 .contact-page-container > .flex{
   display: flex;
   justify-content: space-between;
@@ -334,4 +332,45 @@ p{
   .tickets-section .rounded, .contactUs-form {
     width: 100%;
   }
+}
+
+.tickets-section {
+  background-color: var(--card-bg);
+  color: var(--text-main);
+  border-radius: 10px;
+  padding: 20px;
+  overflow-x: auto;
+  transition: background-color 0.3s ease, color 0.2s ease;
+}
+
+.tickets-section table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--card-bg);
+  color: var(--text-main);
+}
+
+.tickets-section thead {
+  background-color: var(--section-bg);
+}
+
+.tickets-section th,
+.tickets-section td {
+  padding: 12px;
+  text-align: left;
+  color: var(--text-main);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+html.light-mode .tickets-section th,
+html.light-mode .tickets-section td {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.tickets-section tr:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+html.light-mode .tickets-section tr:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
