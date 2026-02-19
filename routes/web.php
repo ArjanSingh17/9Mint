@@ -1,37 +1,56 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AboutUsController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\V1\AuthController;
+<<<<<<< HEAD
+use App\Http\Controllers\Api\V1\FavouriteController;
+use App\Http\Controllers\CollectionPageController;
+=======
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Http\Request;
+use App\Http\Controllers\AdminController;
+>>>>>>> 88fcb052 (feat(admin): Added Admin Middleware, Dashboard, and User Management)
 
 // FRONTEND NFT CONTROLLERS
-use App\Http\Controllers\Web\CollectionController as WebCollection;
-use App\Http\Controllers\Web\NftController as WebNft;
-use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\Web\CartController as WebCartController;
 use App\Http\Controllers\Web\CheckoutController as WebCheckoutController;
-use App\Http\Controllers\Web\InventoryController;
-use App\Http\Controllers\AboutUsController;
-use App\Http\Controllers\ProductsController;
-use App\Http\Controllers\CollectionPageController;
+use App\Http\Controllers\Web\CollectionController as WebCollection;
 use App\Http\Controllers\Web\FavouritePageController;
-use App\Http\Controllers\Api\V1\FavouriteController;
+use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\Web\InventoryController;
+use App\Http\Controllers\Web\NftController as WebNft;
 
 
 // MODELS
 use App\Models\Order;
-use App\Http\Controllers\ContactController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 
 // ------------------------------
 // AUTH (GUEST)
 // ------------------------------
+/*
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/login', [AuthController::class, 'loginWeb']);
     Route::post('/register', [AuthController::class, 'registerWeb']);
+});
+*/
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    
+    // 'throttle:6,1' -> allows 6 tries per 1 minute
+    Route::post('/login', [AuthController::class, 'loginWeb'])->middleware('throttle:6,1');
+    
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'registerWeb']); // You can add it here too!
 });
 
 
@@ -126,7 +145,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/inventory/listings/{listing}', [InventoryController::class, 'destroy'])->name('inventory.listing.destroy');
 
     // view and update details
-  //  Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');
+    //  Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');
     // Handle the form submission to update the profile
     //Route::patch('/profile', [UserProfileController::class, 'updateSelf'])->name('profile.update');
 
@@ -134,6 +153,54 @@ Route::middleware('auth')->group(function () {
     //Route::patch('/profile/password', [UserProfileController::class, 'updatePassword'])->name('password.update');
 });
 
- Route::post('send-email',[ContactController::class,'sendEmail'])->name('send.email');
+Route::post('send-email', [ContactController::class, 'sendEmail'])->name('send.email');
+<<<<<<< HEAD
+Route::livewire('/chat/ticket/{query}', 'pages::chat.ticket.index')
+    ->name('chat.ticket');
+Route::livewire('/chat/user/{user}/{conversation}', 'pages::chat.user.index')
+    ->name('chat.user');
+
+    Route::post('/conversations/start/{listing}', [ConversationController::class, 'start'])
+    ->middleware('auth')
+    ->name('conversations.start');
+
+=======
 Route::livewire('/chat/{query}', 'pages::chat.index')
     ->name('chat');
+>>>>>>> 88fcb052 (feat(admin): Added Admin Middleware, Dashboard, and User Management)
+
+//ADMIN ROUTES 
+Route::middleware(['auth', 'admin'])->group(function () {
+
+    // Dashboard
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+
+<<<<<<< HEAD
+    //tickets
+    Route::livewire('/admin/tickets', 'pages::tickets');
+    
+
+=======
+>>>>>>> 88fcb052 (feat(admin): Added Admin Middleware, Dashboard, and User Management)
+    // Inventory
+    Route::get('/admin/inventory', [AdminController::class, 'inventory'])->name('admin.inventory');
+
+    // User Management
+    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+
+    //Show the edit form
+    Route::get('/admin/users/{id}/edit', [AdminController::class, 'editUser'])->name('admin.users.edit');
+    
+    // Save the changes
+    Route::put('/admin/users/{id}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+<<<<<<< HEAD
+
+});
+
+ // Reviews Management
+    Route::get('/reviewUs', function () {
+    return view('reviewUs');
+=======
+>>>>>>> 88fcb052 (feat(admin): Added Admin Middleware, Dashboard, and User Management)
+});

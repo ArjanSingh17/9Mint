@@ -15,14 +15,14 @@ use App\Http\Controllers\Api\V1\QuotesController;
 use App\Http\Controllers\Api\V1\PriceController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\AdminNftController;
-
+use App\Http\Controllers\Api\V1\ReviewController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
 Route::prefix('v1')->group(function () {
     // Public
-    Route::get('health', fn () => ['ok' => true]);
+    Route::get('health', fn() => ['ok' => true]);
     Route::get('collections', [CollectionController::class, 'index']);
     Route::get('collections/{slug}', [CollectionController::class, 'show']);
     Route::get('nfts', [NftController::class, 'index']);
@@ -35,7 +35,9 @@ Route::prefix('v1')->group(function () {
     Route::post('quotes/bulk', [QuotesController::class, 'bulk']);
     Route::get('convert', [PriceController::class, 'convert']);
     Route::post('register', [AuthController::class, 'register']);
-
+    Route::post('/reviews', [ReviewController::class, 'store']);
+Route::get('/reviews/high', [ReviewController::class, 'highRated']);
+    
     // Authenticated
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
@@ -60,8 +62,16 @@ Route::prefix('v1')->group(function () {
         Route::delete('listings/{id}', [ListingsController::class, 'destroy']);
 
         // Admin
-        Route::prefix('admin')->group(function () {
-            Route::post('nfts', [AdminNftController::class, 'store']);
+
+        // This checks if they are logged in
+        Route::middleware('auth:sanctum')->group(function () {
+
+            // This checks if they are ALSO an admin
+            Route::prefix('admin')
+                ->middleware('admin') // <--- This adds the second layer of security
+                ->group(function () {
+                    Route::post('nfts', [AdminNftController::class, 'store']);
+                });
         });
     });
 });

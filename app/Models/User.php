@@ -27,8 +27,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
-        'wallet_address',
+
     ];
 
     /**
@@ -44,8 +43,7 @@ class User extends Authenticatable
     /**
      * Get the attributes that should be cast.
      *
-     * @return ar
-ray<string, string>
+     * @return array<string, string>
      */
     protected function casts(): array
     {
@@ -76,17 +74,20 @@ ray<string, string>
         return $this->hasMany(Wallet::class);
     }
 
-     public function conversations()
-    {
-        
-        return $this->hasMany(Conversation::class,'sender_id')->orWhere('receiver_id',$this->id)->whereNotDeleted();
-    }
+    public function conversations(): HasMany
+{
+    return $this->hasMany(Conversation::class, 'sender_id')
+        ->where(function($query) {
+            $query->where('sender_id', $this->id)
+                  ->orWhere('receiver_id', $this->id);
+        });
+}
 
     /**
      * The channels the user receives notification broadcasts on.
      */
     public function receivesBroadcastNotificationsOn(): string
     {
-        return 'users.'.$this->id;
+        return 'users.' . $this->id;
     }
 }
