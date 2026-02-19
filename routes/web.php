@@ -119,7 +119,7 @@ Route::middleware('auth')->group(function () {
     })->name('orders.index');
 
     Route::post('/cart', [WebCartController::class, 'store'])->name('cart.store');
-    支撑::delete('/cart/{id}', [WebCartController::class, 'destroy'])->name('cart.destroy');
+    Route::delete('/cart/{id}', [WebCartController::class, 'destroy'])->name('cart.destroy');
     Route::post('/orders', [WebCheckoutController::class, 'store'])->name('orders.store');
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
     Route::post('/inventory/listings', [InventoryController::class, 'store'])->name('inventory.listing.store');
