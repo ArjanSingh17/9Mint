@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,8 +41,6 @@
 
     @stack('scripts')
      @livewireScripts
-<<<<<<< HEAD
-=======
 
     <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -69,6 +66,5 @@
         }
     });               
     </script>
->>>>>>> 80475b33 (Adding the final light and dark mode bits)
 </body>
 </html>
