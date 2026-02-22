@@ -3,8 +3,14 @@
 use App\Http\Controllers\AboutUsController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\V1\AuthController;
+<<<<<<< HEAD
 use App\Http\Controllers\Api\V1\FavouriteController;
 use App\Http\Controllers\CollectionPageController;
+=======
+use App\Http\Controllers\UserProfileController;
+use Illuminate\Http\Request;
+use App\Http\Controllers\AdminController;
+>>>>>>> 88fcb052 (feat(admin): Added Admin Middleware, Dashboard, and User Management)
 
 // FRONTEND NFT CONTROLLERS
 use App\Http\Controllers\ContactController;
@@ -29,11 +35,22 @@ use Illuminate\Support\Facades\Route;
 // ------------------------------
 // AUTH (GUEST)
 // ------------------------------
+/*
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/login', [AuthController::class, 'loginWeb']);
     Route::post('/register', [AuthController::class, 'registerWeb']);
+});
+*/
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    
+    // 'throttle:6,1' -> allows 6 tries per 1 minute
+    Route::post('/login', [AuthController::class, 'loginWeb'])->middleware('throttle:6,1');
+    
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'registerWeb']); // You can add it here too!
 });
 
 
@@ -137,6 +154,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::post('send-email', [ContactController::class, 'sendEmail'])->name('send.email');
+<<<<<<< HEAD
 Route::livewire('/chat/ticket/{query}', 'pages::chat.ticket.index')
     ->name('chat.ticket');
 Route::livewire('/chat/user/{user}/{conversation}', 'pages::chat.user.index')
@@ -146,6 +164,10 @@ Route::livewire('/chat/user/{user}/{conversation}', 'pages::chat.user.index')
     ->middleware('auth')
     ->name('conversations.start');
 
+=======
+Route::livewire('/chat/{query}', 'pages::chat.index')
+    ->name('chat');
+>>>>>>> 88fcb052 (feat(admin): Added Admin Middleware, Dashboard, and User Management)
 
 //ADMIN ROUTES 
 Route::middleware(['auth', 'admin'])->group(function () {
@@ -153,10 +175,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Dashboard
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
 
+<<<<<<< HEAD
     //tickets
     Route::livewire('/admin/tickets', 'pages::tickets');
     
 
+=======
+>>>>>>> 88fcb052 (feat(admin): Added Admin Middleware, Dashboard, and User Management)
     // Inventory
     Route::get('/admin/inventory', [AdminController::class, 'inventory'])->name('admin.inventory');
 
@@ -169,4 +194,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     
     // Save the changes
     Route::put('/admin/users/{id}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+<<<<<<< HEAD
+
+});
+
+ // Reviews Management
+    Route::get('/reviewUs', function () {
+    return view('reviewUs');
+=======
+>>>>>>> 88fcb052 (feat(admin): Added Admin Middleware, Dashboard, and User Management)
 });

@@ -7,6 +7,7 @@
 @endpush
 
 @section('content')
+<div class="about-us-container">
       {{-- Hero --}}
       <section class="Groupname">
         <h1>9 MINT</h1>
@@ -55,7 +56,7 @@
                 $team = [
                     [ "name" => "Naomi", "role" => "Team mediator and Front end engineer" ],
                     [ "name" => "Arjan", "role" => "Team Leader and Back end engineer" ],
-                    [ "name" => "Maliyka", "role" => "Front end engineer leader" ],
+                    [ "name" => "Maliyka", "role" => "Front end engineer leader and respectful behaviourist" ],
                     [ "name" => "Kalil", "role" => "Backend developer and Proofreader" ],
                     [ "name" => "Dariusz", "role" => "Backend engineer and project" ],
                     [ "name" => "Hamza", "role" => "Team creative and frontend developer" ],

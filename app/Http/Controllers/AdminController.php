@@ -64,5 +64,4 @@ class AdminController extends Controller
 
         return redirect()->route('admin.users')->with('success', 'User updated successfully.');
     }
-
 }

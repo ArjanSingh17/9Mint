@@ -482,3 +482,40 @@
     color: rgba(255, 255, 255, 0.4);
     font-size: 0.85rem;
 }
+<<<<<<< HEAD
+=======
+
+body.dark-mode {
+    color: #f0f0f0;
+    background-color: #0a0a14;
+    transition: background-color 0.2s ease, color 0.3s ease;
+}
+
+.nft-board__theme-toggle {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    border-radius: 6px;
+    color: #f0f0f0;
+    cursor: pointer;
+    padding: 0.35rem 0.75rem;
+    z-index: 10;
+    background-color: rgba(255, 255, 255, 0.08);
+    font-weight: 600;
+    font-size: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: background-color 0.2s ease, color 0.3s ease;
+}
+
+.nft-board__theme-toggle:focus-visible {
+    outline-offset: 2px;
+    outline: 2px solid rgba(125, 80, 229, 0.9);
+}
+
+.nft-board__theme-toggle:hover {
+    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.10);
+}
+
+
+>>>>>>> 80475b33 (Adding the final light and dark mode bits)

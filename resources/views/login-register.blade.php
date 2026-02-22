@@ -7,6 +7,7 @@
 @endpush
 
 @section('content')
+<div class="auth-page-container">
   <div class="auth-section">
 
     {{-- Login --}}
@@ -61,7 +62,7 @@
         <button type="submit">Register</button>
       </form>
     </div>
-
+</div>
   </div>
 @endsection
 

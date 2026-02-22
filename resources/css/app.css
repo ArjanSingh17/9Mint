@@ -4,6 +4,37 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+:root {
+   --bg-main: #040457;
+   --text-main: #ffffff;
+   --nav-bg: #111827;
+   --nav-text: #ffffff;
+   --card-bg: #1f2937;
+   --section-bg: #111827;
+   --overlay-bg: rgba(8, 10, 20, 0.85);
+   --button-bg: #6d28d9;
+   --button-hover-bg: #7c3aed;
+   --link-hover: #307ea8;
+   --basket-badge-bg: #ff4d4f;
+   --subtext-color: rgba(255, 255, 255, 0.7);
+   --price-color: #d9b0ff;
+}
+
+html.light-mode {
+    --bg-main: #9fd0e9;
+    --text-main: #000000;
+    --nav-bg: #7ba0e1;
+    --nav-text: #000000;
+    --card-bg: #8cc3d2;
+    --section-bg: #f5f5f5; 
+    --overlay-bg: rgba(255, 255, 255, 0.85);
+    --button-bg: #ffffff;
+    --button-hover-bg: #e5e5e5;
+    --link-hover: #0b60a0;
+    --basket-badge-bg: #ff4d4f;
+    --subtext-color: rgba(0,0,0,0.7);
+    --price-color: #8b5cf6;
+}
 
 /* Navbar */
 .navbar {
@@ -101,20 +132,10 @@
     background: #333;
 }
 
-.nav-btn.profile-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    border-radius: 50%;
-}
-
-/* Base */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: rgb(4, 4, 87); /* tweak bg */
+html {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    transition: background-color 0.2s ease, color 0.3s ease;
 }
 
 /* Legacy logo */
@@ -321,9 +342,10 @@ p {
     width: 100%;
     padding: 8px 10px;
     border-radius: 8px;
-    border: 1px solid #2b2f4a;
-    background: #0b1028;
-    color: #fff;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text-main);
+    transition: background 0.3s, color 0.3s;
 }
 
 .inventory-card__button {
@@ -768,4 +790,249 @@ p {
     display: block;
     font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.6);
+}
+
+    .auth-form {
+        width: 90% !important;
+        max-width: 400px;
+    }
+
+.homepage-container {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 40px;
+  text-align: center;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.light-mode .homepage-container {
+    color: white;
+    background-color: #2d2d2d;
+}
+.homepage-title {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.homepage-subtitle {
+  font-size: 1.25rem;
+  margin-bottom: 40px;
+}
+
+.homepage-buttons a {
+  display: inline-block;
+  padding: 12px 24px;
+  margin: 0 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.homepage-buttons .primary-btn {
+  background-color: var(--button-bg);
+  color: var(--text-main);
+}
+
+.homepage-buttons .primary-btn:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.homepage-buttons .secondary-btn {
+  background-color: transparent;
+  border: 2px solid var(--button-bg);
+  color: var(--button-bg);
+}
+
+.homepage-buttons .secondary-btn:hover {
+  background-color: var(--button-bg);
+  color: var(--text-main);
+}
+
+html.light-mode .homepage-title,
+html.light-mode .homepage-subtitle {
+  color: #000000;
+}
+
+html.light-mode .primary-btn {
+  background-color: #3b82f6; 
+  color: #ffffff;
+}
+
+html.light-mode .primary-btn:hover {
+  background-color: #2563eb; 
+}
+
+html.light-mode .secondary-btn {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+html.light-mode .secondary-btn:hover {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.auth-page-container {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 60px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.auth-section {
+  display: flex;
+  gap: 50px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 900px;
+}
+
+.auth-form {
+  background-color: var(--card-bg);
+  color: var(--text-main);
+  padding: 35px;
+  border-radius: 14px;
+  width: 360px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.auth-form h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 24px;
+}
+
+.error-list {
+  background-color: rgba(255, 77, 79, 0.1);
+  border: 1px solid #ff4d4f;
+  color: #ff4d4f;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"] {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 2px solid var(--section-bg);
+  background-color: var(--card-bg);
+  color: var(--text-main);
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--button-bg);
+  box-shadow: 0 0 0 2px rgba(109, 40, 217, 0.2);
+}
+
+.remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  color: var(--subtext-color);
+}
+
+.auth-form button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--button-bg);
+  color: var(--text-main);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.1s ease;
+}
+
+.auth-form button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.auth-form button:active {
+  transform: scale(0.98);
+}
+
+.forgot-password {
+  display: block;
+  margin-top: 12px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--subtext-color);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+  color: var(--link-hover);
+}
+
+@media (max-width: 768px) {
+  .auth-section {
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .auth-form {
+    width: 90%;
+    max-width: 400px;
+  }
+}
+
+html.light-mode .auth-page-container {
+  --bg-main: #9fd0e9;
+  --card-bg: #333333;
+  --text-main: #ffffff;
+  --section-bg: #444444;
+}
+
+.auth-page-container {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 60px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.auth-page-container .auth-form button{
+  background-color: var(--card-bg);
+  color: var(--text-main);
+  padding: 35px;
+  border-radius: 14px;
+  width: 360px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  transition: background 0.3s ease, color 0.3s ease;
+  cursor: pointer;
+}
+
+.auth-page-container .auth-form input {
+  background-color: #555555;
+  color: #eee;
+  border: 2px solid #777777;
+  transition: all 0.2s ease;
+}
+
+.auth-page-container .auth-form input::placeholder {
+  color: #bbbbbb;
 }
