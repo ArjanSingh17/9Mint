@@ -14,15 +14,19 @@
     <a href="/pricing">Pricing</a>
     <a href="/contactUs">Contact Us</a>
     @auth
-    @php
+      @php
 $userId = auth()->id();
 
-$firstConversation = \App\Models\Conversation::where(function ($q) use ($userId) {
-    $q->where('sender_id', $userId)
-      ->orWhere('receiver_id', $userId);
-})->first();
+$firstConversation = \App\Models\Conversation::where('type', 'user')
+    ->where(function ($q) use ($userId) {
+        $q->where('sender_id', $userId)
+          ->orWhere('receiver_id', $userId);
+    })
+    ->latest()   
+    ->first();
 
 $conversationId = $firstConversation?->id ?? 0;
+
 @endphp
     <a href="{{ url("chat/user/{$userId}/{$conversationId}") }}">
     Chats
@@ -46,6 +50,9 @@ $conversationId = $firstConversation?->id ?? 0;
         }
       }
     @endphp
+     <button id="theme-toggle" class="nav-btn">
+        <span id="theme-icon">🌙</span>
+    </button>
     @auth
       @if($walletBalances->isNotEmpty())
         <div class="wallet-switcher" data-wallet-switcher>
