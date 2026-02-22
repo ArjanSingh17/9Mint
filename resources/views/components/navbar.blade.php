@@ -15,11 +15,16 @@
     <a href="/contactUs">Contact Us</a>
     @auth
     @php
-    $user = auth()->user();
-    $firstConversation = $user->conversations()->first();
-    $conversationId = $firstConversation?->id ?? 0; // fallback if none exist
+$userId = auth()->id();
+
+$firstConversation = \App\Models\Conversation::where(function ($q) use ($userId) {
+    $q->where('sender_id', $userId)
+      ->orWhere('receiver_id', $userId);
+})->first();
+
+$conversationId = $firstConversation?->id ?? 0;
 @endphp
-    <a href="{{ url("chat/user/{$user->id}/{$conversationId}") }}">
+    <a href="{{ url("chat/user/{$userId}/{$conversationId}") }}">
     Chats
 </a>
 @endauth
