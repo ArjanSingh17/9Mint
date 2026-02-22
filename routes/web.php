@@ -21,7 +21,6 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
 // ------------------------------
 // AUTH (GUEST)
 // ------------------------------
