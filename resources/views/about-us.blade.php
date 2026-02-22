@@ -74,9 +74,19 @@
             @endforeach
         </div>
       </section>
+      <!-- -- Reviews Slider -- -->
+<section class="reviews-section">
+    <h2 class="reviews-title">What Our Users Say</h2>
+
+   <div id="reviews-slider" class="reviews-slider">
+      <p id="reviews-loading">Loading reviews...</p>
+  </div>
+</section>
+
 @endsection
-
 @push('scripts')
-    @vite('resources/js/page-scripts/about-us-nft-grid-rotator.js')
+    @vite([
+        'resources/js/page-scripts/about-us-nft-grid-rotator.js',
+        'resources/js/page-scripts/about-us-reviews-slider.js'
+    ])
 @endpush
-

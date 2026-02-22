@@ -1036,3 +1036,47 @@ html.light-mode .auth-page-container {
 .auth-page-container .auth-form input::placeholder {
   color: #bbbbbb;
 }
+
+.reviews-section {
+    background: #0c0c4d;
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.reviews-title {
+    color: white;
+    font-size: 32px;
+    margin-bottom: 40px;
+}
+
+.reviews-slider {
+    max-width: 600px;
+    margin: auto;
+}
+
+.review-card {
+    background: white;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 30px;
+    border-radius: 16px;
+}
+
+.review-stars {
+    color: gold;
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+.review-text {
+    color: #555;
+    font-style: italic;
+}
+
+.review-name {
+    font-weight: bold;  
+    font-size: 18px;
+    margin-top: 15px;
+    color: #1a1a1a;
+}
+
