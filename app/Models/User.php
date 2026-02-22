@@ -90,4 +90,11 @@ class User extends Authenticatable
     {
         return 'users.' . $this->id;
     }
+
+           public function getOtherUsers()
+{
+    return User::where('id', '!=', auth()->id())
+        ->select('id', 'name', 'email') 
+        ->get();
+}
 }

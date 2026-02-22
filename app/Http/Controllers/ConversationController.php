@@ -53,5 +53,46 @@ return redirect()->route('chat.user', [
 
 
 }
+public function startConversation($receiverId)
+{
+    $senderId = auth()->id();
 
+    $existing = \App\Models\Conversation::where('type', 'user')
+        ->where(function ($q) use ($senderId, $receiverId) {
+            $q->where('sender_id', $senderId)->where('receiver_id', $receiverId);
+        })
+        ->orWhere(function ($q) use ($senderId, $receiverId) {
+            $q->where('sender_id', $receiverId)->where('receiver_id', $senderId);
+        })
+        ->first();
+
+    if (!$existing) {
+        $existing = \App\Models\Conversation::create([
+            'type'        => 'user',
+            'sender_id'   => $senderId,
+            'receiver_id' => $receiverId,
+        ]);
+    }
+
+    return redirect()->back();
+}
+public function enterConversation($receiverId)
+{
+    $senderId = auth()->id();
+
+    $conversation = \App\Models\Conversation::where('type', 'user')
+        ->where(function ($q) use ($senderId, $receiverId) {
+            $q->where('sender_id', $senderId)->where('receiver_id', $receiverId);
+        })
+        ->orWhere(function ($q) use ($senderId, $receiverId) {
+            $q->where('sender_id', $receiverId)->where('receiver_id', $senderId);
+        })
+        ->first();
+
+    if (!$conversation) {
+        abort(404, 'No conversation found.');
+    }
+
+    return redirect()->to("chat/user/{$senderId}/{$conversation->id}");
+}
 }

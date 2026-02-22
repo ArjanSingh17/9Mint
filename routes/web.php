@@ -5,14 +5,10 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\FavouriteController;
 use App\Http\Controllers\CollectionPageController;
-use App\Http\Controllers\UserProfileController;
-use Illuminate\Http\Request;
-
-
-// FRONTEND NFT CONTROLLERS
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\Web\CartController as WebCartController;
 use App\Http\Controllers\Web\CheckoutController as WebCheckoutController;
 use App\Http\Controllers\Web\CollectionController as WebCollection;
@@ -20,10 +16,9 @@ use App\Http\Controllers\Web\FavouritePageController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\InventoryController;
 use App\Http\Controllers\Web\NftController as WebNft;
-
-
-// MODELS
+use App\Models\Conversation;
 use App\Models\Order;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
@@ -59,6 +54,7 @@ Route::get('/pricing', fn() => view('pricing'));
 Route::livewire('/contactUs', 'pages::contact-us');
 Route::get('/contactUs/terms', fn() => view('terms-and-conditions'));
 Route::get('/contactUs/faqs', fn() => view('faqs'));
+Route::get('/users', function () {return view('users');})->middleware('auth');
 
 
 // ------------------------------
@@ -109,9 +105,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
     Route::get('/my-favourites', [FavouritePageController::class, 'index'])->name('favourites.index');
     Route::post('/nfts/{nft}/toggle-like', [FavouriteController::class, 'toggle'])->name('nfts.toggle');
-
+    Route::post('/chat/start/{receiverId}', [ConversationController::class, 'startConversation'])->middleware('auth')->name('chat.start');
     Route::patch('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
     Route::patch('/profile/password', [AuthController::class, 'updatePassword'])->name('password.update');
+    Route::get('/chat/enter/{receiverId}', [ConversationController::class, 'enterConversation'])->middleware('auth')->name('chat.enter');
 
     Route::get('/orders', function (Request $r) {
         $user = $r->user();

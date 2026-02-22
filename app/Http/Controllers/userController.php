@@ -41,4 +41,8 @@ class userController extends Controller
 
         return redirect('/test');
     }
+
+ 
+
+
 }
