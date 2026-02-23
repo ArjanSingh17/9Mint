@@ -54,6 +54,18 @@ return redirect()->route('chat.user', [
 
 
 }
+public function startConversation($receiverId)
+{
+    $senderId = auth()->id();
+
+    $existing = \App\Models\Conversation::where('type', 'user')
+        ->where(function ($q) use ($senderId, $receiverId) {
+            $q->where('sender_id', $senderId)->where('receiver_id', $receiverId);
+        })
+        ->orWhere(function ($q) use ($senderId, $receiverId) {
+            $q->where('sender_id', $receiverId)->where('receiver_id', $senderId);
+        })
+        ->first();
 
 public function startWithUser(User $user)
 {

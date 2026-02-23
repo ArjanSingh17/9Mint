@@ -258,7 +258,7 @@
 
 html {
     background-color: var(--bg-main);
-    color: var(--text-main);
+    /*color: var(--text-main);*/
     transition: background-color 0.2s ease, color 0.3s ease;
     scrollbar-gutter: auto;
 }

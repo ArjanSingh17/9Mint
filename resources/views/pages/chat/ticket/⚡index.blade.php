@@ -97,7 +97,7 @@ public function markAsRead()
 
 
 
-    return redirect(route('chat.user.index'));
+    return redirect(route('chat.ticket.index'));
 
     
     
@@ -281,84 +281,69 @@ public function getUserNameById(int $id)
                             </div>
                         </div>
 
-   <!-- Messages -->
-<div class="flex-1 overflow-auto"
-     style="background-color: #DAD3CC"
+    <!-- Messages -->
+<div class="flex-1 overflow-auto" 
+     style="background-color: #DAD3CC" 
      wire:poll.0.1s="loadMessages"
      id="chat-container"
-     x-data="{
-         scrollToBottom() {
-             this.$nextTick(() => {
-                 this.$el.scrollTop = this.$el.scrollHeight;
-             });
-         }
+     x-data="{ 
+         scrollToBottom() { 
+             this.$nextTick(() => { 
+                 this.$el.scrollTop = this.$el.scrollHeight; 
+             }); 
+         } 
      }"
      x-init="scrollToBottom(); $watch('$wire.loadedMessages', () => scrollToBottom())"
      @scroll-to-bottom.window="scrollToBottom()">
-
     <div class="py-2 px-3">
 
-        {{-- Date banner --}}
         <div class="flex justify-center mb-2">
             <div class="rounded py-2 px-4" style="background-color: #DDECF2">
                 <p class="text-sm uppercase">
-                    {{ \Carbon\Carbon::parse(optional($this->selectedConversation->ticket)->created_at)->format('jS F Y') }}
+                     {{ \Carbon\Carbon::parse($this->selectedConversation->ticket->created_at)->format('jS F Y') }}
                 </p>
             </div>
         </div>
 
         @foreach($loadedMessages as $message)
-
-            {{-- My message --}}
             @if($message->sender_id === auth()->id())
+                {{-- My message (right side) --}}
                 <div class="flex justify-end mb-2">
-                    <div class="rounded py-2 px-3 max-w-[45%] break-words"
-                         style="background-color: #E2F7CB">
-
+                    <div class="rounded py-2 px-3 max-w-[45%] break-words" style="background-color: #E2F7CB" >
                         <p class="text-sm mt-1">
-                            {{ $message->body }}
+                            {{$message->body}}
                         </p>
-
                         <p class="text-right text-xs text-grey-dark mt-1">
-                            {{ \Carbon\Carbon::parse($message->created_at)->format('g:i a') }}
-
+                            {{\Carbon\Carbon::parse($message->created_at)->format('g:i a') }}
                             @if($message->read_at)
-                                <span class="text-blue-500">✓✓</span>
-                            @else
-                                <span class="text-gray-400">✓</span>
-                            @endif
+                        <span class="text-blue-500">✓✓</span> {{-- Double check = read --}}
+                    @else
+                        <span class="text-gray-400">✓</span> {{-- Single check = sent --}}
+                    @endif
                         </p>
                     </div>
                 </div>
-
-            {{--Their message --}}
             @else
+                {{-- Their message (left side) --}}
                 <div class="flex mb-2">
-                    <div class="rounded py-2 px-3 max-w-[45%] break-words"
-                         style="background-color: #F2F2F2">
-
+                    <div class="rounded py-2 px-3 max-w-[45%] break-words" style="background-color: #F2F2F2">
                         <p class="text-sm text-emerald-600">
-                            @if(auth()->user()->role === 'admin')
-                                {{ $this->getUserNameById($message->sender_id) ?? 'User' }}
-                            @else
-                                Administrator
+                           @if(auth()->user()->role === 'admin')
+                             {{$this->getUserNameById($this->selectedConversation->sender_id)}}
+                            @else 
+                            Administrator
                             @endif
                         </p>
-
                         <p class="text-sm mt-1">
-                            {{ $message->body }}
+                            {{$message->body}}
                         </p>
-
                         <p class="text-right text-xs text-grey-dark mt-1">
-                            {{ \Carbon\Carbon::parse($message->created_at)->format('g:i a') }}
-                        </p>
-
+                            {{\Carbon\Carbon::parse($message->created_at)->format('g:i a') }}
+                        </p> 
                     </div>
                 </div>
             @endif
-
         @endforeach
-
     </div>
 </div>
 
