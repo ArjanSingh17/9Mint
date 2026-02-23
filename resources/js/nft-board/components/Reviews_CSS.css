@@ -1,0 +1,38 @@
+.reviews {
+    background-color: black;
+    padding: 60px 30px;
+    text-align: center;
+}
+
+.reviews-title {
+    color:white;
+    margin-bottom: 30px;
+    font-size: 25px;
+}
+
+.slider-card {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 30px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
+
+.stars-rating {
+    color: gold;
+    font-size: 22px;
+    margin-bottom: 12px;
+}
+
+.text-reviews {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.name-reviews {
+  font-weight: bold;
+  color: #333;
+}

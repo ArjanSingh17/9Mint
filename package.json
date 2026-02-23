@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "lint:theme": "node scripts/check-theme-hardcoded-colors.mjs"
     },
     "dependencies": {
         "react": "^19.0.0",

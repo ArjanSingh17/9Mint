@@ -1,0 +1,87 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+}
+
+.NFT-Card,
+.Duck-NFT,
+.Cat-NFT,
+.Donkey-NFT,
+.Giraffe-NFT,
+.Lobster-NFT,
+.Rooster-NFT,
+.Squirrel-NFT {
+    display: flex;
+    align-items: flex-start;
+    padding: 25px;
+    border-radius: 12px;
+    margin: 30px auto;
+    width: 90%;
+    max-width: 800px;
+    gap: 20px;
+    background: var(--surface-panel);
+    color: var(--text-main);
+    border: 1px solid var(--border-soft);
+}
+
+.nft-image {
+    height: auto;
+    width: 200px;
+    border: 2px solid var(--border-soft);
+    border-radius: 12px;
+}
+
+.nft-info {
+    flex: 1;
+    text-align: left;
+}
+
+.nft-out-of-stock,
+.nft-out-of-stock-message {
+    color: var(--danger);
+    font-weight: bold;
+}
+
+.small-size,
+.medium-size,
+.large-size,
+.size-option button {
+    color: var(--text-main);
+    background: var(--surface-muted);
+    padding: 8px 16px;
+    border-radius: 5px;
+    margin-right: 10px;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.small-size:hover,
+.medium-size:hover,
+.large-size:hover,
+.size-option button:hover {
+    background: var(--surface-chrome);
+}
+
+.Add-to-basket {
+    color: var(--text-inverse);
+    border: none;
+    margin-top: 20px;
+    padding: 12px 20px;
+    background: var(--button-bg);
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.Add-to-basket:hover {
+    background: var(--button-hover-bg);
+}
+
+.collection-title {
+    text-align: center;
+    color: var(--text-main);
+    margin-top: 20px;
+}

@@ -6,7 +6,8 @@
   --subtext-color: rgba(255,255,255,0.7);
 }
 
-.about-us-page-container {
+.about-us-page-container,
+.about-us-container {
   --bg-main: #040457;
   --card-bg: #c8c8c8f9;
   --text-main: #000000;
@@ -40,15 +41,16 @@
   transition: background-color 0.3s ease, color 0.2s ease;
 }
 
-html.light-mode .contact-page-container, 
-html.light-mode {
-  --bg-main: #9fd0e9;
+html.light-mode .contact-page-container,
+html.light-mode .about-us-page-container,
+html.light-mode .about-us-container {
+  --bg-main: #d9d9de;
   --button-text:rgb(255, 255, 255);
   --button-bg: #ffffff;
-  --section-bg: #cbc7c7;
+  --section-bg: #ffffff;
   --text-main: #000000;
-  --card-bg: #8cc3d2;
-  --accent-color: #494991;
+  --card-bg: #ffffff;
+  --accent-color: #222222;
 }
 .contactUs-section {
     display: flex;

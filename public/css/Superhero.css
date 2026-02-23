@@ -1,15 +1,16 @@
 body {
     margin: 0;
     padding: 0;
-    background-color: rgb(4, 4, 87);
+    background-color: var(--bg-main);
+    color: var(--text-main);
 }
 
 /* UNIFORM CARD STYLE (same as Glossy page) */
 .NFT-Card {
     display: flex;
-    color: white;
+    color: var(--text-main);
     align-items: flex-start;
-    background: black;
+    background: var(--card-bg);
     padding: 25px;
     border-radius: 12px;
     margin: 30px auto;
@@ -21,7 +22,7 @@ body {
 .nft-image {
     height: auto;
     width: 200px;
-    border: 2px solid white;
+    border: 2px solid var(--section-bg);
     border-radius: 12px;
 }
 
@@ -62,8 +63,8 @@ body {
 .medium-size,
 .large-size,
 .size-option button {
-    color: white;
-    background: #222;
+    color: var(--text-main);
+    background: var(--section-bg);
     padding: 8px 16px;
     border-radius: 5px;
     margin-right: 10px;
@@ -80,7 +81,7 @@ body {
 }
 
 .size-option button.selected {
-    border: 2px solid white;
+    border: 2px solid var(--section-bg);
     background: #444;
 }
 
@@ -118,6 +119,6 @@ body {
 /* Page Title */
 .collection-title {
     text-align: center;
-    color: white;
+    color: var(--text-main);
     margin-top: 20px;
 }

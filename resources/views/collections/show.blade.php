@@ -3,12 +3,7 @@
 @section('title', $collection->name)
 
 @push('styles')
-    {{-- Per-collection styles if needed --}}
-    @if ($collection->slug === 'glossy-collection')
-        <link rel="stylesheet" href="{{ asset('css/Glossy-collection.css') }}">
-    @elseif ($collection->slug === 'superhero-collection')
-        <link rel="stylesheet" href="{{ asset('css/Superhero.css?v=' . time()) }}">
-    @endif
+    @vite('resources/css/pages/collections-legacy.css')
 @endpush
 
 @push('scripts')
