@@ -29,6 +29,7 @@
   --link-hover: #00b5c3;
   --basket-badge-bg: var(--danger);
   --price-color: #00b5c3;
+  --chart-tick-color: rgba(255, 255, 255, 0.7);
 }
 
 html.light-mode {
@@ -63,4 +64,5 @@ html.light-mode {
   --link-hover: #0479ae;
   --basket-badge-bg: var(--danger);
   --price-color: #0479ae;
+  --chart-tick-color: #000000;
 }

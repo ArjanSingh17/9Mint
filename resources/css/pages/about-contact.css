@@ -94,6 +94,23 @@
   color: var(--link-hover);
 }
 
+.reviews-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: var(--link-hover);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.reviews-cta-btn:hover {
+  background: color-mix(in srgb, var(--link-hover) 85%, #000 15%);
+}
+
 .contact-page-container > .flex {
   display: flex;
   justify-content: space-between;

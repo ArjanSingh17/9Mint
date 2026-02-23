@@ -44,14 +44,14 @@ const Chart = ({ points = [], currency }) => {
     };
     const toY = (value) => padding + (1 - (value - min) / range) * chartHeight;
 
-    const chartColor = '#8b5cf6';
+    const chartColor = 'var(--link-hover)';
     const line = points.length === 1
         ? `${midX},${toY(points[0].value)} ${width - padding},${toY(points[0].value)}`
         : points.map((p, idx) => `${toX(idx)},${toY(p.value)}`).join(' ');
     const latest = points[points.length - 1];
     const latestX = toX(points.length - 1);
     const latestY = toY(latest.value);
-    const tickColor = 'rgba(255, 255, 255, 0.7)';
+    const tickColor = 'var(--chart-tick-color)';
     const gridColor = 'rgba(255, 255, 255, 0.12)';
     const fontSize = 11;
     const formatTickValue = (value) => formatMoney(value, currency);
