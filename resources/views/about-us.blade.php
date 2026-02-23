@@ -20,6 +20,7 @@
           <div id="reviews-slider" class="reviews-slider">
               <p id="reviews-loading">Loading reviews...</p>
           </div>
+          <a href="/reviewUs" class="reviews-cta-btn">Review Us</a>
       </section>
 
       {{-- About --}}

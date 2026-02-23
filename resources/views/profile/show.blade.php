@@ -103,9 +103,18 @@
     }
 
     .profile-show-nfts h2 {
-        color: #000;
+        color: var(--text-primary);
         font-size: 20px;
         margin-bottom: 16px;
+    }
+
+    .profile-show-nfts-title-link {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .profile-show-nfts-title-link:hover {
+        color: var(--link-hover);
     }
 
     .profile-show-nft-grid {
@@ -242,7 +251,18 @@
         @endphp
 
         <div class="profile-show-nfts">
-            <h2>{{ ($isOwner ?? false) ? 'Inventory' : $user->name . "'s NFTs" }}</h2>
+            <h2>
+                @if (($isOwner ?? false))
+                    <a href="{{ route('inventory.show', ['username' => $user->name]) }}" class="profile-show-nfts-title-link">Inventory</a>
+                @else
+                    {{ $user->name . "'s Inventory" }}
+                @endif
+            </h2>
+            @if (!($isOwner ?? false))
+                <p>
+                    <a href="{{ route('inventory.show', ['username' => $user->name]) }}" class="profile-show-inventory-btn">View inventory</a>
+                </p>
+            @endif
             @if($ownedTokens->isEmpty())
                 <p class="profile-show-empty">No NFTs owned yet.</p>
             @else
@@ -272,7 +292,7 @@
         </div>
     @else
         <div class="profile-show-nfts">
-            <h2>{{ $user->name . "'s NFTs" }}</h2>
+            <h2>{{ $user->name . "'s Inventory" }}</h2>
             <p class="profile-show-empty">This user's NFT collection is private.</p>
         </div>
     @endif

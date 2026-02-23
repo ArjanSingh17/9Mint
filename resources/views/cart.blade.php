@@ -5,26 +5,53 @@
 
 @push('styles')
   @vite('resources/css/pages/app-pages.css')
+  <style>
+    .basket-feedback-banner {
+      position: fixed;
+      top: var(--basket-feedback-top, 0px);
+      left: 0;
+      right: 0;
+      z-index: 120;
+      width: 100%;
+      padding: 10px 16px;
+      text-align: center;
+      font-weight: 700;
+      color: #fff;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-8px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .basket-feedback-banner.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .basket-feedback-banner.is-success {
+      background: #16a34a;
+    }
+
+    .basket-feedback-banner.is-error {
+      background: #dc2626;
+    }
+  </style>
 @endpush
 
 @section('content')
+    <div
+      id="basketFeedbackBanner"
+      class="basket-feedback-banner{{ session('status') || session('error') ? ' is-visible' : '' }}{{ session('status') ? ' is-success' : '' }}{{ session('error') ? ' is-error' : '' }}"
+      role="status"
+      aria-live="polite"
+    >
+      {{ session('status') ?? session('error') }}
+    </div>
+
     {{-- Header --}}
     <div class="basket-page">
       <h1 class="basket-title">Your Basket</h1>
-
-      {{-- Success --}}
-      @if(session('status'))
-        <div style="background: #4CAF50; color: white; padding: 15px; margin: 20px auto; max-width: 1200px; border-radius: 8px; text-align: center;">
-            {{ session('status') }}
-        </div>
-      @endif
-
-      {{-- Error --}}
-      @if(session('error'))
-        <div style="background: #f44336; color: white; padding: 15px; margin: 20px auto; max-width: 1200px; border-radius: 8px; text-align: center;">
-            {{ session('error') }}
-        </div>
-      @endif
 
       <div class="basket-content">
         {{-- Items --}}
@@ -124,4 +151,35 @@
       </div>
     </div>
 @endsection
+
+@push('scripts')
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const banner = document.getElementById('basketFeedbackBanner');
+      if (!banner || !banner.textContent.trim()) return;
+
+      const header = document.querySelector('header');
+
+      const updateBannerOffset = function () {
+        if (!header) {
+          document.documentElement.style.setProperty('--basket-feedback-top', '0px');
+          return;
+        }
+
+        const rect = header.getBoundingClientRect();
+        const nearTop = window.scrollY <= 12;
+        const top = nearTop ? Math.max(0, Math.ceil(rect.height)) : 0;
+        document.documentElement.style.setProperty('--basket-feedback-top', top + 'px');
+      };
+
+      updateBannerOffset();
+      window.addEventListener('scroll', updateBannerOffset, { passive: true });
+      window.addEventListener('resize', updateBannerOffset);
+
+      window.setTimeout(function () {
+        banner.classList.remove('is-visible');
+      }, 4500);
+    });
+  </script>
+@endpush
 

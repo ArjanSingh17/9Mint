@@ -70,9 +70,6 @@
         }
       }
     @endphp
-     <button id="theme-toggle" class="nav-btn">
-        <span id="theme-icon">🌙</span>
-    </button>
     @auth
       @if($walletIsLinked)
         <div class="wallet-switcher" data-wallet-switcher>

@@ -326,6 +326,10 @@ html.light-mode .nft-board__flyout-heart {
     color: #ff4d4d;
 }
 
+html.light-mode .nft-board__flyout-heart[data-liked="1"] {
+    color: #ff4d4d;
+}
+
 .nft-board__flyout-heart:hover {
     transform: scale(1.05);
 }
