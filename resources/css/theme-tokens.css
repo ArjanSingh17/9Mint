@@ -1,0 +1,66 @@
+:root {
+  --surface-main: #171734;
+  --surface-chrome: #101023;
+  --surface-panel: #101023;
+  --surface-muted: #101023;
+  --surface-input: #1f2937;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.72);
+  --text-muted: rgba(255, 255, 255, 0.6);
+  --text-inverse: #ffffff;
+  --accent: #1f2937;
+  --accent-strong: #1f2937;
+  --danger: #ff4d4f;
+  --success: #4caf50;
+  --border-soft: rgba(255, 255, 255, 0.14);
+  --border-input: rgba(255, 255, 255, 0.2);
+  --shadow-elevated: 0 10px 30px rgba(0, 0, 0, 0.25);
+
+  /* Backwards-compatible aliases during migration */
+  --bg-main: var(--surface-main);
+  --nav-bg: var(--surface-chrome);
+  --card-bg: var(--surface-panel);
+  --section-bg: var(--surface-muted);
+  --text-main: var(--text-primary);
+  --nav-text: var(--text-primary);
+  --subtext-color: var(--text-secondary);
+  --button-bg: var(--accent);
+  --button-hover-bg: var(--accent-strong);
+  --link-hover: #00b5c3;
+  --basket-badge-bg: var(--danger);
+  --price-color: #00b5c3;
+}
+
+html.light-mode {
+  --surface-main: #d9d9de;
+  --surface-chrome: #ffffff;
+  --surface-panel: #ffffff;
+  --surface-muted: #f3f4f6;
+  --surface-input: #ffffff;
+  --text-primary: #111111;
+  --text-secondary: rgba(0, 0, 0, 0.72);
+  --text-muted: rgba(0, 0, 0, 0.56);
+  --text-inverse: #ffffff;
+  --accent: #111111;
+  --accent-strong: #111111;
+  --link-hover: #0479ae;
+  --danger: #dc2626;
+  --success: #16a34a;
+  --border-soft: rgba(15, 23, 42, 0.12);
+  --border-input: rgba(15, 23, 42, 0.25);
+  --shadow-elevated: 0 10px 30px rgba(0, 0, 0, 0.12);
+
+  /* Migration aliases */
+  --bg-main: var(--surface-main);
+  --nav-bg: var(--surface-chrome);
+  --card-bg: var(--surface-panel);
+  --section-bg: var(--surface-muted);
+  --text-main: var(--text-primary);
+  --nav-text: var(--text-primary);
+  --subtext-color: var(--text-secondary);
+  --button-bg: var(--accent);
+  --button-hover-bg: var(--accent-strong);
+  --link-hover: #0479ae;
+  --basket-badge-bg: var(--danger);
+  --price-color: #0479ae;
+}

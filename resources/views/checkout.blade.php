@@ -3,7 +3,7 @@
 @section('title', 'Checkout')
 
 @push('styles')
-  <link rel="stylesheet" href="{{ asset('css/checkout.css') }}">
+  @vite('resources/css/pages/checkout.css')
 @endpush
 
 @push('scripts')
@@ -13,7 +13,15 @@
        
 @section('content')
     {{-- Checkout --}}
-    <div class="checkoutContainer">
+    @if($order)
+      <div
+        id="checkoutExpiry"
+        class="checkout-expiry-banner"
+        data-expires-at="{{ optional($order->expires_at)->toIso8601String() }}"
+      ></div>
+    @endif
+
+    <div class="checkoutContainer {{ $order ? 'has-expiry-banner' : '' }}">
       <h1>Checkout</h1>
 
       {{-- Success --}}
@@ -96,17 +104,17 @@
             <h2>Payment Method</h2>
             <div class="payment-methods">
               <label class="payment-option">
-                <input type="radio" name="provider" value="mock_bank">
+                <input type="radio" name="provider" value="mock_bank" required>
                 <span class="payment-option__title">Bank Transfer</span>
                 <span class="payment-option__desc">Pay directly from your bank account.</span>
               </label>
               <label class="payment-option">
-                <input type="radio" name="provider" value="mock_crypto">
+                <input type="radio" name="provider" value="mock_crypto" required>
                 <span class="payment-option__title">Crypto Wallet</span>
                 <span class="payment-option__desc">Pay with a crypto wallet address.</span>
               </label>
               <label class="payment-option">
-                <input type="radio" name="provider" value="mock_wallet">
+                <input type="radio" name="provider" value="mock_wallet" required>
                 <span class="payment-option__title">9Mint Wallet</span>
                 <span class="payment-option__desc">Pay using your 9Mint wallet balance.</span>
               </label>
@@ -116,10 +124,10 @@
               <h3>Bank details</h3>
               <p class="payment-instructions">Use the account details below to complete your transfer.</p>
               <div class="payment-fields">
-                <input type="text" name="bank_account_name" placeholder="Account name (e.g. 9Mint Ltd)">
-                <input type="text" name="bank_sort_code" placeholder="Sort code (e.g. 12-34-56)">
-                <input type="text" name="bank_account_number" placeholder="Account number (e.g. 12345678)">
-                <input type="text" name="bank_reference" placeholder="Payment reference (Order #{{ $order->id }})">
+                <input type="text" name="bank_account_name" placeholder="Account name (e.g. 9Mint Ltd)" required>
+                <input type="text" name="bank_sort_code" placeholder="Sort code (e.g. 12-34-56)" required>
+                <input type="text" name="bank_account_number" placeholder="Account number (e.g. 12345678)" required>
+                <input type="text" name="bank_reference" placeholder="Payment reference (Order #{{ $order->id }})" required>
               </div>
             </div>
 
@@ -127,9 +135,9 @@
               <h3>Wallet details</h3>
               <p class="payment-instructions">Send the exact amount to the wallet address shown.</p>
               <div class="payment-fields">
-                <input type="text" name="wallet_address" placeholder="Wallet address (e.g. 0x...)">
-                <input type="text" name="wallet_tag" placeholder="Memo / Tag (optional)">
-                <input type="text" name="wallet_network" value="{{ $order->pay_currency }}" readonly>
+                <input type="text" name="wallet_address" placeholder="Wallet address (e.g. 0x...)" required>
+                <input type="text" name="wallet_tag" placeholder="Memo / Tag" required>
+                <input type="text" name="wallet_network" value="{{ $order->pay_currency }}" readonly required>
               </div>
             </div>
 
@@ -140,7 +148,7 @@
               <div class="payment-fields">
                 <label>
                   Wallet currency
-                  <select name="wallet_currency" data-wallet-currency-select>
+                  <select name="wallet_currency" data-wallet-currency-select required>
                     @foreach ($walletBalances as $balance)
                       <option value="{{ $balance->currency }}" data-balance="{{ $balance->balance ?? 0 }}">
                         {{ $balance->currency }}
@@ -182,13 +190,7 @@
             </div>
           </section>
 
-          <div
-            id="checkoutExpiry"
-            data-expires-at="{{ optional($order->expires_at)->toIso8601String() }}"
-            style="margin: 10px 0; font-weight: 600;"
-          ></div>
-
-          <button type="submit">Place Order</button>
+          <button type="submit" class="checkout-place-order">Place Order</button>
         </form>
       @endif
     </div>

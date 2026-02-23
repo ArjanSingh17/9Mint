@@ -102,9 +102,9 @@ new class extends Component {
 };
 ?>
 
-<div>
+<div class="contact-page-container">
 <head>
-  <link rel="stylesheet" href="{{ asset('css/contactUs.css') }}">
+  @vite('resources/css/pages/about-contact.css')
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -114,34 +114,34 @@ new class extends Component {
   <main class="flex justify-evenly items-center gap-4">
       <div class="flex-grow">
         <h1>Tickets</h1> 
-        <div class="bg-black border-white rounded border-10 h-screen">
+        <div class="tickets-shell h-screen">
           <div class="overflow-x-auto m-5">
-            <table class="min-w-full bg-white">
-              <thead class="bg-gray-100 whitespace-nowrap">
+            <table class="min-w-full tickets-table">
+              <thead class="tickets-thead whitespace-nowrap">
                 <tr>
-                  <th class="p-4 text-left text-[13px] font-semibold text-slate-900">Title</th>
-                  <th class="p-4 text-left text-[13px] font-semibold text-slate-900">Status</th>
-                  <th class="p-4 text-left text-[13px] font-semibold text-slate-900">Created At</th>
-                  <th class="p-4 text-left text-[13px] font-semibold text-slate-900">Unread Messages</th>
-                  <th class="p-4 text-left text-[13px] font-semibold text-slate-900">Actions</th>
+                  <th class="p-4 text-left text-[13px] font-semibold tickets-heading-cell">Title</th>
+                  <th class="p-4 text-left text-[13px] font-semibold tickets-heading-cell">Status</th>
+                  <th class="p-4 text-left text-[13px] font-semibold tickets-heading-cell">Created At</th>
+                  <th class="p-4 text-left text-[13px] font-semibold tickets-heading-cell">Unread Messages</th>
+                  <th class="p-4 text-left text-[13px] font-semibold tickets-heading-cell">Actions</th>
                 </tr>
               </thead>
 
               <tbody class="whitespace-nowrap">
                 @forelse ($tickets as $ticket)
-                  <tr class="hover:bg-gray-50">
-                    <td class="p-4 text-[15px] text-slate-900 font-medium">
+                  <tr class="tickets-row">
+                    <td class="p-4 text-[15px] tickets-cell font-medium">
                         {{ $ticket->title }}
                     </td>
 
-                    <td class="p-4 text-[15px] text-slate-600 font-medium">
+                    <td class="p-4 text-[15px] tickets-cell font-medium">
                         {{ $ticket->status}}
                     </td>
 
-                    <td class="p-4 text-[15px] text-slate-600 font-medium">
+                    <td class="p-4 text-[15px] tickets-cell font-medium">
                         {{ $ticket->created_at->format('Y-m-d') }}
                     </td>
-                    <td class="p-4 text-[15px] text-slate-600 font-medium">
+                    <td class="p-4 text-[15px] tickets-cell font-medium">
                        <span wire:poll.5s>
                        {{ $ticket->conversations->sum(fn ($conversation) => $conversation->unreadMessagesCount()) }}
                       </span>
@@ -165,7 +165,7 @@ new class extends Component {
                   </tr>
                 @empty
                   <tr>
-                    <td colspan="4" class="p-4 text-center text-gray-500">
+                    <td colspan="4" class="p-4 text-center tickets-empty">
                         No tickets yet
                     </td>
                   </tr>
