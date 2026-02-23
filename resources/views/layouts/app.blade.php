@@ -58,6 +58,8 @@
         <a href="/contactUs/faqs">FAQs</a>
         <span>|</span>
         <a href="/contactUs">Contact Us</a>
+        <span>|</span>
+        <a href="/reviewUs">Review Us</a>
     </footer>
 
     <x-theme-fab />
