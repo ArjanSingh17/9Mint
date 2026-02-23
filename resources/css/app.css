@@ -4,42 +4,12 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-:root {
-   --bg-main: #040457;
-   --text-main: #ffffff;
-   --nav-bg: #111827;
-   --nav-text: #ffffff;
-   --card-bg: #1f2937;
-   --section-bg: #111827;
-   --overlay-bg: rgba(8, 10, 20, 0.85);
-   --button-bg: #6d28d9;
-   --button-hover-bg: #7c3aed;
-   --link-hover: #307ea8;
-   --basket-badge-bg: #ff4d4f;
-   --subtext-color: rgba(255, 255, 255, 0.7);
-   --price-color: #d9b0ff;
-}
-
-html.light-mode {
-    --bg-main: #9fd0e9;
-    --text-main: #000000;
-    --nav-bg: #7ba0e1;
-    --nav-text: #000000;
-    --card-bg: #8cc3d2;
-    --section-bg: #f5f5f5; 
-    --overlay-bg: rgba(255, 255, 255, 0.85);
-    --button-bg: #ffffff;
-    --button-hover-bg: #e5e5e5;
-    --link-hover: #0b60a0;
-    --basket-badge-bg: #ff4d4f;
-    --subtext-color: rgba(0,0,0,0.7);
-    --price-color: #8b5cf6;
-}
+/* Theme tokens live in resources/css/theme-tokens.css */
 
 /* Navbar */
 .navbar {
     width: 100%;
-    background-color: white;
+    background-color: var(--nav-bg);
     padding: 10px 16px; /* tweak spacing */
     box-sizing: border-box;
     display: flex;
@@ -54,8 +24,21 @@ html.light-mode {
 /* Logo */
 .logo-container .logo-image,
 .logo-image {
-    height: 50px; /* tweak size */
+    height: 80px; /* bigger 9mint icon */
     width: auto;
+}
+
+.logo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.logo-wordmark {
+    height: 34px;
+    width: auto;
+    display: block;
+    margin-left: -8px;
 }
 
 /* Links */
@@ -69,14 +52,14 @@ html.light-mode {
 
 .nav-links a {
     text-decoration: none;
-    color: black;
+    color: var(--nav-text);
     font-weight: 500;
     font-size: 16px;
     transition: color 0.3s;
 }
 
 .nav-links a:hover {
-    color: #307ea8;
+    color: var(--link-hover);
 }
 
 .nav-auth {
@@ -86,6 +69,99 @@ html.light-mode {
     margin-left: auto;
 }
 
+.nav-search {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(42vw, 520px);
+    min-width: 320px;
+}
+
+.nav-search__input-wrap {
+    height: 40px;
+    border-radius: 999px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-main);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    gap: 8px;
+}
+
+.nav-search__icon {
+    font-size: 15px;
+    opacity: 0.85;
+}
+
+.nav-search__input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text-main);
+    font-size: 16px;
+}
+
+.nav-search__clear {
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.nav-search__clear.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.nav-search__menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--surface-chrome);
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    box-shadow: var(--shadow-elevated);
+    overflow: hidden;
+    display: none;
+    z-index: 120;
+}
+
+.nav-search__menu.is-open {
+    display: block;
+}
+
+.nav-search__option {
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
+    color: var(--text-main);
+    padding: 12px 14px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.nav-search__option-muted {
+    color: var(--text-secondary);
+}
+
+.nav-search__option-query {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.nav-search__option + .nav-search__option {
+    border-top: 1px solid var(--border-soft);
+}
+
+.nav-search__option:hover {
+    background: color-mix(in srgb, var(--surface-main) 35%, transparent);
+}
+
 .basket-btn {
     position: relative;
     background: transparent;
@@ -93,6 +169,22 @@ html.light-mode {
     cursor: pointer;
     font-size: 22px;
     padding: 4px;
+}
+
+@media (max-width: 1120px) {
+    .nav-search {
+        position: relative;
+        left: auto;
+        transform: none;
+        order: 4;
+        width: 100%;
+        min-width: 0;
+        margin: 10px 0 0;
+    }
+
+    .nav-auth {
+        margin-left: 0;
+    }
 }
 
 .basket-icon {
@@ -118,8 +210,8 @@ html.light-mode {
 
 .nav-btn {
     padding: 8px 16px; /* tweak size */
-    background: black;
-    color: white;
+    background: var(--button-bg);
+    color: var(--text-inverse);
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -129,25 +221,58 @@ html.light-mode {
 }
 
 .nav-btn:hover {
-    background: #333;
+    background: var(--button-hover-bg);
+}
+
+.nav-btn.profile-icon {
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--link-hover);
+    color: #fff;
+}
+
+.nav-btn.profile-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.nav-btn.profile-icon:hover {
+    background: color-mix(in srgb, var(--link-hover) 85%, #000 15%);
+}
+
+.nav-btn.signin,
+.nav-btn.signout {
+    background: var(--link-hover);
+    color: #fff;
+}
+
+.nav-btn.signin:hover,
+.nav-btn.signout:hover {
+    background: color-mix(in srgb, var(--link-hover) 85%, #000 15%);
 }
 
 html {
     background-color: var(--bg-main);
     /*color: var(--text-main);*/
     transition: background-color 0.2s ease, color 0.3s ease;
+    scrollbar-gutter: auto;
 }
 
 /* Legacy logo */
 .logo-image {
     height: auto;
-    width: 80px; /* tweak size */
-    padding: 10px; /* tweak padding */
+    width: 120px; /* keep larger fallback size */
+    padding: 8px; /* avoid oversized click area */
 }
 
 h1 {
     text-align: center;
-    color: white;
+    color: var(--text-main);
 }
 
 nav ul {
@@ -158,7 +283,7 @@ nav ul {
 
 nav ul li a {
     text-decoration: none;
-    color: black;
+    color: var(--nav-text);
     font-weight: 500;
 }
 
@@ -179,10 +304,10 @@ p {
     align-items: center;
     gap: 6px;
     padding: 4px 8px;
-    background: #f5f5f5;
+    background: var(--surface-panel);
     border-radius: 8px;
     font-size: 12px;
-    color: #111;
+    color: var(--text-main);
 }
 
 .wallet-label {
@@ -190,17 +315,18 @@ p {
 }
 
 .wallet-select {
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-soft);
     border-radius: 6px;
     padding: 4px 6px;
     font-size: 12px;
-    background: white;
+    background: var(--surface-input);
+    color: var(--text-main);
 }
 
 .wallet-balance,
 .wallet-empty {
     font-weight: 600;
-    color: #111;
+    color: var(--text-main);
 }
 
 /* Inventory grid refinements */
@@ -327,7 +453,7 @@ p {
 .inventory-card__price {
     margin: 0;
     font-weight: 600;
-    color: #d9b0ff;
+    color: var(--price-color);
 }
 
 .inventory-card__field {
@@ -459,10 +585,10 @@ p {
 }
 
 .nft-collection-card {
-    background: #111;
+    background: var(--surface-panel);
     border-radius: 12px;
     text-decoration: none;
-    color: #fff;
+    color: var(--text-main);
     overflow: hidden;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     display: flex;
@@ -531,14 +657,14 @@ p {
 .nft-collection-meta h3 {
     margin: 0 0 8px;
     font-size: 1rem;
-    color: #fff;
+    color: var(--text-main);
     text-align: right;
 }
 
 .nft-collection-price {
     margin: 0 0 6px;
     font-weight: 600;
-    color: #d9b0ff;
+    color: var(--price-color);
     text-align: left;
 }
 
@@ -561,7 +687,7 @@ p {
 .nft-collection-stock {
     margin: 0;
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--subtext-color);
     text-align: left;
 }
 
@@ -586,7 +712,7 @@ p {
 }
 
 .nft-detail__info-panel {
-    background: #0f172a;
+    background: var(--surface-panel);
     border-radius: 12px;
     padding: 20px 24px;
     height: 100%;
@@ -607,7 +733,42 @@ p {
 .nft-detail__marketplace-note {
     margin: 6px 0 10px;
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--subtext-color);
+}
+
+.nft-detail__marketplace-note a {
+    color: var(--link-hover);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.nft-detail__seller-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.nft-detail__contact-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    padding: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    background: transparent;
+    color: var(--subtext-color);
+}
+
+.nft-detail__contact-btn:hover {
+    color: var(--text-main);
+}
+
+.nft-detail__inline-contact-form {
+    display: inline;
 }
 
 .nft-detail__prices ul {
@@ -631,7 +792,7 @@ p {
     grid-template-columns: 1fr auto;
     gap: 16px;
     align-items: center;
-    background: #0f172a;
+    background: var(--surface-panel);
     border-radius: 12px;
     padding: 12px 16px;
 }
@@ -643,7 +804,7 @@ p {
 .token-strip__sub {
     margin: 0 0 8px;
     font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--subtext-color);
     text-align: left;
 }
 
@@ -675,7 +836,7 @@ p {
 .token-strip__hint {
     margin: 0;
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--subtext-color);
     text-align: right;
 }
 
@@ -702,7 +863,7 @@ p {
 #nft-market {
     margin-top: 40px;
     padding: 20px;
-    background: #0f172a;
+    background: var(--surface-panel);
     border-radius: 12px;
 }
 
@@ -730,7 +891,7 @@ p {
 }
 
 .nft-market__chart {
-    background: #0b1220;
+    background: color-mix(in srgb, var(--surface-panel) 85%, #000 15%);
     border-radius: 10px;
     padding: 12px;
     min-height: 260px;
@@ -746,7 +907,7 @@ p {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #cbd5f5;
+    color: var(--subtext-color);
 }
 
 .nft-market__chart svg {
@@ -757,7 +918,7 @@ p {
 
 .nft-market__chart-meta {
     margin-bottom: 8px;
-    color: #cbd5f5;
+    color: var(--subtext-color);
     font-size: 0.9rem;
 }
 
@@ -776,20 +937,79 @@ p {
     gap: 12px;
     align-items: center;
     padding: 10px 12px;
-    background: #111827;
+    background: var(--surface-panel);
     border-radius: 8px;
 }
 
 .nft-market__row.header {
     background: transparent;
     font-weight: 700;
-    color: #cbd5f5;
+    color: var(--subtext-color);
 }
 
 .nft-market__cell.name span {
     display: block;
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--subtext-color);
+}
+
+.nft-market__cell.name a {
+    color: var(--link-hover);
+    text-decoration: none;
+}
+
+.nft-detail .Add-to-basket {
+    background: var(--link-hover);
+    color: #fff;
+}
+
+.nft-detail .Add-to-basket:hover {
+    background: color-mix(in srgb, var(--link-hover) 85%, #000 15%);
+}
+
+.nft-market__cell.action button,
+.nft-market__cell.action a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 600;
+    text-decoration: none;
+    background: var(--link-hover);
+    color: #fff;
+    cursor: pointer;
+}
+
+.nft-market__cell.action button:hover,
+.nft-market__cell.action a:hover {
+    background: color-mix(in srgb, var(--link-hover) 85%, #000 15%);
+}
+
+.nft-market__contact-btn {
+    margin-left: 0;
+    border: none;
+    padding: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: transparent;
+    color: var(--subtext-color);
+    cursor: pointer;
+}
+
+.nft-market__contact-btn:hover {
+    color: var(--text-main);
+}
+
+.nft-market__seller-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nft-market__inline-contact-form {
+    display: inline;
 }
 
     .auth-form {
@@ -806,10 +1026,6 @@ p {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-html.light-mode .homepage-container {
-    color: white;
-    background-color: #2d2d2d;
-}
 .homepage-title {
   font-size: 3rem;
   margin-bottom: 20px;
@@ -856,24 +1072,6 @@ html.light-mode .homepage-subtitle {
   color: #000000;
 }
 
-html.light-mode .primary-btn {
-  background-color: #3b82f6; 
-  color: #ffffff;
-}
-
-html.light-mode .primary-btn:hover {
-  background-color: #2563eb; 
-}
-
-html.light-mode .secondary-btn {
-  border-color: #3b82f6;
-  color: #3b82f6;
-}
-
-html.light-mode .secondary-btn:hover {
-  background-color: #3b82f6;
-  color: #ffffff;
-}
 
 .auth-page-container {
   background-color: var(--bg-main);
@@ -947,7 +1145,7 @@ html.light-mode .secondary-btn:hover {
   gap: 8px;
   font-size: 14px;
   margin-bottom: 15px;
-  color: var(--subtext-color);
+  color: var(--text-main);
 }
 
 .auth-form button {
@@ -997,13 +1195,6 @@ html.light-mode .secondary-btn:hover {
   }
 }
 
-html.light-mode .auth-page-container {
-  --bg-main: #9fd0e9;
-  --card-bg: #333333;
-  --text-main: #ffffff;
-  --section-bg: #444444;
-}
-
 .auth-page-container {
   background-color: var(--bg-main);
   color: var(--text-main);
@@ -1016,35 +1207,135 @@ html.light-mode .auth-page-container {
 }
 
 .auth-page-container .auth-form button{
-  background-color: var(--card-bg);
+  background-color: color-mix(in srgb, var(--surface-input) 70%, #000 30%);
   color: var(--text-main);
-  padding: 35px;
   border-radius: 14px;
-  width: 360px;
+  width: 100%;
+  max-width: min(100%, 360px);
+  min-height: 56px;
+  padding: clamp(14px, 2.2vw, 26px);
+  margin-inline: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   transition: background 0.3s ease, color 0.3s ease;
   cursor: pointer;
 }
 
+.auth-page-container .auth-form button.is-ready {
+  background-color: var(--link-hover);
+  color: #fff;
+}
+
 .auth-page-container .auth-form input {
-  background-color: #555555;
-  color: #eee;
-  border: 2px solid #777777;
+  background-color: var(--surface-input);
+  color: var(--text-main);
+  border: 2px solid var(--border-input);
   transition: all 0.2s ease;
 }
 
 .auth-page-container .auth-form input::placeholder {
-  color: #bbbbbb;
+  color: var(--text-secondary);
+}
+
+.auth-page-container .auth-section {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 420px;
+  gap: 18px;
+  padding: 0;
+}
+
+.auth-page-container .auth-form {
+  width: min(100%, 360px);
+  margin: 0 auto;
+}
+
+.auth-page-container .auth-form--register {
+  display: none;
+}
+
+.auth-page-container .auth-signup-prompt {
+  color: var(--text-main);
+  font-size: 14px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.auth-page-container .auth-signup-prompt a {
+  color: var(--link-hover);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.auth-page-container .show-register .auth-signup-prompt {
+  display: none;
+}
+
+.auth-page-container .show-register .auth-form--register {
+  display: block;
+}
+
+.theme-fab,
+.friend-fab {
+  position: fixed;
+  bottom: 16px;
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: var(--surface-chrome);
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 1200;
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.28),
+    0 0 0 4px color-mix(in srgb, var(--surface-main) 92%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.theme-fab {
+  left: 16px;
+}
+
+.friend-fab {
+  right: 16px;
+}
+
+.theme-fab:hover,
+.friend-fab:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 26px rgba(0, 0, 0, 0.32),
+    0 0 0 4px color-mix(in srgb, var(--surface-main) 96%, transparent);
+}
+
+.theme-fab:focus-visible,
+.friend-fab:focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.95);
+  outline-offset: 3px;
+}
+
+.friend-fab span {
+  display: inline-block;
+  line-height: 1;
+  transform: translateY(1px) scaleY(1.3);
+  transform-origin: center;
 }
 
 .reviews-section {
-    background: #0c0c4d;
+    background: var(--surface-panel);
     padding: 80px 20px;
     text-align: center;
 }
 
 .reviews-title {
-    color: white;
+    color: var(--text-main);
     font-size: 32px;
     margin-bottom: 40px;
 }
@@ -1055,11 +1346,12 @@ html.light-mode .auth-page-container {
 }
 
 .review-card {
-    background: white;
+    background: var(--surface-chrome);
     max-width: 500px;
     margin: 0 auto;
     padding: 30px;
     border-radius: 16px;
+    color: var(--text-main);
 }
 
 .review-stars {
@@ -1069,7 +1361,7 @@ html.light-mode .auth-page-container {
 }
 
 .review-text {
-    color: #555;
+    color: var(--text-secondary);
     font-style: italic;
 }
 
@@ -1077,6 +1369,6 @@ html.light-mode .auth-page-container {
     font-weight: bold;  
     font-size: 18px;
     margin-top: 15px;
-    color: #1a1a1a;
+    color: var(--text-main);
 }
 

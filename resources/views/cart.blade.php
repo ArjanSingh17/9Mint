@@ -4,7 +4,7 @@
 @section('title', 'Your Basket')
 
 @push('styles')
-  <link rel="stylesheet" href="{{ asset('css/App.css') }}">
+  @vite('resources/css/pages/app-pages.css')
 @endpush
 
 @section('content')
@@ -116,9 +116,9 @@
           </div>
 
           @if(!$cartItems->isEmpty())
-            <a href="/checkout"><button class="checkout-button">Proceed to Checkout</button></a>
+            <a href="/checkout" class="checkout-button">Proceed to Checkout</a>
           @else
-            <a href="/products"><button class="checkout-button">Browse Products</button></a>
+            <a href="/products" class="checkout-button">Browse Products</a>
           @endif
         </div>
       </div>

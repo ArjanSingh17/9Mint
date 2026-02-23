@@ -3,12 +3,13 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    
+    background-color: var(--bg-main);
+    color: var(--text-main);
 }
 
 .Pricing-info {
-    background-color: black;
-    color: white;
+    background-color: var(--card-bg);
+    color: var(--text-main);
     text-align: center;
     padding: 30px 40px;
     width: 60%;
@@ -18,14 +19,14 @@ body {
 }
 
 .Pricing-info p {
-    color:white;
+    color: var(--text-main);
     margin: 10px 0;
     font-size: 16px;
 }
 
 #Pricing_sizes {
-    background-color: black;
-    color: white !important;
+    background-color: var(--card-bg);
+    color: var(--text-main) !important;
     width: 60%;
     max-width: 700px;
 
@@ -66,7 +67,7 @@ body {
 }
 
 .pricing-item {
-    background-color:#000000;
+    background-color: var(--card-bg);
     padding: 20px;
     border-radius: 10px;
 
@@ -80,10 +81,10 @@ body {
 
 .pricing-text h4 {
     margin: 0 0 10px;
-    color: white;
+    color: var(--text-main);
 }
 
 .pricing-text p {
     margin: 0;
-    color: #ccc;
+    color: var(--subtext-color);
 }

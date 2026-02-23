@@ -1,0 +1,83 @@
+/* Shared themed primitives */
+body.app-shell {
+  background-color: var(--surface-main);
+  color: var(--text-primary);
+}
+
+.navbar,
+.site-footer {
+  background-color: var(--surface-chrome);
+  color: var(--text-primary);
+}
+
+.site-footer {
+  border-top: 1px solid var(--border-soft);
+}
+
+.theme-fab,
+.friend-fab {
+  border: 1px solid var(--border-soft);
+}
+
+.surface-panel,
+.profile-card,
+.orders-card,
+.basket-item,
+.basket-summary,
+.auth-form,
+.collection-card,
+.nft-collection-card,
+.nft-detail__info-panel,
+.token-strip,
+#nft-market,
+.Pricing-info,
+#Pricing_sizes,
+.pricing-item {
+  background-color: var(--surface-panel);
+  color: var(--text-primary);
+  border: none;
+  box-shadow: var(--shadow-elevated);
+}
+
+.themed-input,
+.profile-card input[type="text"],
+.profile-card input[type="email"],
+.profile-card input[type="password"],
+.auth-form input,
+.checkoutSection input,
+.checkoutSection select,
+.token-strip__form input,
+.token-strip__form select {
+  background-color: var(--surface-input);
+  color: var(--text-primary);
+  border: 1px solid var(--border-input);
+}
+
+.btn-primary,
+.nav-btn,
+.checkout-button,
+.profile-card button[type="submit"],
+.inventory-card__button,
+.Add-to-basket {
+  background: var(--button-bg);
+  color: var(--text-inverse);
+  border: none;
+}
+
+.btn-primary:hover,
+.nav-btn:hover,
+.checkout-button:hover,
+.profile-card button[type="submit"]:hover,
+.inventory-card__button:hover,
+.Add-to-basket:hover {
+  background: var(--button-hover-bg);
+}
+
+.text-muted,
+.orders-meta,
+.collection-stock,
+.nft-collection-stock,
+.token-strip__sub,
+.token-strip__hint {
+  color: var(--text-secondary);
+}

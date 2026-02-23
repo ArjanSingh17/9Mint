@@ -5,17 +5,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script>
+        (function () {
+            try {
+                if (localStorage.getItem('theme') === 'light') {
+                    document.documentElement.classList.add('light-mode');
+                } else {
+                    document.documentElement.classList.remove('light-mode');
+                }
+            } catch (e) {
+                document.documentElement.classList.remove('light-mode');
+            }
+        })();
+    </script>
 
     <title>9Mint - @yield('title', 'Page')</title>
     <link rel="icon" href="{{ asset('images/9mint.png') }}">
 
     {{-- Enables React Fast Refresh when running Vite dev server (no-op in production) --}}
     @viteReactRefresh
-    @vite(['resources/css/app.css', 'resources/css/layout.css', 'resources/js/app.js'])
+    @vite([
+        'resources/css/theme-tokens.css',
+        'resources/css/layout.css',
+        'resources/css/theme-components.css',
+        'resources/css/app.css',
+        'resources/js/app.js',
+    ])
     @stack('styles')
+    @vite('resources/css/theme-layer.css')
      @livewireStyles
 </head>
-<body>
+<body class="app-shell">
     {{-- Shared top navigation bar --}}
     <header>
         <x-navbar />
@@ -38,7 +58,12 @@
         <a href="/contactUs/faqs">FAQs</a>
         <span>|</span>
         <a href="/contactUs">Contact Us</a>
+        <span>|</span>
+        <a href="/reviewUs">Review Us</a>
     </footer>
+
+    <x-theme-fab />
+    <x-friend-fab />
 
     @stack('scripts')
      @livewireScripts
