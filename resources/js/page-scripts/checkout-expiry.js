@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const el = document.getElementById('checkoutExpiry');
     if (!el) return;
+    const header = document.querySelector('header');
 
     const expiresAt = el.dataset.expiresAt ? new Date(el.dataset.expiresAt) : null;
     if (!expiresAt || Number.isNaN(expiresAt.getTime())) {
@@ -8,8 +9,22 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const form = el.closest('form');
+    const form = document.querySelector('.checkoutContainer form');
     const submitButton = form ? form.querySelector('button[type="submit"]') : null;
+
+    const updateBannerOffset = () => {
+        if (!header) {
+            document.documentElement.style.setProperty('--checkout-expiry-top', '0px');
+            return;
+        }
+
+        const rect = header.getBoundingClientRect();
+        // Keep banner under header only near the top of the page.
+        // Once user scrolls down, pin banner to viewport top to avoid transitional gaps.
+        const nearTop = window.scrollY <= 12;
+        const top = nearTop ? Math.max(0, Math.ceil(rect.height)) : 0;
+        document.documentElement.style.setProperty('--checkout-expiry-top', `${top}px`);
+    };
 
     const update = () => {
         const now = new Date();
@@ -26,5 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     update();
+    updateBannerOffset();
     setInterval(update, 1000);
+    window.addEventListener('scroll', updateBannerOffset, { passive: true });
+    window.addEventListener('resize', updateBannerOffset);
 });

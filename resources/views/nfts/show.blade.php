@@ -3,7 +3,8 @@
 @section('title', $nft->name)
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/App.css') }}">
+    @vite('resources/css/pages/app-pages.css')
+    @vite('resources/css/pages/collections-legacy.css')
 @endpush
 
 @push('scripts')
@@ -24,9 +25,27 @@
                         ? '9Mint'
                         : ($listing->seller?->name ?? 'Unknown');
                 @endphp
-                <p class="nft-detail__marketplace-note">
-                    Seller: {{ $sellerName }} • Listing #{{ $listing->id }}
-                </p>
+                <div class="nft-detail__seller-row">
+                    <p class="nft-detail__marketplace-note">
+                        Seller:
+                        @if ($listing->seller?->name)
+                            <a href="{{ route('profile.show', ['username' => $listing->seller->name]) }}">{{ $sellerName }}</a>
+                        @else
+                            {{ $sellerName }}
+                        @endif
+                        @auth
+                            @if ($listing->seller_user_id !== auth()->id())
+                                <form method="POST" action="{{ route('conversations.start', $listing->id) }}" class="nft-detail__inline-contact-form">
+                                    @csrf
+                                    <button type="submit" class="nft-detail__contact-btn">Contact me</button>
+                                </form>
+                            @endif
+                        @else
+                            <a href="{{ route('login', ['redirect' => request()->fullUrl()]) }}" class="nft-detail__contact-btn">Contact me</a>
+                        @endauth
+                        • Listing #{{ $listing->id }}
+                    </p>
+                </div>
             @endif
             @if ($collection)
                 <p class="nft-detail__collection">

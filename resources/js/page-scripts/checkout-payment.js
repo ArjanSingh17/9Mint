@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const checkoutForm = document.querySelector('.checkoutContainer form');
+    const placeOrderButton = checkoutForm?.querySelector('.checkout-place-order');
     const methodInputs = Array.from(document.querySelectorAll('input[name="provider"]'));
     const detailSections = Array.from(document.querySelectorAll('.payment-details'));
     const summary = document.querySelector('[data-payment-summary]');
@@ -10,7 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const amountLabel = document.querySelector('[data-payment-amount]');
     const conversionText = document.querySelector('[data-conversion-text]');
 
-    if (methodInputs.length === 0 || detailSections.length === 0) return;
+    if (!checkoutForm || !placeOrderButton || methodInputs.length === 0 || detailSections.length === 0) return;
+
+    const updatePlaceOrderState = () => {
+        const hasProvider = methodInputs.some((input) => input.checked);
+        const formValid = checkoutForm.checkValidity();
+        const isReady = hasProvider && formValid;
+        placeOrderButton.classList.toggle('is-ready', isReady);
+    };
 
     const formatMoney = (amount, currency) => {
         if (amount === null || amount === undefined) return '--';
@@ -100,10 +109,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (value === 'mock_crypto') updateConversion();
             if (value === 'mock_wallet') updateWalletSummary();
         }
+
+        updatePlaceOrderState();
     };
 
     methodInputs.forEach((input) => {
-        input.addEventListener('change', () => setActive(input.value));
+        input.addEventListener('change', () => {
+            setActive(input.value);
+            updatePlaceOrderState();
+        });
     });
 
     const checked = methodInputs.find((input) => input.checked);
@@ -121,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const updateNetwork = () => {
             walletNetworkLabel.textContent = walletNetworkSelect.value;
             updateConversion();
+            updatePlaceOrderState();
         };
         walletNetworkSelect.addEventListener('change', updateNetwork);
         updateNetwork();
@@ -130,7 +145,12 @@ document.addEventListener('DOMContentLoaded', () => {
         walletCurrencySelect.addEventListener('change', () => {
             updateWalletBalance();
             updateWalletSummary();
+            updatePlaceOrderState();
         });
         updateWalletBalance();
     }
+
+    checkoutForm.addEventListener('input', updatePlaceOrderState);
+    checkoutForm.addEventListener('change', updatePlaceOrderState);
+    updatePlaceOrderState();
 });

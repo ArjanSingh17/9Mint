@@ -3,7 +3,7 @@
 @section('title', 'Create New Password')
 
 @push('styles')
-  <link rel="stylesheet" href="{{ asset('css/App.css') }}">
+  @vite('resources/css/pages/app-pages.css')
 @endpush
 
 @section('content')

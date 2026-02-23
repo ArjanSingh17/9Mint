@@ -5,14 +5,13 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\FavouriteController;
 use App\Http\Controllers\CollectionPageController;
-use App\Http\Controllers\UserProfileController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 
 // FRONTEND NFT CONTROLLERS
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\UserProfileController;
+use App\Models\User;
 use App\Http\Controllers\Web\CartController as WebCartController;
 use App\Http\Controllers\Web\CheckoutController as WebCheckoutController;
 use App\Http\Controllers\Web\CollectionController as WebCollection;
@@ -20,14 +19,25 @@ use App\Http\Controllers\Web\FavouritePageController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\InventoryController;
 use App\Http\Controllers\Web\NftController as WebNft;
-use App\Http\Controllers\Web\PasswordResetController;
+
 
 // MODELS
 use App\Models\Order;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
 
 // ------------------------------
 // AUTH (GUEST)
 // ------------------------------
+/*
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/login', [AuthController::class, 'loginWeb']);
+    Route::post('/register', [AuthController::class, 'registerWeb']);
+});
+*/
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     
@@ -35,21 +45,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'loginWeb'])->middleware('throttle:6,1');
     
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    // Consider adding throttle here too if you're worried about bot registrations
-    Route::post('/register', [AuthController::class, 'registerWeb']); 
-    // Forgot Password Routes
-    Route::get('/forgot-password', [PasswordResetController::class, 'showLinkRequestForm'])
-        ->name('password.request');
-
-    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])
-        ->name('password.email');
-
-    // Reset Password Routes
-    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])
-        ->name('password.reset');
-
-    Route::post('/reset-password', [PasswordResetController::class, 'reset'])
-        ->name('password.update');
+    Route::post('/register', [AuthController::class, 'registerWeb']); // You can add it here too!
 });
 
 
@@ -73,21 +69,21 @@ Route::get('/products', [ProductsController::class, 'index'])->name('products.in
 Route::get('/aboutUs', [AboutUsController::class, 'index'])->name('about');
 Route::get('/nft/{slug}', [WebNft::class, 'show'])->name('nfts.show');
 
-Route::get('/my-profile', function (Request $r) {
-    if (!auth()->check()) {
-        return redirect()->route('login')->with('status', 'Please log in to view your profile.');
-    }
-    return view('profile.show', ['user' => $r->user()]);
-})->name('profile.show');
+Route::get('/my-profile', function () {
+    return redirect()->route('profile.settings');
+})->name('profile.legacy');
 
 
 // ------------------------------
 // FRONTEND TEAM OLD URL SUPPORT
 // ------------------------------
+
+// Old Glossy URL used in frontend
 Route::get('/products/Glossy-collection', function () {
     return redirect()->route('collections.show', ['slug' => 'glossy-collection']);
 });
 
+// Old Superhero URL used in frontend
 Route::get('/products/SuperheroCollection', function () {
     return redirect()->route('collections.show', ['slug' => 'superhero-collection']);
 });
@@ -96,6 +92,7 @@ Route::get('/products/SuperheroCollection', function () {
 // ------------------------------
 // NEW DYNAMIC COLLECTION ROUTE
 // ------------------------------
+// This handles: /products/{slug}
 Route::get('/products/{slug}', [CollectionPageController::class, 'show'])
     ->where('slug', '.*')
     ->name('collections.show');
@@ -106,7 +103,7 @@ Route::get('/products/{slug}', [CollectionPageController::class, 'show'])
 // ------------------------------
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
+    Route::get('/profile/settings', [AuthController::class, 'profile'])->name('profile.settings');
     Route::get('/my-favourites', [FavouritePageController::class, 'index'])->name('favourites.index');
     Route::post('/nfts/{nft}/toggle-like', [FavouriteController::class, 'toggle'])->name('nfts.toggle');
 
@@ -138,42 +135,71 @@ Route::middleware('auth')->group(function () {
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
     Route::post('/inventory/listings', [InventoryController::class, 'store'])->name('inventory.listing.store');
     Route::delete('/inventory/listings/{listing}', [InventoryController::class, 'destroy'])->name('inventory.listing.destroy');
+    Route::post('/conversations/start-user/{user}', [ConversationController::class, 'startWithUser'])->name('conversations.start-user');
 
-    // Chat / Conversations
-    Route::post('/conversations/start/{listing}', [ConversationController::class, 'start'])->name('conversations.start');
+    // view and update details
+    //  Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');
+    // Handle the form submission to update the profile
+    //Route::patch('/profile', [UserProfileController::class, 'updateSelf'])->name('profile.update');
+
+    // change Password
+    //Route::patch('/profile/password', [UserProfileController::class, 'updatePassword'])->name('password.update');
 });
 
+Route::get('/inventory/{username}', [InventoryController::class, 'showByUsername'])
+    ->name('inventory.show');
+
+Route::get('/profile', function () {
+    abort(404);
+});
+
+Route::get('/profile/{username}', function (string $username) {
+    $profileUser = User::where('name', $username)->firstOrFail();
+    $isOwner = auth()->check() && auth()->id() === $profileUser->id;
+
+    return view('profile.show', [
+        'user' => $profileUser,
+        'isOwner' => $isOwner,
+    ]);
+})->name('profile.show');
+
 Route::post('send-email', [ContactController::class, 'sendEmail'])->name('send.email');
+Route::livewire('/chat/ticket/{query}', 'pages::chat.ticket.index')
+    ->name('chat.ticket');
+Route::livewire('/chat/user/{user}/{conversation}', 'pages::chat.user.index')
+    ->name('chat.user');
 
-// ------------------------------
-// CHAT & TICKETS (LIVEWIRE)
-// ------------------------------
-Route::livewire('/chat/ticket/{query}', 'pages::chat.ticket.index')->name('chat.ticket');
-Route::livewire('/chat/user/{user}/{conversation}', 'pages::chat.user.index')->name('chat.user');
-Route::livewire('/chat/{query}', 'pages::chat.index')->name('chat');
+Route::post('/conversations/start/{listing}', [ConversationController::class, 'start'])
+    ->middleware('auth')
+    ->name('conversations.start');
 
-// ------------------------------
-// ADMIN ROUTES 
-// ------------------------------
+Route::livewire('/chat/{query}', 'pages::chat.index')
+    ->name('chat');
+
+//ADMIN ROUTES 
 Route::middleware(['auth', 'admin'])->group(function () {
 
     // Dashboard
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
 
-    // Tickets
+    //tickets
     Route::livewire('/admin/tickets', 'pages::tickets');
-
     // Inventory
     Route::get('/admin/inventory', [AdminController::class, 'inventory'])->name('admin.inventory');
 
     // User Management
     Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
     Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+
+    //Show the edit form
     Route::get('/admin/users/{id}/edit', [AdminController::class, 'editUser'])->name('admin.users.edit');
+    
+    // Save the changes
     Route::put('/admin/users/{id}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+
 });
 
 // Reviews Management
 Route::get('/reviewUs', function () {
     return view('reviewUs');
-})->name('review.us');
+});

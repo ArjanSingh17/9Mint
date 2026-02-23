@@ -15,6 +15,7 @@ class PaymentService
     {
         return DB::transaction(function () use ($order, $user, $provider, $outcome) {
             $walletService = app(WalletService::class);
+            $walletAddressService = app(WalletAddressService::class);
             $platformUserId = User::where('name', '9Mint')->value('id');
             $feeRate = Listing::SERVICE_FEE_RATE;
             $intent = PaymentIntent::create([
@@ -72,6 +73,13 @@ class PaymentService
                             $platformFee = $gross * $feeRate;
 
                             if ($sellerId) {
+                                if ($sellerId !== $platformUserId) {
+                                    $seller = User::whereKey($sellerId)->lockForUpdate()->first();
+                                    if ($seller && empty($seller->wallet_address)) {
+                                        $walletAddressService->assignGeneratedAddress($seller);
+                                    }
+                                }
+
                                 $walletService->credit($sellerId, $currency, $sellerNet, [
                                     'order_id' => $order->id,
                                     'listing_id' => $item->listing_id,

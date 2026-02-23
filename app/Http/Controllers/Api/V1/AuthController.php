@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Http\Requests\RegisterRequest;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
+use App\Services\WalletAddressService;
+use Illuminate\Support\Facades\Schema;
 
 class AuthController extends Controller
 {
@@ -111,7 +113,7 @@ class AuthController extends Controller
 
         $r->session()->regenerate();
 
-        return redirect()->intended(route('profile'));
+        return redirect()->intended(route('profile.settings'));
     }
 
     public function logout(Request $r)
@@ -138,7 +140,12 @@ class AuthController extends Controller
         /** @var \App\Models\User $user */
         $user = $r->user();
 
-        $data = $r->validate([
+        $walletAddressService = app(WalletAddressService::class);
+        $r->merge([
+            'wallet_address' => $walletAddressService->normalize($r->input('wallet_address')),
+        ]);
+
+        $rules = [
             'name' => [
                 'required',
                 'string',
@@ -152,8 +159,22 @@ class AuthController extends Controller
                 'max:255',
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
-            'wallet_address' => ['nullable', 'string', 'max:255'],
-        ]);
+            'wallet_address' => [
+                'nullable',
+                'string',
+                'max:255',
+                'min:26',
+                'regex:/^(0x[a-f0-9]{40}|[A-Za-z0-9]{26,255})$/',
+                Rule::unique('users', 'wallet_address')->ignore($user->id),
+            ],
+        ];
+
+        // Backward-compatible for environments where this migration isn't applied yet.
+        if (Schema::hasColumn('users', 'nfts_public')) {
+            $rules['nfts_public'] = ['required', 'boolean'];
+        }
+
+        $data = $r->validate($rules);
 
         $user->update($data);
 
