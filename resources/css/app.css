@@ -6,6 +6,16 @@
 
 /* Theme tokens live in resources/css/theme-tokens.css */
 
+:root {
+    --transition-speed: 0.5s;
+}
+
+html, body, header, footer, button, .card, .page-container {
+    transition: background-color var(--transition-speed) ease,
+                color var(--transition-speed) ease,
+                border-color var(--transition-speed) ease;
+}
+
 /* Navbar */
 .navbar {
     width: 100%;
@@ -211,11 +221,7 @@
 .nav-btn {
     padding: 8px 16px; /* tweak size */
     background: var(--button-bg);
-<<<<<<< HEAD
-    color: (--text-main);
-=======
     color: var(--text-inverse);
->>>>>>> 513ee8ef8cad0112d394a91c5ca609b02b86aeb0
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -226,8 +232,6 @@
 
 .nav-btn:hover {
     background: var(--button-hover-bg);
-<<<<<<< HEAD
-=======
 }
 
 .nav-btn.profile-icon {
@@ -260,7 +264,6 @@
 .nav-btn.signin:hover,
 .nav-btn.signout:hover {
     background: color-mix(in srgb, var(--link-hover) 85%, #000 15%);
->>>>>>> 513ee8ef8cad0112d394a91c5ca609b02b86aeb0
 }
 
 html {
