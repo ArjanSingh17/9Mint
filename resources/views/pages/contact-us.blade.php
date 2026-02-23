@@ -102,9 +102,9 @@ new class extends Component {
 };
 ?>
 
-<div>
+<div class="contact-page-container">
 <head>
-  <link rel="stylesheet" href="{{ asset('css/contactUs.css') }}">
+  @vite('resources/css/pages/about-contact.css')
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -129,19 +129,19 @@ new class extends Component {
 
               <tbody class="whitespace-nowrap">
                 @forelse ($tickets as $ticket)
-                  <tr class="hover:bg-gray-50">
-                    <td class="p-4 text-[15px] text-slate-900 font-medium">
+                  <tr class="tickets-row">
+                    <td class="p-4 text-[15px] tickets-cell font-medium">
                         {{ $ticket->title }}
                     </td>
 
-                    <td class="p-4 text-[15px] text-slate-600 font-medium">
+                    <td class="p-4 text-[15px] tickets-cell font-medium">
                         {{ $ticket->status}}
                     </td>
 
-                    <td class="p-4 text-[15px] text-slate-600 font-medium">
+                    <td class="p-4 text-[15px] tickets-cell font-medium">
                         {{ $ticket->created_at->format('Y-m-d') }}
                     </td>
-                    <td class="p-4 text-[15px] text-slate-600 font-medium">
+                    <td class="p-4 text-[15px] tickets-cell font-medium">
                        <span wire:poll.5s>
                        {{ $ticket->conversations->sum(fn ($conversation) => $conversation->unreadMessagesCount()) }}
                       </span>
@@ -165,7 +165,7 @@ new class extends Component {
                   </tr>
                 @empty
                   <tr>
-                    <td colspan="4" class="p-4 text-center text-gray-500">
+                    <td colspan="4" class="p-4 text-center tickets-empty">
                         No tickets yet
                     </td>
                   </tr>

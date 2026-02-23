@@ -5,7 +5,7 @@
 @section('title', 'Terms and Conditions')
 
 @push('styles')
- <link rel="stylesheet" href="{{ asset('css/contactUs.css') }}">
+ @vite('resources/css/pages/about-contact.css')
 @endpush
 
 @section('content')

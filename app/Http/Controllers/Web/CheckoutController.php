@@ -68,6 +68,13 @@ class CheckoutController extends Controller
             'city' => ['required', 'string', 'max:255'],
             'postal_code' => ['required', 'string', 'max:40'],
             'provider' => ['required', 'in:mock_bank,mock_crypto,mock_wallet'],
+            'bank_account_name' => ['required_if:provider,mock_bank', 'string', 'max:255'],
+            'bank_sort_code' => ['required_if:provider,mock_bank', 'string', 'max:50'],
+            'bank_account_number' => ['required_if:provider,mock_bank', 'string', 'max:50'],
+            'bank_reference' => ['required_if:provider,mock_bank', 'string', 'max:255'],
+            'wallet_address' => ['required_if:provider,mock_crypto', 'string', 'max:255'],
+            'wallet_tag' => ['required_if:provider,mock_crypto', 'string', 'max:255'],
+            'wallet_network' => ['required_if:provider,mock_crypto', 'string', 'max:20'],
             'wallet_currency' => ['required_if:provider,mock_wallet', 'string', 'max:10'],
         ]);
 

@@ -98,4 +98,9 @@ class Conversation extends Model
             ->whereNull('read_at')
             ->count();
     }
+
+ public function lastMessage()
+{
+    return $this->hasOne(Message::class)->latestOfMany();
+}
 }

@@ -3,7 +3,7 @@
 @section('title', 'Products')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/products.css') }}">
+    @vite('resources/css/pages/products.css')
 @endpush
 
 @section('content')
@@ -24,25 +24,7 @@
                     $totalEditions = $collection->nfts->sum('editions_total');
                     $remainingEditions = $collection->nfts->sum('editions_remaining');
                 @endphp
-                <div class="collection-card">
-                    <h3>
-                        <a href="{{ route('collections.show', ['slug' => $collection->slug]) }}">
-                            {{ $collection->name }}
-                        </a>
-                    </h3>
-
-                    @if ($collection->description)
-                        <p>{{ $collection->description }}</p>
-                    @endif
-
-                    @if($totalEditions > 0)
-                        <p class="collection-stock">
-                            Stock: {{ $remainingEditions }} NFTs available (out of {{ $totalEditions }})
-                        </p>
-                    @endif
-
-                    <p>Click to find more about each individual NFT.</p>
-
+                <a class="collection-card" href="{{ route('collections.show', ['slug' => $collection->slug]) }}">
                     @if ($imageUrls->isNotEmpty())
                         <div class="collection-image-wrapper">
                             <img
@@ -53,7 +35,23 @@
                             >
                         </div>
                     @endif
-                </div>
+
+                    <div class="collection-content">
+                        <h3>{{ $collection->name }}</h3>
+
+                        @if ($collection->description)
+                            <p>{{ $collection->description }}</p>
+                        @endif
+
+                        @if($totalEditions > 0)
+                            <p class="collection-stock">
+                                Stock: {{ $remainingEditions }} NFTs available (out of {{ $totalEditions }})
+                            </p>
+                        @endif
+
+                        <p>Click to find more about each individual NFT.</p>
+                    </div>
+                </a>
             @endforeach
         @endif
     </section>

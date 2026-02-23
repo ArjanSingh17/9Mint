@@ -22,10 +22,10 @@ body {
 .site-footer {
     text-align: center;
     padding: 20px; /* tweak padding */
-    border-top: 1px solid #ccc;
+    border-top: 1px solid var(--border-soft);
     font-size: 0.9rem; /* tweak size */
-    color: #555;
-    background-color: #ffffff;
+    color: var(--text-secondary);
+    background-color: var(--surface-chrome);
     width: 100%;
     box-sizing: border-box;
     flex-shrink: 0;

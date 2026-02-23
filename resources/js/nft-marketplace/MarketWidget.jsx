@@ -44,14 +44,14 @@ const Chart = ({ points = [], currency }) => {
     };
     const toY = (value) => padding + (1 - (value - min) / range) * chartHeight;
 
-    const chartColor = '#8b5cf6';
+    const chartColor = 'var(--link-hover)';
     const line = points.length === 1
         ? `${midX},${toY(points[0].value)} ${width - padding},${toY(points[0].value)}`
         : points.map((p, idx) => `${toX(idx)},${toY(p.value)}`).join(' ');
     const latest = points[points.length - 1];
     const latestX = toX(points.length - 1);
     const latestY = toY(latest.value);
-    const tickColor = 'rgba(255, 255, 255, 0.7)';
+    const tickColor = 'var(--chart-tick-color)';
     const gridColor = 'rgba(255, 255, 255, 0.12)';
     const fontSize = 11;
     const formatTickValue = (value) => formatMoney(value, currency);
@@ -145,14 +145,23 @@ export default function MarketWidget({ slug, currencies = [], defaultCurrency = 
         return (
             <div className="nft-market__row" key={listing.listing_id}>
                 <div className="nft-market__cell name">
-                   {listing.listing_id && (
-<form method="POST" action={`/conversations/start/${listing.listing_id}`}>
-    <input type="hidden" name="_token" value={csrfToken} />
-    <button type="submit" className="hover:text-blue-500 transition cursor-pointer">
-        <strong>{listing.seller}</strong>
-    </button>
-</form>
-)}
+                    <div className="nft-market__seller-line">
+                        {listing.seller ? (
+                            <a href={`/profile/${encodeURIComponent(listing.seller)}`}>
+                                <strong>{listing.seller}</strong>
+                            </a>
+                        ) : (
+                            <strong>Unknown</strong>
+                        )}
+                        {listing.listing_id && isAuthed && (!viewerId || listing.seller_user_id !== viewerId) ? (
+                            <form method="POST" action={`/conversations/start/${listing.listing_id}`} className="nft-market__inline-contact-form">
+                                <input type="hidden" name="_token" value={csrfToken} />
+                                <button type="submit" className="nft-market__contact-btn">
+                                    Contact me
+                                </button>
+                            </form>
+                        ) : null}
+                    </div>
                     <span>Listing #{listing.listing_id}</span>
                 </div>
                 <div className="nft-market__cell price">{price}</div>
@@ -185,7 +194,7 @@ export default function MarketWidget({ slug, currencies = [], defaultCurrency = 
                 </div>
             </div>
         );
-    }), [listings, isAuthed, csrfToken, loadMarket]);
+    }), [listings, isAuthed, csrfToken, loadMarket, viewerId]);
 
     return (
         <section id="nft-market">
