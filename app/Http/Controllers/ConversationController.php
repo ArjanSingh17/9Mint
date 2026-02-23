@@ -51,23 +51,44 @@ return redirect()->route('chat.user', [
     'conversation' => $conversation->id,
 ]);
 
-
-
 }
 public function startConversation($receiverId)
 {
     $senderId = auth()->id();
 
-    $existing = \App\Models\Conversation::where('type', 'user')
+    // Prevent messaging yourself
+    if ($senderId == $receiverId) {
+        abort(403);
+    }
+
+    // Check for existing conversation (both directions)
+    $conversation = Conversation::where('type', 'user')
+        ->whereNull('ticket_id')
         ->where(function ($q) use ($senderId, $receiverId) {
-            $q->where('sender_id', $senderId)->where('receiver_id', $receiverId);
-        })
-        ->orWhere(function ($q) use ($senderId, $receiverId) {
-            $q->where('sender_id', $receiverId)->where('receiver_id', $senderId);
+            $q->where(function ($sub) use ($senderId, $receiverId) {
+                $sub->where('sender_id', $senderId)
+                    ->where('receiver_id', $receiverId);
+            })->orWhere(function ($sub) use ($senderId, $receiverId) {
+                $sub->where('sender_id', $receiverId)
+                    ->where('receiver_id', $senderId);
+            });
         })
         ->first();
 
-public function startWithUser(User $user)
+    // Create if not exists
+    if (! $conversation) {
+        Conversation::create([
+            'type'        => 'user',
+            'sender_id'   => $senderId,
+            'receiver_id' => $receiverId,
+            'ticket_id'   => null,
+        ]);
+    }
+
+    // Redirect back to the same page
+    return back()->with('success', 'Conversation started.');
+}
+function startWithUser(User $user)
 {
     $buyer = auth()->user();
     $sellerId = $user->id;
@@ -106,4 +127,24 @@ public function startWithUser(User $user)
     ]);
 }
 
-}
+
+
+public function enterConversation($receiverId)
+{
+    $senderId = auth()->id();
+
+    $conversation = \App\Models\Conversation::where('type', 'user')
+        ->where(function ($q) use ($senderId, $receiverId) {
+            $q->where('sender_id', $senderId)->where('receiver_id', $receiverId);
+        })
+        ->orWhere(function ($q) use ($senderId, $receiverId) {
+            $q->where('sender_id', $receiverId)->where('receiver_id', $senderId);
+        })
+        ->first();
+
+    if (!$conversation) {
+        abort(404, 'No conversation found.');
+    }
+
+    return redirect()->to("chat/user/{$senderId}/{$conversation->id}");
+}}
