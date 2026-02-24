@@ -18,6 +18,7 @@ use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CollectionPageController;
 use App\Http\Controllers\Web\FavouritePageController;
 use App\Http\Controllers\Api\V1\FavouriteController;
+use App\Http\Controllers\NftReviewController;
 
 
 // MODELS
@@ -164,3 +165,14 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/reviewUs', function () {
     return view('reviewUs');
 });
+
+// Handle review submission
+Route::post('/nfts/{nft}/review', [NftReviewController::class, 'store'])
+    ->name('nfts.review.store')
+    ->middleware('auth');
+// Handle review update (if you want to allow users to edit their reviews)
+    Route::put('/nfts/{nft}/review', [NftReviewController::class, 'update'])
+    ->middleware('auth')
+    ->name('nfts.review.update');
+
+

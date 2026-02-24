@@ -150,4 +150,110 @@
         data-auth="{{ auth()->check() ? '1' : '0' }}"
         data-viewer-id="{{ auth()->id() }}"
     ></div>
+
+    <hr class="review-divider">
+
+<section class="nft-reviews-section">
+
+    <h3>Customer NFT Reviews</h3>
+
+    @if($reviewCount > 0)
+        <div class="review-summary">
+            <strong>{{ number_format($averageRating, 1) }}</strong>
+            out of 5 ({{ $reviewCount }} reviews)
+        </div>
+
+        @foreach($nft->reviews as $review)
+            <div class="review-card">
+                <div class="review-stars">
+                    {{ str_repeat('★', $review->rating) }}
+                    {{ str_repeat('☆', 5 - $review->rating) }}
+                </div>
+
+                <div class="review-author">
+                    {{ $review->user->name }}
+                </div>
+
+                <div class="review-text">
+                    {{ $review->review_text }}
+                </div>
+
+                <div class="review-date">
+                    {{ $review->created_at->format('d M Y') }}
+                </div>
+                @if(auth()->check() && auth()->id() === $review->user_id)
+    <button type="button"
+        onclick="toggleEditForm()"
+        class="edit-review-btn">
+     Edit Review
+</button>
+
+@endif
+
+            </div>
+        @endforeach
+    @else
+        <p class="no-reviews">No reviews yet. Be the first to review this NFT.</p>
+    @endif
+
+
+    @if(auth()->check())
+        <div id="review-edit-form" class="review-form-wrapper" style="display: none;">
+
+            <h4>
+                {{ $userReview ? 'Edit Your Review' : 'Write a Customer Review' }}
+            </h4>
+
+            <form method="POST"
+                  action="{{ $userReview
+                      ? route('nfts.review.update', $nft)
+                      : route('nfts.review.store', $nft) }}">
+
+                @csrf
+                @if($userReview)
+                    @method('PUT')
+                @endif
+
+                <div class="star-rating">
+                    @for($i = 5; $i >= 1; $i--)
+                        <input type="radio"
+                               id="star{{ $i }}"
+                               name="rating"
+                               value="{{ $i }}"
+                               {{ $userReview && $userReview->rating == $i ? 'checked' : '' }}>
+                        <label for="star{{ $i }}">★</label>
+                    @endfor
+                </div>
+
+                <textarea name="review_text" required>{{ $userReview->review_text ?? '' }}</textarea>
+
+                <button type="submit" class="review-submit-btn">
+                    {{ $userReview ? 'Update Review' : 'Submit Review' }}
+                </button>
+            </form>
+        </div>
+    @else
+        <div class="login-to-review">
+            <a href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
+                Login to write a review
+            </a>
+        </div>
+    @endif
+
+</section>
+
+</section>
+<script>
+function toggleEditForm() {
+    const form = document.getElementById('review-edit-form');
+
+    if (form.style.display === "none") {
+        form.style.display = "block";
+        form.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        form.style.display = "none";
+    }
+}
+</script>
+
 @endsection
