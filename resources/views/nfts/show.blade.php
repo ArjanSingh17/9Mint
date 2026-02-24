@@ -197,48 +197,56 @@
     @endif
 
 
-    @if(auth()->check())
-        <div id="review-edit-form" class="review-form-wrapper" style="display: none;">
+   @if(auth()->check())
 
-            <h4>
-                {{ $userReview ? 'Edit Your Review' : 'Write a Customer Review' }}
-            </h4>
+    <div id="review-edit-form" class="review-form-wrapper" style="display: {{ $userReview ? 'none' : 'block' }};">
 
-            <form method="POST"
-                  action="{{ $userReview
-                      ? route('nfts.review.update', $nft)
-                      : route('nfts.review.store', $nft) }}">
+        <h4>
+            {{ $userReview ? 'Edit Your Review' : 'Write a Customer Review' }}
+        </h4>
 
-                @csrf
-                @if($userReview)
-                    @method('PUT')
-                @endif
+        <form method="POST"
+              action="{{ $userReview
+                  ? route('nfts.review.update', $nft)
+                  : route('nfts.review.store', $nft) }}">
 
-                <div class="star-rating">
-                    @for($i = 5; $i >= 1; $i--)
-                        <input type="radio"
-                               id="star{{ $i }}"
-                               name="rating"
-                               value="{{ $i }}"
-                               {{ $userReview && $userReview->rating == $i ? 'checked' : '' }}>
-                        <label for="star{{ $i }}">★</label>
-                    @endfor
-                </div>
+            @csrf
+            @if($userReview)
+                @method('PUT')
+            @endif
 
-                <textarea name="review_text" required>{{ $userReview->review_text ?? '' }}</textarea>
+            <div class="star-rating">
+                @for($i = 5; $i >= 1; $i--)
+                    <input type="radio"
+                           id="star{{ $i }}"
+                           name="rating"
+                           value="{{ $i }}"
+                           {{ $userReview && $userReview->rating == $i ? 'checked' : '' }}>
+                    <label for="star{{ $i }}">★</label>
+                @endfor
+            </div>
 
-                <button type="submit" class="review-submit-btn">
-                    {{ $userReview ? 'Update Review' : 'Submit Review' }}
-                </button>
-            </form>
-        </div>
-    @else
-        <div class="login-to-review">
-            <a href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
-                Login to write a review
-            </a>
-        </div>
-    @endif
+            <textarea name="review_text" required>
+{{ $userReview->review_text ?? '' }}
+            </textarea>
+
+            <button type="submit" class="review-submit-btn">
+                {{ $userReview ? 'Update Review' : 'Submit Review' }}
+            </button>
+
+        </form>
+    </div>
+
+@else
+
+    <div class="login-to-review">
+        <a href="{{ route('login', ['redirect' => request()->fullUrl()]) }}">
+            Login to write a review
+        </a>
+    </div>
+
+@endif
+
 
 </section>
 
