@@ -65,4 +65,11 @@ class AdminController extends Controller
         return redirect()->route('admin.users')->with('success', 'User updated successfully.');
     }
 
+    public function inventory()
+{
+    // Fetch all NFTs and their collection info
+    $nfts = \App\Models\Nft::with('collection')->get();
+
+    return view('admin.inventory', compact('nfts'));
+}
 }

@@ -1,20 +1,41 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script>
+        (function () {
+            try {
+                if (localStorage.getItem('theme') === 'light') {
+                    document.documentElement.classList.add('light-mode');
+                } else {
+                    document.documentElement.classList.remove('light-mode');
+                }
+            } catch (e) {
+                document.documentElement.classList.remove('light-mode');
+            }
+        })();
+    </script>
 
     <title>9Mint - @yield('title', 'Page')</title>
     <link rel="icon" href="{{ asset('images/9mint.png') }}">
 
     {{-- Enables React Fast Refresh when running Vite dev server (no-op in production) --}}
     @viteReactRefresh
-    @vite(['resources/css/app.css', 'resources/css/layout.css', 'resources/js/app.js'])
+    @vite([
+        'resources/css/theme-tokens.css',
+        'resources/css/layout.css',
+        'resources/css/theme-components.css',
+        'resources/css/app.css',
+        'resources/js/app.js',
+    ])
     @stack('styles')
+    @vite('resources/css/theme-layer.css')
      @livewireStyles
 </head>
-<body>
+<body class="app-shell">
     {{-- Shared top navigation bar --}}
     <header>
         <x-navbar />
@@ -25,7 +46,7 @@
         @isset($slot)
         {{ $slot }}
     @endisset
-        @yield('content') 
+    @yield('content') 
     </main>
 
     {{-- Shared footer --}}
@@ -41,7 +62,35 @@
         <a href="/reviewUs">Review Us</a>
     </footer>
 
+    <x-theme-fab />
+    <x-friend-fab />
+
     @stack('scripts')
      @livewireScripts
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleButton = document.getElementById("theme-toggle");
+        const themeIcon = document.getElementById("theme-icon");
+        const savedTheme = localStorage.getItem("theme");
+
+        if (savedTheme === "light") {
+            document.documentElement.classList.add("light-mode");
+            if (themeIcon) themeIcon.textContent = "☀️";
+        }else {
+            document.documentElement.classList.remove("light-mode");
+            if (themeIcon) themeIcon.textContent = "🌙"
+        }
+
+        if (toggleButton) {
+            toggleButton.addEventListener("click", function () {
+                document.documentElement.classList.toggle("light-mode");
+                const isLight = document.documentElement.classList.contains("light-mode");
+                localStorage.setItem("theme", isLight ? "light" : "dark");
+                if (themeIcon) themeIcon.textContent = isLight ? "☀️" : "🌙";
+            });
+        }
+    });               
+    </script>
 </body>
 </html>

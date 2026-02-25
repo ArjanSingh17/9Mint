@@ -1,5 +1,56 @@
-body {
-    background-color : rgb(4, 4, 87);
+:root {
+  --bg-main: #040457;
+  --text-main: #ffffff;
+  --section-bg: #040457;
+  --card-bg: #000000f9;
+  --subtext-color: rgba(255,255,255,0.7);
+}
+
+.about-us-page-container,
+.about-us-container {
+  --bg-main: #040457;
+  --card-bg: #c8c8c8f9;
+  --text-main: #000000;
+  --subtext-color: rgba(177, 173, 173, 0.7);
+  --button-bg: #000000;
+  --button-text: #ffffff;
+  --section-bg: #040457;
+
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  transition: background-color 0.3s ease, color 0.2s ease;
+}
+.contact-page-container {
+  --bg-main: #040457;
+  --card-bg: #3b3636f9;
+  --text-main: #ffffff;
+  --subtext-color: rgba(255,255,255,0.7);
+  --button-bg: #000000;
+  --button-text: #ffffff;
+  --section-bg: #040457;
+  --accent-color: #000000;
+
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  transition: background-color 0.3s ease, color 0.2s ease;
+}
+
+html.light-mode .contact-page-container,
+html.light-mode .about-us-page-container,
+html.light-mode .about-us-container {
+  --bg-main: #d9d9de;
+  --button-text:rgb(255, 255, 255);
+  --button-bg: #ffffff;
+  --section-bg: #ffffff;
+  --text-main: #000000;
+  --card-bg: #ffffff;
+  --accent-color: #222222;
 }
 .contactUs-section {
     display: flex;
@@ -37,24 +88,12 @@ body {
         width: 80%;
         padding: 10px;
         margin-bottom: 15px;
-        border: 1px solid #ccc;
+        border: 1px solid var(--accent-color);
         border-radius: 5px;
         font-size: 14px;
         
     }
-  h1{
-    text-align: center;
-    color: white;
-  }  
 
- h2 {
-    text-align: center;
-    color: white;
- }
- h3 {
-    text-align: center;
-    color: white;
- }
 .contactUs-form button {
     background-color:black;
     color: white;
@@ -87,7 +126,7 @@ body {
 p{
     margin-top: 10px;
     font-size: 14px;
-    color: white;
+    color: var(--subtext-color);
     text-align: center;
 }
 .nft-grid {
@@ -108,8 +147,8 @@ p{
 .about-section {
     padding: 40px;
     text-align: center;
-    background-color: rgb(4, 4, 87);
-    color: white;
+    background-color: var(--bg-main);
+    color: var(--text-main);
 
 }
 .about-section h2 {
@@ -120,8 +159,8 @@ p{
 .team-section {
     padding: 40px;
     text-align: center;
-    background-color: rgb(4, 4, 87);
-    color: white;
+    background-color: var(--section-bg);
+    color: var(--text-main);
     text-align: center;
 
 }
@@ -132,9 +171,9 @@ p{
     justify-content: center;
 }
 .team-card {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--card-bg);
    padding: 20px;
-    border-radius: 10px;
+   border-radius: 10px;
     width: 200px;
     
 }
@@ -246,3 +285,55 @@ p{
   }
 }
 
+@media (max-width: 768px) {
+    .team-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* adjusting sizes for mobile devices*/
+.contact-page-container > .flex{
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 30px;
+  
+}
+
+.tickets-section,
+.contactUs-section > .flex > div:first-child{
+  flex: 1 1 500px;
+  box-sizing: border-box;
+  max-width: 600px;
+}
+
+.contactUs-form {
+  padding: 20px;
+  width: 100%;
+  border-radius: 10px;
+  background-color: var(--card-bg);
+}
+
+.tickets-section .rounded {
+  padding: 20px;
+  overflow-x: auto;
+  border-radius: 10px;
+  background-color: var(--card-bg);
+}
+@media (max-width: 900px) {
+  .contact-page-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tickets-section,
+  .contactUs-section {
+    width: 90%;;
+    max-width: 600px;
+  }
+
+  .tickets-section .rounded, .contactUs-form {
+    width: 100%;
+  }
+}

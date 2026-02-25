@@ -3,25 +3,24 @@
 @section('title', 'About Us')
 
 @push('styles')
-  <link rel="stylesheet" href="{{ asset('css/contactUs.css') }}">
+  @vite('resources/css/pages/about-contact.css')
 @endpush
 
 @section('content')
+<div class="about-page-container about-us-container">
       {{-- Hero --}}
       <section class="Groupname">
         <h1>9 MINT</h1>
         <p>All about art and creativity</p>
       </section>
 
-    {{-- NFT grid --}}
-      @php
-          $imageUrls = $nfts->pluck('image_url')->values();
-          $initialCount = min(5, $imageUrls->count()); // initial count
-      @endphp
-      <section class="nft-grid" data-images='@json($imageUrls)'>
-        @for ($i = 0; $i < $initialCount; $i++)
-            <img src="{{ $imageUrls[$i] }}" alt="NFT {{ $i + 1 }}" />
-        @endfor
+      <!-- -- Reviews Slider -- -->
+      <section class="reviews-section">
+          <h2 class="reviews-title">What Our Users Say</h2>
+          <div id="reviews-slider" class="reviews-slider">
+              <p id="reviews-loading">Loading reviews...</p>
+          </div>
+          <a href="/reviewUs" class="reviews-cta-btn">Review Us</a>
       </section>
 
       {{-- About --}}
@@ -49,39 +48,28 @@
       {{-- Team --}}
       <section class="team-section">
         <h2>Meet the Team</h2>
-
-        <div class="team-grid">
-            @php
-                $team = [
-                    [ "name" => "Naomi", "role" => "Team mediator and Front end engineer" ],
-                    [ "name" => "Arjan", "role" => "Team Leader and Back end engineer" ],
-                    [ "name" => "Maliyka", "role" => "Front end engineer leader" ],
-                    [ "name" => "Kalil", "role" => "Backend developer and Proofreader" ],
-                    [ "name" => "Dariusz", "role" => "Backend engineer and project" ],
-                    [ "name" => "Hamza", "role" => "Team creative and frontend developer" ],
-                    [ "name" => "Jahirul", "role" => "Backend Engineer and Timekeeper" ],
-                    [ "name" => "Vlas", "role" => "Front/Backend Engineer and digital artist" ],
-                ];
-            @endphp
-
-            @foreach($team as $member)
-                <div class="team-card">
-                    <img src="{{ asset('images/logo.png')}}" alt="Logo">
-                    <h3>{{ $member['name'] }}</h3>
-                    <p>Role: {{ $member['role'] }}</p>
-                </div>
-            @endforeach
+        <div class="team-table-wrap">
+            <table class="team-table">
+                <thead>
+                    <tr>
+                        <th align="left">Name</th>
+                        <th align="left">Role</th>
+                        <th align="left">ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><b>Arjan Singh</b></td><td>Project Lead &amp; Backend</td><td><code>240209768</code></td></tr>
+                    <tr><td><b>Dariusz Dabrowski</b></td><td>Backend Lead</td><td><code>240353669</code></td></tr>
+                    <tr><td><b>Jahirul Islam</b></td><td>Backend</td><td><code>240219893</code></td></tr>
+                    <tr><td><b>Khalil Suleiman</b></td><td>Backend</td><td><code>240248572</code></td></tr>
+                    <tr><td><b>Maliyka Liaqat</b></td><td>Frontend Lead</td><td><code>240119641</code></td></tr>
+                    <tr><td><b>Hamza Heybe</b></td><td>Frontend</td><td><code>240158042</code></td></tr>
+                    <tr><td><b>Naomi Olowu</b></td><td>Frontend</td><td><code>240229043</code></td></tr>
+                    <tr><td><b>Vlas Yermachenko</b></td><td>Full-stack &amp; NFT Artist</td><td><code>240180928</code></td></tr>
+                </tbody>
+            </table>
         </div>
       </section>
-      <!-- -- Reviews Slider -- -->
-<section class="reviews-section">
-    <h2 class="reviews-title">What Our Users Say</h2>
-
-   <div id="reviews-slider" class="reviews-slider">
-      <p id="reviews-loading">Loading reviews...</p>
-  </div>
-</section>
-
 @endsection
 @push('scripts')
     @vite([
