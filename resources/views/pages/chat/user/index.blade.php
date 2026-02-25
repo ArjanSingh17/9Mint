@@ -143,29 +143,26 @@ new class extends Component {
 
     // REALTIME BROADCAST HANDLER
     public function broadcastedNotifications($event)
-    {
-        if ($event['type'] == MessageSent::class) {
-
-            // only process events for the open conversation
-            if ($event['conversation_id'] != $this->selectedConversation->id) {
-                return;
-            }
-
+{
+    if ($event['type'] == MessageSent::class) {
+        if ($event['conversation_id'] == $this->selectedConversation->id) {
             $newMessage = Message::find($event['message_id']);
-
-            if (!$newMessage) {
-                return;
-            }
 
             $this->loadedMessages->push($newMessage);
 
-            // important: do not mark as read here
-            // read happens only in mount()
+            $newMessage->read_at = now();
+            $newMessage->save();
+
+            $this->selectedConversation->getReceiver()
+                ->notify(new MessageRead($this->selectedConversation->id));
 
             $this->dispatch('scroll-to-bottom');
         }
     }
+}
 
+
+    
     // LOAD MESSAGES
     public function loadMessages()
     {
