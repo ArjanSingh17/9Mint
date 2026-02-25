@@ -11,6 +11,7 @@ use App\Http\Controllers\Web\PasswordResetController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\TrendingController;
 use App\Http\Controllers\UserProfileController;
 use App\Models\User;
 use App\Http\Controllers\Web\CartController as WebCartController;
@@ -71,6 +72,7 @@ Route::get('/users', function () {return view('users');})->middleware('auth');
 // ------------------------------
 Route::get('/homepage', [HomeController::class, 'index'])->name('homepage');
 Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
+Route::get('/trending', [TrendingController::class, 'index'])->name('trending.index');
 Route::get('/aboutUs', [AboutUsController::class, 'index'])->name('about');
 Route::get('/nft/{slug}', [WebNft::class, 'show'])->name('nfts.show');
 
