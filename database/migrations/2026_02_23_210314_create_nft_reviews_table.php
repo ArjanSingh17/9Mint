@@ -18,9 +18,6 @@ return new class extends Migration
               ->constrained('nfts')
               ->cascadeOnDelete();
 
-        $table->foreignId('user_id')
-              ->constrained()
-              ->cascadeOnDelete();
 
         $table->integer('rating'); // 1-5
         $table->text('review_text');
