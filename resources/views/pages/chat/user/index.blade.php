@@ -242,28 +242,32 @@ new class extends Component {
 };
 ?>
 
+@push('styles')
+    @vite('resources/css/pages/chat.css')
+@endpush
+
 <!-- component -->
 <div class="w-full overflow-hidden">
-<div class="bg-white ">
+<div class="chat-page-container bg-white ">
     <div>
-        <div class="w-full h-32" style="background-color: #449388"></div>
+        <div class="w-full h-32 chat-header-band"></div>
 
         <div class="container mx-auto" style="margin-top: -128px;">
             <div class="py-6 h-screen">
-                <div class="flex border border-grey rounded shadow-lg h-full">
+                <div class="flex border-grey rounded shadow-lg h-full">
 
                     <!-- Left -->
-                    <div class="w-1/3 border flex flex-col">
+                    <div class="w-1/3 border flex flex-col chat-sidebar">
 
                         <!-- Header -->
-                        <div class="py-2 px-3 bg-grey-lighter flex flex-row justify-between items-center">
+                        <div class="py-2 px-3 flex flex-row justify-between items-center chat-sidebar-header">
                             <div class="flex items-center gap-2">
         <img class="w-10 h-10 rounded-full"
              src="https://images.macrumors.com/t/n4CqVR2eujJL-GkUPhv1oao_PmI=/1600x/article-new/2019/04/guest-user-250x250.jpg"/>
-        <span>{{ auth()->user()->name }}</span>
+        <span class="chat-sidebar-username">{{ auth()->user()->name }}</span>
     </div>
                           
-                            <a class="flex bg-teal-700 hover:bg-teal-800 cursor-pointer p-2 rounded-2xl transition-colors duration-200" href="/users">
+                            <a class="flex cursor-pointer p-2 rounded-2xl transition-colors duration-200 chat-btn-add" href="/users">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
   <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clip-rule="evenodd" />
 </svg> Add Friends
@@ -272,14 +276,14 @@ new class extends Component {
                         </div>
 
                         <!-- Search -->
-                        <div class="py-2 px-2 bg-grey-lightest">
+                        <div class="py-2 px-2 chat-sidebar-search">
                             <input type="text" class="w-full px-2 py-2 text-sm" placeholder="Search for a chat"/>
                         </div>
 
                         <!-- Contacts -->
-                        <div class="bg-grey-lighter flex-1 overflow-auto">
+                        <div class="flex-1 overflow-auto chat-sidebar-contacts">
                             @foreach($userConversations as $conversation)
-                            <div class="px-3 flex items-center cursor-pointer rounded-3xl mr-1 ml-1 mb-1 mt-1 {{ $selectedConversation->id === $conversation->id ? 'bg-gray-200' : 'bg-white hover:bg-gray-100' }}"
+                            <div class="px-3 flex items-center cursor-pointer rounded-3xl mr-1 ml-1 mb-1 mt-1 chat-conversation-item {{ $selectedConversation->id === $conversation->id ? 'active' : '' }}"
      wire:click="selectConversation({{ $conversation->id }})"
      wire:key="conversation-{{ $conversation->id }}" x-data
      @update-url.window="history.pushState({}, '', $event.detail.url)">
@@ -289,16 +293,16 @@ new class extends Component {
                                 </div>
                                 <div class="ml-4 flex-1  py-4">
                                     <div class="flex items-bottom justify-between">
-                                        <p class="{{ $selectedConversation->id === $conversation->id ? 'text-emerald-600' : 'text-grey-darkest' }}">
+                                        <p class="conversation-name">
                                            {{ $conversation->sender_id === auth()->id()
                                              ? $conversation->receiver->name
                                              : $conversation->sender->name }}
                                         </p>
-                                        <p class="text-xs text-grey-darkest">
+                                        <p class="text-xs conversation-time">
                                             {{ $conversation->lastMessage?->created_at?->format('g:i a') }}
                                         </p>
                                     </div>
-                                    <p class="text-grey-dark mt-1 text-sm">
+                                    <p class="mt-1 text-sm conversation-preview">
                                        {{ \Illuminate\Support\Str::limit($conversation->lastMessage?->body, 30) }}
                                     </p>
                                 </div>
@@ -310,10 +314,10 @@ new class extends Component {
 
 
                     <!-- Right -->
-                    <div class="w-2/3 border flex flex-col">
+                    <div class="w-2/3 border flex flex-col chat-main">
 
                         <!-- Header -->
-                         <div class="py-2 px-3 bg-grey-lighter flex flex-row justify-between items-center">
+                         <div class="py-2 px-3 flex flex-row justify-between items-center chat-main-header">
                             <div class="flex items-center">
                                 <div>
                                     @if(auth()->user()->role === 'admin')
@@ -323,7 +327,7 @@ new class extends Component {
                                 @endif
                             </div>
                                 <div class="ml-4">
-                                   <p class="text-grey-darker text-xs mt-1 pb-2.5">
+                                   <p class="text-xs mt-1 pb-2.5 chat-contact-name">
                                      {{ $selectedConversation->sender_id === auth()->id()
                                      ? $selectedConversation->receiver->name
                                     : $selectedConversation->sender->name }}
@@ -342,8 +346,7 @@ new class extends Component {
                         </div>
 
                         <!-- Messages -->
-<div class="flex-1 overflow-auto"
-     style="background-color: #DAD3CC"
+<div class="flex-1 overflow-auto chat-messages-area"
      wire:poll.0.1s="loadMessages"
      id="chat-container"
      x-data="{
@@ -360,7 +363,7 @@ new class extends Component {
 
         {{-- Date banner --}}
         <div class="flex justify-center mb-2">
-            <div class="rounded py-2 px-4" style="background-color: #DDECF2">
+            <div class="rounded py-2 px-4 chat-date-banner">
                 <p class="text-sm uppercase">
                     {{ \Carbon\Carbon::parse(optional($this->selectedConversation->ticket)->created_at)->format('jS F Y') }}
                 </p>
@@ -372,20 +375,19 @@ new class extends Component {
             {{-- My message --}}
             @if($message->sender_id === auth()->id())
                 <div class="flex justify-end mb-2">
-                    <div class="rounded py-2 px-3 max-w-[45%] break-words"
-                         style="background-color: #E2F7CB">
+                    <div class="rounded py-2 px-3 max-w-[45%] break-words chat-bubble-out">
 
                         <p class="text-sm mt-1">
                             {{ $message->body }}
                         </p>
 
-                        <p class="text-right text-xs text-grey-dark mt-1">
+                        <p class="text-right text-xs mt-1 bubble-time">
                             {{ \Carbon\Carbon::parse($message->created_at)->format('g:i a') }}
 
                             @if($message->read_at)
-                                <span class="text-blue-500">✓✓</span>
+                                <span class="chat-tick-read">✓✓</span>
                             @else
-                                <span class="text-gray-400">✓</span>
+                                <span class="chat-tick-sent">✓</span>
                             @endif
                         </p>
                     </div>
@@ -394,10 +396,9 @@ new class extends Component {
             {{-- Their message --}}
             @else
                 <div class="flex mb-2">
-                    <div class="rounded py-2 px-3 max-w-[45%] break-words"
-                         style="background-color: #F2F2F2">
+                    <div class="rounded py-2 px-3 max-w-[45%] break-words chat-bubble-in">
 
-                        <p class="text-sm text-emerald-600">
+                        <p class="text-sm bubble-sender-name">
                             {{ $selectedConversation->sender_id === auth()->id()
                                      ? $selectedConversation->receiver->name
                                     : $selectedConversation->sender->name }}
@@ -407,7 +408,7 @@ new class extends Component {
                             {{ $message->body }}
                         </p>
 
-                        <p class="text-right text-xs text-grey-dark mt-1">
+                        <p class="text-right text-xs mt-1 bubble-time">
                             {{ \Carbon\Carbon::parse($message->created_at)->format('g:i a') }}
                         </p>
 
@@ -423,13 +424,13 @@ new class extends Component {
                       <!-- Input -->
                         <form wire:submit.prevent="sendMessage">
                             @csrf
-                        <div class="bg-grey-lighter px-4 py-4 flex items-center">
+                        <div class="px-4 py-4 flex items-center chat-input-area">
                             <div class="flex-1 mx-4">
                               <input class="w-full border rounded px-2 py-2" type="text" id="body" wire:model="body" placeholder="Write your Message..." required />
                             </div>
                             <div>
                                <button type="submit"
-              class="px-6 py-2.5 min-w-[170px] rounded-full cursor-pointer text-white text-sm tracking-wider font-medium border-0 outline-0 bg-blue-700 hover:bg-blue-800">Send</button>
+              class="px-6 py-2.5 min-w-[170px] rounded-full cursor-pointer text-sm tracking-wider font-medium border-0 outline-0 chat-btn-send">Send</button>
             </form>
                             </div>
                         </div>

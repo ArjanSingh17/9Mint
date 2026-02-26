@@ -230,20 +230,24 @@ public function getUserNameById(int $id)
 
 };
 ?>
- <div class="w-full overflow-hidden">
-<div class="bg-white ">
-<div>
-        <div class="w-full h-32 " style="background-color: #449388"></div>
+ @push('styles')
+    @vite('resources/css/pages/chat.css')
+@endpush
 
-        <div class="w-full px-4" style="margin-top: -128px;">
+<div class="w-full overflow-hidden">
+<div class="chat-page-container bg-white ">
+<div>
+        <div class="w-full h-32 chat-header-band"></div>
+
+        <div class="w-full px-4 chat-page-container" style="margin-top: -128px;">
             <div class="py-6 h-screen ">
-                <div class="border border-grey rounded shadow-lg h-full ">
+                <div class="rounded shadow-lg h-full ">
 
                     <!-- Right -->
-                    <div class="border flex flex-col h-full ">
+                    <div class="border flex flex-col h-full chat-main">
 
                         <!-- Header -->
-                       <div class="py-2 px-3 bg-grey-lighter flex items-center relative">
+                       <div class="py-2 px-3 flex items-center relative chat-main-header">
                             <div class="flex items-center">
                                 <div>
                                     @if(auth()->user()->role === 'admin')
@@ -253,7 +257,7 @@ public function getUserNameById(int $id)
                                 @endif
                             </div>
                                 <div class="ml-4">
-                                    <p class="text-grey-darker text-xs mt-1 pb-2.5 ">
+                                    <p class="text-xs mt-1 pb-2.5 chat-contact-name">
                                          @if(auth()->user()->role === 'admin')
                                         {{$this->getUserNameById($this->selectedConversation->sender_id)}}
                                         @else 
@@ -264,7 +268,7 @@ public function getUserNameById(int $id)
                                     
                                 </div>
                             </div> 
-                            <p class="absolute left-1/2 -translate-x-1/2 text-grey-darkest pt-2.5">
+                            <p class="absolute left-1/2 -translate-x-1/2 pt-2.5 chat-contact-name">
                                        Title: {{$this->selectedConversation->ticket->title}}
                                     </p>
 
@@ -274,10 +278,9 @@ public function getUserNameById(int $id)
                                 </div>
                             
                         </div>
-
+    
     <!-- Messages -->
-<div class="flex-1 overflow-auto" 
-     style="background-color: #DAD3CC" 
+<div class="flex-1 overflow-auto chat-messages-area"
      wire:poll.0.1s="loadMessages"
      id="chat-container"
      x-data="{ 
@@ -292,7 +295,7 @@ public function getUserNameById(int $id)
     <div class="py-2 px-3">
 
         <div class="flex justify-center mb-2">
-            <div class="rounded py-2 px-4" style="background-color: #DDECF2">
+            <div class="rounded py-2 px-4 chat-date-banner">
                 <p class="text-sm uppercase">
                      {{ \Carbon\Carbon::parse($this->selectedConversation->ticket->created_at)->format('jS F Y') }}
                 </p>
@@ -303,16 +306,16 @@ public function getUserNameById(int $id)
             @if($message->sender_id === auth()->id())
                 {{-- My message (right side) --}}
                 <div class="flex justify-end mb-2">
-                    <div class="rounded py-2 px-3 max-w-[45%] break-words" style="background-color: #E2F7CB" >
+                    <div class="rounded py-2 px-3 max-w-[45%] break-words chat-bubble-out">
                         <p class="text-sm mt-1">
                             {{$message->body}}
                         </p>
-                        <p class="text-right text-xs text-grey-dark mt-1">
+                        <p class="text-right text-xs mt-1 bubble-time">
                             {{\Carbon\Carbon::parse($message->created_at)->format('g:i a') }}
                             @if($message->read_at)
-                        <span class="text-blue-500">✓✓</span> {{-- Double check = read --}}
+                        <span class="chat-tick-read">✓✓</span>
                     @else
-                        <span class="text-gray-400">✓</span> {{-- Single check = sent --}}
+                        <span class="chat-tick-sent">✓</span>
                     @endif
                         </p>
                     </div>
@@ -320,8 +323,8 @@ public function getUserNameById(int $id)
             @else
                 {{-- Their message (left side) --}}
                 <div class="flex mb-2">
-                    <div class="rounded py-2 px-3 max-w-[45%] break-words" style="background-color: #F2F2F2">
-                        <p class="text-sm text-emerald-600">
+                    <div class="rounded py-2 px-3 max-w-[45%] break-words chat-bubble-in">
+                        <p class="text-sm bubble-sender-name">
                            @if(auth()->user()->role === 'admin')
                              {{$this->getUserNameById($this->selectedConversation->sender_id)}}
                             @else 
@@ -331,7 +334,7 @@ public function getUserNameById(int $id)
                         <p class="text-sm mt-1">
                             {{$message->body}}
                         </p>
-                        <p class="text-right text-xs text-grey-dark mt-1">
+                        <p class="text-right text-xs mt-1 bubble-time">
                             {{\Carbon\Carbon::parse($message->created_at)->format('g:i a') }}
                         </p> 
                     </div>
@@ -344,13 +347,13 @@ public function getUserNameById(int $id)
                         <!-- Input -->
                         <form wire:submit.prevent="sendMessage">
                             @csrf
-                        <div class="bg-grey-lighter px-4 py-4 flex items-center">
+                        <div class="px-4 py-4 flex items-center chat-input-area">
                             <div class="flex-1 mx-4">
                               <input class="w-full border rounded px-2 py-2" type="text" id="body" wire:model="body" placeholder="Write your Message..." required />
                             </div>
                             <div>
                                <button type="submit"
-              class="px-6 py-2.5 min-w-[170px] rounded-full cursor-pointer text-white text-sm tracking-wider font-medium border-0 outline-0 bg-blue-700 hover:bg-blue-800">Send</button>
+              class="px-6 py-2.5 min-w-[170px] rounded-full cursor-pointer text-sm tracking-wider font-medium border-0 outline-0 chat-btn-send">Send</button>
             </form>
                             </div>
                         </div>
