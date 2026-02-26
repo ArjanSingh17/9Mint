@@ -12,6 +12,7 @@
     <a href="/homepage">Homepage</a>
     <a href="/aboutUs">About Us</a>
     <a href="/products">Products</a>
+    <a href="/trending">Trending</a>
     <a href="/pricing">Pricing</a>
   </div>
 
