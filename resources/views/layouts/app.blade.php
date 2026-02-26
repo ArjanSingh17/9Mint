@@ -20,7 +20,8 @@
     </script>
 
     <title>9Mint - @yield('title', 'Page')</title>
-    <link rel="icon" href="{{ asset('images/9mint.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('favicon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.png') }}">
 
     {{-- Enables React Fast Refresh when running Vite dev server (no-op in production) --}}
     @viteReactRefresh
@@ -59,7 +60,7 @@
         <span>|</span>
         <a href="/contactUs">Contact Us</a>
         <span>|</span>
-        <a href="/reviewUs">Review Us</a>
+        <a href="{{ route('about') }}">About Us</a>
     </footer>
 
     <x-theme-fab />

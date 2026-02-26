@@ -9,7 +9,7 @@
 @section('content')
     {{-- Collections --}}
     <section id="NFT_collections">
-        <h2>Our Collections</h2>
+        <h2>All collections</h2>
 
         {{-- Empty --}}
         @if ($collections->isEmpty())
@@ -21,17 +21,20 @@
             @foreach ($collections as $collection)
                 @php
                     $imageUrls = $collection->nfts->pluck('image_url')->values();
+                    $coverImageUrl = $collection->cover_image_url;
                     $totalEditions = $collection->nfts->sum('editions_total');
-                    $remainingEditions = $collection->nfts->sum('editions_remaining');
+                    $listedEditions = (int) ($collection->listed_editions_count ?? 0);
                 @endphp
                 <a class="collection-card" href="{{ route('collections.show', ['slug' => $collection->slug]) }}">
-                    @if ($imageUrls->isNotEmpty())
+                    @if ($coverImageUrl || $imageUrls->isNotEmpty())
                         <div class="collection-image-wrapper">
                             <img
-                                src="{{ asset(ltrim($imageUrls[0], '/')) }}"
+                                src="{{ asset(ltrim($coverImageUrl ?: $imageUrls[0], '/')) }}"
                                 alt="{{ $collection->name }} Preview"
                                 class="collection-preview"
-                                data-images='@json($imageUrls)'
+                                @if (!$coverImageUrl)
+                                    data-images='@json($imageUrls)'
+                                @endif
                             >
                         </div>
                     @endif
@@ -45,7 +48,7 @@
 
                         @if($totalEditions > 0)
                             <p class="collection-stock">
-                                Stock: {{ $remainingEditions }} NFTs available (out of {{ $totalEditions }})
+                                Stock: {{ $listedEditions }} NFTs listed (out of {{ $totalEditions }})
                             </p>
                         @endif
 

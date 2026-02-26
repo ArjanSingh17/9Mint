@@ -12,6 +12,19 @@
 @endpush
        
 @section('content')
+    @php
+      $isCreatorFeeCheckout = !empty($creatorFeeCheckout);
+      $creatorFeeAmount = (float) ($creatorFeeCheckout->pay_total_amount ?? 80);
+      $creatorFeeCurrency = $creatorFeeCheckout->pay_currency ?? 'GBP';
+      $creatorFeeSymbol = $currencySymbols[$creatorFeeCurrency] ?? null;
+      $paymentReferenceId = $isCreatorFeeCheckout
+        ? ('CF-' . ($creatorFeeCheckout->collection_id ?? 'NEW'))
+        : ($order->id ?? 'PENDING');
+      $walletNetworkValue = $isCreatorFeeCheckout
+        ? $creatorFeeCurrency
+        : ($order->pay_currency ?? 'GBP');
+    @endphp
+
     {{-- Checkout --}}
     @if($order)
       <div
@@ -44,11 +57,12 @@
       @endphp
 
       {{-- Empty --}}
-      @if(!$order)
+      @if(!$order && !$isCreatorFeeCheckout)
         <p style="text-align: center; padding: 40px;">Your cart is empty or checkout has expired. <a href="/products">Browse products</a></p>
       @else
         <form method="POST" action="{{ route('orders.store') }}">
           @csrf
+          <input type="hidden" name="checkout_context" value="{{ $isCreatorFeeCheckout ? 'creator_fee' : 'cart' }}">
 
           {{-- Shipping --}}
           <section class="checkoutSection">
@@ -63,31 +77,47 @@
 
           {{-- Summary --}}
           <section class="checkoutSection">
-            <h2>Your Order</h2>
+            <h2>{{ $isCreatorFeeCheckout ? 'Creator Fee' : 'Your Order' }}</h2>
 
             <div style="margin-bottom: 20px;">
-              @foreach($order->items as $item)
+              @if ($isCreatorFeeCheckout)
                 @php
-                  $listing = $item->listing;
-                  $nft = $listing?->token?->nft;
-                  $itemTotal = ($item->pay_unit_amount ?? 0) * $item->quantity;
-                  $subtotal += $itemTotal;
-                  $nftName = $nft?->name ?? 'NFT';
-                  $currency = $item->pay_currency ?? ($order->pay_currency ?? 'GBP');
-                  $displayCurrency = $displayCurrency ?: $currency;
-                  $currencySymbol = $currencySymbols[$currency] ?? null;
+                  $subtotal = $creatorFeeAmount;
+                  $displayCurrency = $creatorFeeCurrency;
                 @endphp
-
                 <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; margin-bottom: 10px;">
                   <div>
-                    <strong>{{ $nftName }}</strong><br>
-                    <small>Listing #{{ $listing?->id }} | Quantity: {{ $item->quantity }}</small>
+                    <strong>Collection Creation Fee</strong><br>
+                    <small>{{ $creatorFeeCheckout->collection_name ?? 'Pending collection' }}</small>
                   </div>
                   <div>
-                    <strong>{{ $currencySymbol ? $currencySymbol . number_format($itemTotal, 2) : number_format($itemTotal, 2) . ' ' . $currency }}</strong>
+                    <strong>{{ $creatorFeeSymbol ? $creatorFeeSymbol . number_format($creatorFeeAmount, 2) : number_format($creatorFeeAmount, 2) . ' ' . $creatorFeeCurrency }}</strong>
                   </div>
                 </div>
-              @endforeach
+              @else
+                @foreach($order->items as $item)
+                  @php
+                    $listing = $item->listing;
+                    $nft = $listing?->token?->nft;
+                    $itemTotal = ($item->pay_unit_amount ?? 0) * $item->quantity;
+                    $subtotal += $itemTotal;
+                    $nftName = $nft?->name ?? 'NFT';
+                    $currency = $item->pay_currency ?? ($order->pay_currency ?? 'GBP');
+                    $displayCurrency = $displayCurrency ?: $currency;
+                    $currencySymbol = $currencySymbols[$currency] ?? null;
+                  @endphp
+
+                  <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; margin-bottom: 10px;">
+                    <div>
+                      <strong>{{ $nftName }}</strong><br>
+                      <small>Listing #{{ $listing?->id }} | Quantity: {{ $item->quantity }}</small>
+                    </div>
+                    <div>
+                      <strong>{{ $currencySymbol ? $currencySymbol . number_format($itemTotal, 2) : number_format($itemTotal, 2) . ' ' . $currency }}</strong>
+                    </div>
+                  </div>
+                @endforeach
+              @endif
 
               <div style="display: flex; justify-content: space-between; padding: 15px 10px; border-top: 2px solid #333; margin-top: 15px;">
                 <strong>Total:</strong>
@@ -127,7 +157,7 @@
                 <input type="text" name="bank_account_name" placeholder="Account name (e.g. 9Mint Ltd)" required>
                 <input type="text" name="bank_sort_code" placeholder="Sort code (e.g. 12-34-56)" required>
                 <input type="text" name="bank_account_number" placeholder="Account number (e.g. 12345678)" required>
-                <input type="text" name="bank_reference" placeholder="Payment reference (Order #{{ $order->id }})" required>
+                <input type="text" name="bank_reference" placeholder="Payment reference (Order #{{ $paymentReferenceId }})" required>
               </div>
             </div>
 
@@ -137,7 +167,7 @@
               <div class="payment-fields">
                 <input type="text" name="wallet_address" placeholder="Wallet address (e.g. 0x...)" required>
                 <input type="text" name="wallet_tag" placeholder="Memo / Tag" required>
-                <input type="text" name="wallet_network" value="{{ $order->pay_currency }}" readonly required>
+                <input type="text" name="wallet_network" value="{{ $walletNetworkValue }}" readonly required>
               </div>
             </div>
 
@@ -165,22 +195,29 @@
             <div
               class="payment-summary is-hidden"
               data-payment-summary
-              data-pay-amount="{{ $order->pay_total_amount }}"
-              data-pay-currency="{{ $order->pay_currency }}"
-              data-ref-amount="{{ $order->ref_total_amount }}"
-              data-ref-currency="{{ $order->ref_currency }}"
+              data-pay-amount="{{ $isCreatorFeeCheckout ? $creatorFeeAmount : $order->pay_total_amount }}"
+              data-pay-currency="{{ $isCreatorFeeCheckout ? $creatorFeeCurrency : $order->pay_currency }}"
+              data-ref-amount="{{ $isCreatorFeeCheckout ? $creatorFeeAmount : $order->ref_total_amount }}"
+              data-ref-currency="{{ $isCreatorFeeCheckout ? $creatorFeeCurrency : $order->ref_currency }}"
             >
               <p class="payment-summary__amount" data-payment-amount>
-                @php $paySymbol = $currencySymbols[$order->pay_currency ?? 'GBP'] ?? null; @endphp
+                @php
+                  $summaryPayCurrency = $isCreatorFeeCheckout ? $creatorFeeCurrency : ($order->pay_currency ?? 'GBP');
+                  $summaryPayAmount = $isCreatorFeeCheckout ? $creatorFeeAmount : ($order->pay_total_amount ?? 0);
+                  $paySymbol = $currencySymbols[$summaryPayCurrency] ?? null;
+                @endphp
                 Amount due: {{ $paySymbol
-                    ? $paySymbol . number_format($order->pay_total_amount ?? 0, 2)
-                    : number_format($order->pay_total_amount ?? 0, 2) . ' ' . $order->pay_currency }}
+                    ? $paySymbol . number_format($summaryPayAmount, 2)
+                    : number_format($summaryPayAmount, 2) . ' ' . $summaryPayCurrency }}
               </p>
               <p class="payment-summary__hint" data-wallet-network-row>
                 Network: <span data-wallet-network>ETH</span>
               </p>
               <p class="payment-summary__hint" data-conversion-text>
-                @if ($order->ref_currency)
+                @if ($isCreatorFeeCheckout)
+                  Conversion: {{ $creatorFeeCurrency }} {{ number_format($creatorFeeAmount, 2) }}
+                  equals {{ $creatorFeeCurrency }} {{ number_format($creatorFeeAmount, 2) }} at checkout time.
+                @elseif ($order->ref_currency)
                   Conversion: {{ $order->ref_currency }} {{ number_format($order->ref_total_amount ?? 0, 2) }}
                   equals {{ $order->pay_currency }} {{ number_format($order->pay_total_amount ?? 0, 2) }} at checkout time.
                 @else

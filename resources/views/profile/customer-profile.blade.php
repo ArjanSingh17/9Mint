@@ -18,23 +18,22 @@
       </div>
     @endif
 
-    {{-- Sections --}}
-    <div class="profile-sections">
-      {{-- Account Details Form --}}
-      <div class="profile-card">
-        @include('partials.update-details-form')
+    <div class="profile-layout">
+      <div class="profile-main">
+        {{-- Account Customization --}}
+        <div class="profile-card">
+          @include('partials.update-customization-form')
+        </div>
+
+        {{-- Account Details --}}
+        <div class="profile-card">
+          @include('partials.update-details-form')
+        </div>
       </div>
 
-      {{-- Security and Password Form --}}
-      <div class="profile-card">
-        @include('partials.update-password-form')
-      </div>
-
-      {{-- Activity Links --}}
-      <div class="profile-card profile-activity">
+      <div class="profile-side">
         @include('partials.activity-links')
       </div>
-
     </div>
   </div>
 @endsection

@@ -4,6 +4,13 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+/* Layer scale keeps overlay ordering predictable across pages. */
+:root {
+    --z-content: 1;
+    --z-nav: 220;
+    --z-nav-popover: 230;
+}
+
 /* Theme tokens live in resources/css/theme-tokens.css */
 
 /* Navbar */
@@ -18,7 +25,8 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     position: sticky;
     top: 0;
-    z-index: 100; /* tweak stacking */
+    z-index: var(--z-nav);
+    isolation: isolate;
 }
 
 /* Logo */
@@ -50,16 +58,58 @@
     margin-left: 32px;
 }
 
-.nav-links a {
-    text-decoration: none;
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-dropdown > summary {
+    list-style: none;
+    cursor: pointer;
     color: var(--nav-text);
     font-weight: 500;
     font-size: 16px;
     transition: color 0.3s;
 }
 
-.nav-links a:hover {
+.nav-dropdown > summary::-webkit-details-marker {
+    display: none;
+}
+
+.nav-dropdown > summary::after {
+    content: " ▼";
+    font-size: 11px;
+}
+
+.nav-dropdown[open] > summary,
+.nav-dropdown > summary:hover {
     color: var(--link-hover);
+}
+
+.nav-links__menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 170px;
+    background: var(--surface-chrome);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    box-shadow: var(--shadow-elevated);
+    overflow: hidden;
+    z-index: var(--z-nav-popover);
+}
+
+.nav-links__menu a {
+    display: block;
+    text-decoration: none;
+    color: var(--text-main);
+    font-weight: 500;
+    font-size: 14px;
+    padding: 10px 12px;
+}
+
+.nav-links__menu a:hover {
+    color: var(--link-hover);
+    background: color-mix(in srgb, var(--surface-main) 40%, transparent);
 }
 
 .nav-auth {
@@ -127,7 +177,7 @@
     box-shadow: var(--shadow-elevated);
     overflow: hidden;
     display: none;
-    z-index: 120;
+    z-index: var(--z-nav-popover);
 }
 
 .nav-search__menu.is-open {
@@ -246,13 +296,15 @@
 }
 
 .nav-btn.signin,
-.nav-btn.signout {
+.nav-btn.signout,
+.nav-btn.admin-dashboard-btn {
     background: var(--link-hover);
     color: #fff;
 }
 
 .nav-btn.signin:hover,
-.nav-btn.signout:hover {
+.nav-btn.signout:hover,
+.nav-btn.admin-dashboard-btn:hover {
     background: color-mix(in srgb, var(--link-hover) 85%, #000 15%);
 }
 
@@ -390,7 +442,8 @@ p {
 .inventory-card__media img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    background: color-mix(in srgb, var(--surface-input) 70%, #000 30%);
     display: block;
 }
 
@@ -643,7 +696,8 @@ p {
 .nft-collection-thumb img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    background: color-mix(in srgb, var(--surface-input) 70%, #000 30%);
     display: block;
 }
 

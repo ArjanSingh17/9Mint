@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Listing extends Model
 {
+    public const PLATFORM_FEE_RATE = 0.015;
+    public const CREATOR_FEE_RATE = 0.010;
     public const SERVICE_FEE_RATE = 0.025;
 
     protected $fillable = [

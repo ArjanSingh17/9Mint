@@ -8,7 +8,7 @@ class AboutUsController extends Controller
 {
     public function index()
     {
-        $nfts = Nft::where('is_active', true)->get();
+        $nfts = Nft::marketVisible()->get();
 
         return view('about-us', compact('nfts'));
     }

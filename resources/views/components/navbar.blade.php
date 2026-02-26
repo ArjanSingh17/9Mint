@@ -9,10 +9,35 @@
 
   {{-- Links --}}
   <div class="nav-links">
-    <a href="/homepage">Homepage</a>
-    <a href="/aboutUs">About Us</a>
-    <a href="/products">Products</a>
-    <a href="/pricing">Pricing</a>
+    <details class="nav-dropdown">
+      <summary>Browse</summary>
+      <div class="nav-links__menu">
+        <a href="/homepage">Store Home</a>
+        <a href="/products">Products</a>
+        @auth
+          <a href="{{ route('favourites.index') }}">My Favourites</a>
+        @endauth
+        <a href="/pricing">Pricing</a>
+      </div>
+    </details>
+
+    <details class="nav-dropdown">
+      <summary>Community</summary>
+      <div class="nav-links__menu">
+        <a href="/aboutUs">About Us</a>
+      </div>
+    </details>
+
+    @auth
+      <details class="nav-dropdown">
+        <summary>{{ auth()->user()->name }}</summary>
+        <div class="nav-links__menu">
+          <a href="{{ route('profile.show', ['username' => auth()->user()->name]) }}">Profile</a>
+          <a href="{{ route('inventory.index') }}">Inventory</a>
+          <a href="{{ route('listings.index') }}">Listings</a>
+        </div>
+      </details>
+    @endauth
   </div>
 
   {{-- Center search (UI only) --}}
@@ -99,8 +124,8 @@
 
     @auth
       @if(Auth::user()->role === 'admin')
-        <a href="{{ route('admin.dashboard') }}" class="nav-btn" style="color: white;">
-          Admin Dashboard
+        <a href="{{ route('admin.dashboard') }}" class="nav-btn admin-dashboard-btn">
+          Admin
         </a>
       @endif
 
@@ -110,11 +135,19 @@
       </form>
 
       <a href="{{ route('profile.show', ['username' => auth()->user()->name]) }}" class="nav-btn profile-icon" title="My Profile">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
+        @if(!empty(auth()->user()->profile_image_url))
+          <img
+            src="{{ asset(ltrim(auth()->user()->profile_image_url, '/')) }}"
+            alt="{{ auth()->user()->name }} avatar"
+            style="width: 100%; height: 100%; border-radius: 999px; object-fit: cover; display: block;"
+          >
+        @else
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        @endif
       </a>
     @else
       <a href="{{ route('login') }}" class="nav-btn signin">Login / Register</a>
@@ -124,6 +157,26 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    const navDropdowns = document.querySelectorAll('.nav-dropdown');
+    navDropdowns.forEach(function (dropdown) {
+      dropdown.addEventListener('toggle', function () {
+        if (!dropdown.open) return;
+        navDropdowns.forEach(function (other) {
+          if (other !== dropdown) {
+            other.open = false;
+          }
+        });
+      });
+    });
+
+    document.addEventListener('click', function (event) {
+      navDropdowns.forEach(function (dropdown) {
+        if (!dropdown.contains(event.target)) {
+          dropdown.open = false;
+        }
+      });
+    });
+
     const searchRoot = document.querySelector('[data-nav-search]');
     if (!searchRoot) return;
 
