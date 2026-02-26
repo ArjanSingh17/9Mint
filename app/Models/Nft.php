@@ -78,4 +78,10 @@ class Nft extends Model
     {
         return $this->belongsToMany(User::class, 'favourites');
     }
+
+    public function reviews()
+{
+    return $this->hasMany(NftReview::class);
+}
+
 }
