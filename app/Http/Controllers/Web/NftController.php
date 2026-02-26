@@ -13,8 +13,11 @@ use App\Services\Pricing\PricingService;
 class NftController extends Controller
 {
     public function show($slug)
-    {
-        $nft = Nft::where('slug', $slug)->where('is_active', 1)->firstOrFail();
+{
+    $nft = Nft::with(['collection', 'reviews.user'])
+        ->where('slug', $slug)
+        ->where('is_active', 1)
+        ->firstOrFail();
         $collection = $nft->collection;
 
         $listing = Listing::with('seller')->whereHas('token', function ($query) use ($nft) {
@@ -51,6 +54,7 @@ class NftController extends Controller
         $eligibleTokenIds = [];
         if (auth()->check()) {
             $user = auth()->user();
+
             $ownedTokens = NftToken::with('listing')
                 ->where('nft_id', $nft->id)
                 ->where('owner_user_id', $user->id)
@@ -65,7 +69,20 @@ class NftController extends Controller
                 ->unique()
                 ->all();
         }
+        //New code to calculate average rating and review count
+         $averageRating = $nft->reviews()->avg('rating');
+         $reviewCount   = $nft->reviews()->count();
+         $userHasReviewed = false;
 
-        return view('nfts.show', compact('nft', 'collection', 'listing', 'quotes', 'currencies', 'ownedTokens', 'eligibleTokenIds'));
+$userReview = null;
+
+if (auth()->check()) {
+    $userReview = $nft->reviews()
+        ->where('user_id', auth()->id())
+        ->first();
+}
+
+
+        return view('nfts.show', compact('nft', 'collection', 'listing', 'quotes', 'currencies', 'ownedTokens', 'eligibleTokenIds' , 'averageRating', 'reviewCount', 'userReview'));
     }
 }

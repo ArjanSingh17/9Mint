@@ -11,12 +11,17 @@ use App\Http\Controllers\Web\PasswordResetController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\TrendingController;
 use App\Http\Controllers\UserProfileController;
 use App\Models\User;
 use App\Http\Controllers\Web\CartController as WebCartController;
 use App\Http\Controllers\Web\CheckoutController as WebCheckoutController;
 use App\Http\Controllers\Web\CollectionController as WebCollection;
 use App\Http\Controllers\Web\FavouritePageController;
+use App\Http\Controllers\NftReviewController;
+
+
+// MODELS
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\InventoryController;
 use App\Http\Controllers\Web\NftController as WebNft;
@@ -67,6 +72,7 @@ Route::get('/users', function () {return view('users');})->middleware('auth');
 // ------------------------------
 Route::get('/homepage', [HomeController::class, 'index'])->name('homepage');
 Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
+Route::get('/trending', [TrendingController::class, 'index'])->name('trending.index');
 Route::get('/aboutUs', [AboutUsController::class, 'index'])->name('about');
 Route::get('/nft/{slug}', [WebNft::class, 'show'])->name('nfts.show');
 
@@ -204,4 +210,15 @@ Route::middleware(['auth', 'admin'])->group(function () {
 // Reviews Management
 Route::get('/reviewUs', function () {
     return view('reviewUs');
-})->name('review.us');
+});
+
+// Handle review submission
+Route::post('/nfts/{nft}/review', [NftReviewController::class, 'store'])
+    ->name('nfts.review.store')
+    ->middleware('auth');
+// Handle review update (if you want to allow users to edit their reviews)
+    Route::put('/nfts/{nft}/review', [NftReviewController::class, 'update'])
+    ->middleware('auth')
+    ->name('nfts.review.update');
+
+

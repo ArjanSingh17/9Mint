@@ -1379,3 +1379,127 @@ html.light-mode .homepage-subtitle {
     color: var(--text-main);
 }
 
+.star-rating {
+    direction: rtl;
+    display: inline-flex;
+    font-size: 30px;
+}
+
+
+
+
+.star-rating input {
+    display: none;
+}
+
+.star-rating label {
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.star-rating input:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+    color: gold;
+}
+
+.review-divider {
+    margin: 60px 0 30px 0;
+}
+
+.nft-reviews-section {
+    max-width: 800px;
+    margin: 0 auto 80px auto;
+}
+
+.review-summary {
+    margin-bottom: 25px;
+    font-size: 18px;
+}
+
+.review-card {
+    background: #0f1b45;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.review-stars {
+    color: gold;
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.review-author {
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.review-text {
+    margin-bottom: 8px;
+}
+
+.review-date {
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.review-form-wrapper {
+    margin-top: 40px;
+    padding: 25px;
+    background: #111a3a;
+    border-radius: 12px;
+}
+
+.review-form-wrapper textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    margin-top: 15px;
+    resize: vertical;
+}
+
+.review-submit-btn {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: gold;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.review-submit-btn:hover {
+    opacity: 0.85;
+}
+
+.already-reviewed {
+    margin-top: 20px;
+    padding: 20px;
+    background: #1b2550;
+    border-radius: 12px;
+    font-weight: 500;
+}
+/* Edit Review Button */
+.edit-review-btn {
+    background-color: #FFD700;
+    color: #000;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 10px;
+}
+
+.edit-review-btn:hover {
+    background-color: #ffcc00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
