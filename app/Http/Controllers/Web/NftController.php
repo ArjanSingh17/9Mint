@@ -110,6 +110,6 @@ if (auth()->check()) {
 }
 
 
-        return view('nfts.show', compact('nft', 'collection', 'listing', 'quotes', 'currencies', 'ownedTokens', 'eligibleTokenIds' , 'averageRating', 'reviewCount', 'userReview'));
+        return view('nfts.show', compact('nft', 'collection', 'listing', 'listedEditionsCount', 'quotes', 'currencies', 'ownedTokens', 'eligibleTokenIds', 'averageRating', 'reviewCount', 'userReview'));
     }
 }

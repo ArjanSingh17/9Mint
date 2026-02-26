@@ -1,0 +1,276 @@
+/* =============================================
+   resources/css/pages/chat.css
+   COLOUR OVERRIDES ONLY — no layout/spacing/sizing changes.
+   All colours sourced from existing root CSS variables.
+   ============================================= */
+
+/* Outer wrapper */
+.chat-page-container {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}
+
+/* Teal header band */
+.chat-header-band {
+   background-color: color-mix(in srgb, var(--card-bg) 70%, #000 30%);
+}
+
+/* ── Sidebar ─────────────────────────────────── */
+
+/* Sidebar panel — base level */
+.chat-sidebar {
+  background-color: var(--card-bg);
+  border-color: var(--border-soft);
+}
+
+/* Sidebar header — slightly darker than the contacts list */
+.chat-sidebar-header {
+  background-color: color-mix(in srgb, var(--card-bg) 70%, #000 30%);
+}
+
+.chat-sidebar-username {
+  color: var(--text-main);
+}
+
+.chat-sidebar-search {
+  background-color: color-mix(in srgb, var(--card-bg) 80%, #000 20%);
+}
+
+.chat-sidebar-search input {
+  background-color: var(--surface-input);
+  color: var(--text-main);
+  border-color: var(--border-input);
+}
+
+.chat-sidebar-search input::placeholder {
+  color: var(--subtext-color);
+}
+
+/* Contacts list — base/lightest sidebar surface */
+.chat-sidebar-contacts {
+  background-color: var(--card-bg);
+}
+
+/* Add Friends button */
+.chat-btn-add {
+  background-color: var(--button-bg);
+  color: var(--text-inverse);
+}
+
+.chat-btn-add:hover {
+  background-color: color-mix(in srgb, var(--button-bg) 75%, #000 25%);
+}
+
+/* ── Conversation rows ───────────────────────── */
+
+.chat-conversation-item {
+  background-color: color-mix(in srgb, var(--card-bg) 85%, #000 15%);
+}
+
+.chat-conversation-item:hover {
+  background-color: color-mix(in srgb, var(--card-bg) 85%, #fff 15%);
+}
+
+.chat-conversation-item.active {
+  background-color: color-mix(in srgb, var(--card-bg) 75%, #fff 25%);
+  cursor:default;
+}
+
+.chat-conversation-item .conversation-name {
+  color: var(--text-main);
+}
+
+.chat-conversation-item.active .conversation-name {
+  color: var(--link-hover);
+}
+
+.chat-conversation-item .conversation-time {
+  color: var(--subtext-color);
+}
+
+.chat-conversation-item .conversation-preview {
+  color: var(--subtext-color);
+}
+
+/* ── Main panel ──────────────────────────────── */
+
+.chat-main {
+  background-color: var(--card-bg);
+  border-color: var(--border-soft);
+}
+
+/* Main header — slightly darker than sidebar header */
+.chat-main-header {
+  background-color: color-mix(in srgb, var(--card-bg) 70%, #000 30%);
+  border-color: var(--border-soft);
+}
+
+.chat-contact-name {
+  color: var(--text-main);
+}
+
+/* ── Messages area ───────────────────────────── */
+
+/* Slightly darker than bg-main but lighter than sidebar/header */
+.chat-messages-area {
+  background-color: color-mix(in srgb, var(--bg-main) 75%, #000 25%);
+}
+
+/* Date banner */
+.chat-date-banner {
+  background-color: color-mix(in srgb, var(--section-bg) 70%, #000 30%);
+}
+
+.chat-date-banner p {
+  color: var(--subtext-color);
+}
+
+/* Outgoing bubble */
+.chat-bubble-out {
+  background-color: color-mix(in srgb, var(--card-bg) 85%, #449388 15%);
+  color: var(--text-main);
+}
+
+/* Incoming bubble */
+.chat-bubble-in {
+  background-color: var(--surface-panel);
+  border: 1px solid var(--border-soft);
+  color: var(--text-main);
+}
+
+.chat-bubble-in .bubble-sender-name {
+  color: var(--link-hover);
+}
+
+/* Timestamps inside both bubble types */
+.chat-bubble-out .bubble-time,
+.chat-bubble-in .bubble-time {
+  color: var(--subtext-color);
+}
+
+/* Read receipts */
+.chat-tick-read {
+  color: var(--link-hover);
+}
+
+.chat-tick-sent {
+  color: var(--subtext-color);
+}
+
+/* ── Input area ──────────────────────────────── */
+
+.chat-input-area {
+  background-color: color-mix(in srgb, var(--card-bg) 70%, #000 30%);
+  border-color: var(--border-soft);
+}
+
+.chat-input-area input {
+  background-color: var(--surface-input);
+  color: var(--text-main);
+  border-color: var(--border-input);
+}
+
+.chat-input-area input::placeholder {
+  color: var(--subtext-color);
+}
+
+/* Send button */
+.chat-btn-send {
+  background-color: var(--button-bg);
+  color: var(--text-inverse);
+}
+
+.chat-btn-send:hover {
+  background-color: color-mix(in srgb, var(--button-bg) 75%, #000 25%);
+}
+/* ── Light mode overrides ────────────────────── */
+
+/* Messages area — lighter than headers in light mode */
+html.light-mode .chat-messages-area {
+  background-color: color-mix(in srgb, var(--bg-main) 65%, #FFF 35%);
+}
+
+/* Conversation rows — subtle gray tint when not interacted */
+html.light-mode .chat-conversation-item {
+  background-color: color-mix(in srgb, var(--card-bg) 100%, #888 0%);
+  color: var(--text-main);
+}
+
+/* Hover — goes darker instead */
+html.light-mode .chat-conversation-item:hover {
+  background-color: color-mix(in srgb, var(--card-bg) 80%, #000 10%);
+}
+
+/* Active — darker still */
+html.light-mode .chat-conversation-item.active {
+  background-color: color-mix(in srgb, var(--card-bg) 80%, #000 20%);
+}
+
+/* light gray tint */
+html.light-mode .chat-conversation-item {
+  background-color: color-mix(in srgb, var(--card-bg) 92%, #888 8%);
+}
+/* Add Friends button */
+html.light-mode .chat-btn-add {
+  background-color: color-mix(in srgb, var(--button-bg) 80%, #FFF 20%);
+  color: var(--text-inverse);
+}
+/* Add Friends button */
+html.light-mode .chat-btn-add:hover {
+  background-color: color-mix(in srgb, var(--button-bg) 90%, #FFF 10%);
+}
+/* Send button */
+html.light-mode .chat-btn-send {
+  background-color: color-mix(in srgb, var(--button-bg) 75%, #FFF 25%);
+  color: var(--text-inverse);
+}
+
+html.light-mode .chat-date-banner {
+  background-color: color-mix(in srgb, var(--section-bg) 85%, #000 15%);
+}
+
+/* Send button hover */
+html.light-mode .chat-btn-send:hover {
+  background-color: color-mix(in srgb, var(--button-bg) 90%, #FFF 10%);
+}
+
+/* ── Users page (layouts.app version) ───────── */
+
+.users-page-wrapper {
+  background-color: var(--bg-main);
+}
+
+.users-page-heading {
+  color: var(--text-main);
+}
+
+.user-card {
+  background-color: var(--card-bg);
+  border-color: var(--border-soft);
+}
+
+.user-card-name {
+  color: var(--text-main);
+}
+
+.user-card-email {
+  color: var(--subtext-color);
+}
+
+.user-btn-message {
+  background-color: #059669;
+  color: #ffffff;
+}
+
+.user-btn-message:hover {
+  background-color: color-mix(in srgb, #059669 75%, #000 25%);
+}
+
+.user-btn-add {
+  background-color: var(--button-bg);
+  color: var(--text-inverse);
+}
+
+.user-btn-add:hover {
+  background-color: color-mix(in srgb, var(--button-bg) 75%, #000 25%);
+}

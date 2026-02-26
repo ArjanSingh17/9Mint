@@ -14,6 +14,7 @@
       <div class="nav-links__menu">
         <a href="/homepage">Store Home</a>
         <a href="/products">Products</a>
+        <a href="/trending">Trending</a>
         @auth
           <a href="{{ route('favourites.index') }}">My Favourites</a>
         @endauth
