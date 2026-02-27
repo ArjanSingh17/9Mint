@@ -7,7 +7,7 @@
 /* Theme tokens live in resources/css/theme-tokens.css */
 
 :root {
-    --transition-speed: 0.5s;
+    --transition-speed: 0.7s;
 }
 
 html, body, header, footer, button, .card, .page-container {

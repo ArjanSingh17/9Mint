@@ -1,5 +1,5 @@
 
-   <?php
+<?php
  
 use Livewire\Component;
 use App\Models\User;
@@ -114,16 +114,16 @@ new class extends Component {
   <main class="flex justify-evenly items-center gap-4">
       <div class="flex-grow">
         <h1>Tickets</h1> 
-        <div class="tickets-section h-screen rounded">
+        <div class="tickets-shell h-screen">
           <div class="overflow-x-auto m-5">
-            <table class="min-w-full ">
-              <thead class="whitespace-nowrap">
+            <table class="min-w-full tickets-table">
+              <thead class="tickets-thead whitespace-nowrap">
                 <tr>
-                  <th class="p-4 text-left text-[13px] font-semibold ">Title</th>
-                  <th class="p-4 text-left text-[13px] font-semibold ">Status</th>
-                  <th class="p-4 text-left text-[13px] font-semibold ">Created At</th>
-                  <th class="p-4 text-left text-[13px] font-semibold ">Unread Messages</th>
-                  <th class="p-4 text-left text-[13px] font-semibold ">Actions</th>
+                  <th class="p-4 text-left text-[13px] font-semibold tickets-heading-cell">Title</th>
+                  <th class="p-4 text-left text-[13px] font-semibold tickets-heading-cell">Status</th>
+                  <th class="p-4 text-left text-[13px] font-semibold tickets-heading-cell">Created At</th>
+                  <th class="p-4 text-left text-[13px] font-semibold tickets-heading-cell">Unread Messages</th>
+                  <th class="p-4 text-left text-[13px] font-semibold tickets-heading-cell">Actions</th>
                 </tr>
               </thead>
 
