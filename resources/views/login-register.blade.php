@@ -42,12 +42,13 @@
         Dont have an account yet?
         <a href="#" id="show-register-link">Sign up now.</a>
       </p>
-
-      @if (Route::has('password.request'))
-        <a class="forgot-password" href="{{ route('password.request') }}" style="display: block; text-align: center; margin-top: 15px; color: #555; text-decoration: none; font-size: 0.9rem;">
-          Forgot Password?
-        </a>
-      @endif
+    <div style="text-align: center; margin-top: 15px;">
+    <a class="forgot-password" href="{{ route('password.request') }}" 
+       style="color: #00d4ff; text-decoration: none; font-size: 0.9rem; transition: 0.3s;"
+       onmouseover="this.style.color='#fff'" 
+       onmouseout="this.style.color='#00d4ff'">
+        Forgot Password?
+    </a>
     </div>
 
     {{-- Register --}}
