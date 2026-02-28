@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\CartItem;
 use App\Models\Collection;
+use App\Models\Nft;
 use App\Models\Order;
 use App\Models\PaymentIntent;
 use App\Models\Wallet;
@@ -14,7 +15,10 @@ use App\Services\WalletService;
 use App\Services\Pricing\CurrencyCatalogInterface;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class CheckoutController extends Controller
 {
@@ -23,9 +27,21 @@ class CheckoutController extends Controller
         $user = $request->user();
         $creatorFeeCollection = null;
         $creatorFeeCheckout = null;
+        $creatorFeeDraft = $request->session()->get('creator_fee_draft');
         $creatorFeeCollectionId = $request->session()->get('creator_fee_collection_id');
 
-        if ($creatorFeeCollectionId) {
+        if (is_array($creatorFeeDraft) && ! empty($creatorFeeDraft['id'])) {
+            $creatorFeeCheckout = (object) [
+                'draft_id' => $creatorFeeDraft['id'],
+                'collection_id' => null,
+                'collection_name' => $creatorFeeDraft['name'] ?? 'Pending collection',
+                'nft_count' => count($creatorFeeDraft['nfts'] ?? []),
+                'pay_currency' => 'GBP',
+                'pay_total_amount' => (float) ($creatorFeeDraft['creation_fee_amount_gbp'] ?? 80.00),
+                'ref_currency' => 'GBP',
+                'ref_total_amount' => (float) ($creatorFeeDraft['creation_fee_amount_gbp'] ?? 80.00),
+            ];
+        } elseif ($creatorFeeCollectionId) {
             $creatorFeeCollection = Collection::query()
                 ->where('id', $creatorFeeCollectionId)
                 ->where('submitted_by_user_id', $user->id)
@@ -37,7 +53,9 @@ class CheckoutController extends Controller
             } else {
                 $creatorFeeCheckout = (object) [
                     'collection_id' => $creatorFeeCollection->id,
+                    'draft_id' => null,
                     'collection_name' => $creatorFeeCollection->name,
+                    'nft_count' => $creatorFeeCollection->nfts()->count(),
                     'pay_currency' => 'GBP',
                     'pay_total_amount' => 80.00,
                     'ref_currency' => 'GBP',
@@ -165,6 +183,13 @@ class CheckoutController extends Controller
             'success'
         );
 
+        $purchasedListingIds = $order->items->pluck('listing_id')->filter()->all();
+        if (! empty($purchasedListingIds)) {
+            CartItem::where('user_id', $request->user()->id)
+                ->whereIn('listing_id', $purchasedListingIds)
+                ->delete();
+        }
+
         $request->session()->forget('checkout_order_id');
 
         return redirect('/cart')
@@ -174,6 +199,7 @@ class CheckoutController extends Controller
     private function storeCreatorFeeCheckout(Request $request)
     {
         $user = $request->user();
+        $creatorFeeDraft = $request->session()->get('creator_fee_draft');
         $collectionId = $request->session()->get('creator_fee_collection_id');
         $collection = $collectionId
             ? Collection::query()
@@ -182,14 +208,20 @@ class CheckoutController extends Controller
                 ->first()
             : null;
 
-        if (! $collection || $collection->creation_fee_payment_state !== 'unpaid') {
+        $isDraftCheckout = is_array($creatorFeeDraft) && ! empty($creatorFeeDraft['id']);
+        $isLegacyCollectionCheckout = $collection && $collection->creation_fee_payment_state === 'unpaid';
+
+        if (! $isDraftCheckout && ! $isLegacyCollectionCheckout) {
+            $request->session()->forget('creator_fee_draft');
             $request->session()->forget('creator_fee_collection_id');
             return redirect()->route('creator.collections.create')
                 ->with('error', 'Creator fee checkout session expired. Please submit again.');
         }
 
         $provider = $request->input('provider');
-        $payAmount = 80.00;
+        $payAmount = $isDraftCheckout
+            ? (float) ($creatorFeeDraft['creation_fee_amount_gbp'] ?? 80.00)
+            : 80.00;
         $payCurrency = 'GBP';
 
         $order = Order::create([
@@ -226,7 +258,8 @@ class CheckoutController extends Controller
                     (float) $conversion['amount'],
                     [
                         'order_id' => $order->id,
-                        'collection_id' => $collection->id,
+                        'collection_id' => $collection?->id,
+                        'creator_fee_draft_id' => $creatorFeeDraft['id'] ?? null,
                         'fx_provider' => $conversion['fx_provider'],
                         'fx_rate' => [
                             'from' => $payCurrency,
@@ -258,7 +291,12 @@ class CheckoutController extends Controller
             'status' => 'captured',
             'metadata' => [
                 'context' => 'creator_fee',
-                'collection_id' => $collection->id,
+                'collection_id' => $collection?->id,
+                'creator_fee_draft_id' => $creatorFeeDraft['id'] ?? null,
+                'collection_name' => $creatorFeeDraft['name'] ?? $collection?->name,
+                'nft_count' => $isDraftCheckout
+                    ? count($creatorFeeDraft['nfts'] ?? [])
+                    : ($collection ? $collection->nfts()->count() : null),
                 'amount' => $payAmount,
                 'currency' => $payCurrency,
             ],
@@ -267,10 +305,147 @@ class CheckoutController extends Controller
         $order->update(['status' => 'paid']);
 
         $updateData['creation_fee_payment_intent_id'] = $intent->id;
+
+        if ($isDraftCheckout) {
+            $createdCollection = $this->createCollectionFromPaidDraft($creatorFeeDraft, $user, $updateData);
+            $this->cleanupCreatorDraftAssets($creatorFeeDraft);
+
+            $request->session()->forget('creator_fee_draft');
+            $request->session()->forget('creator_fee_collection_id');
+
+            return redirect()->route('creator.collections.create')
+                ->with('status', 'Creator fee paid. Collection "' . $createdCollection->name . '" is now awaiting admin review.');
+        }
+
         $collection->update($updateData);
         $request->session()->forget('creator_fee_collection_id');
 
         return redirect()->route('creator.collections.create')
             ->with('status', 'Creator fee paid. Your collection is now awaiting admin review.');
+    }
+
+    private function createCollectionFromPaidDraft(array $draft, $user, array $feeData): Collection
+    {
+        return DB::transaction(function () use ($draft, $user, $feeData) {
+            $collection = Collection::create([
+                'slug' => $this->uniqueCollectionSlug((string) ($draft['name'] ?? 'collection')),
+                'name' => $draft['name'] ?? 'Untitled collection',
+                'description' => $draft['description'] ?? null,
+                'cover_image_url' => null,
+                'creator_name' => $user->name,
+                'submitted_by_user_id' => $user->id,
+                'approval_status' => Collection::APPROVAL_PENDING,
+                'is_public' => false,
+                'creation_fee_payment_state' => $feeData['creation_fee_payment_state'] ?? 'paid_unheld',
+                'creation_fee_refund_state' => $feeData['creation_fee_refund_state'] ?? 'none',
+                'creation_fee_order_id' => $feeData['creation_fee_order_id'] ?? null,
+                'creation_fee_payment_intent_id' => $feeData['creation_fee_payment_intent_id'] ?? null,
+                'creation_fee_provider' => $feeData['creation_fee_provider'] ?? null,
+                'creation_fee_amount_gbp' => $feeData['creation_fee_amount_gbp'] ?? 80.00,
+                'creation_fee_hold_currency' => $feeData['creation_fee_hold_currency'] ?? null,
+                'creation_fee_hold_amount' => $feeData['creation_fee_hold_amount'] ?? null,
+                'creation_fee_hold_reference' => $feeData['creation_fee_hold_reference'] ?? null,
+            ]);
+
+            $collectionFolder = $collection->uploadFolderName();
+
+            if (! empty($draft['cover_image_temp_path'])) {
+                $coverImageUrl = $this->moveDraftAssetToCollectionFolder(
+                    (string) $draft['cover_image_temp_path'],
+                    $collectionFolder,
+                    'cover'
+                );
+                $collection->update(['cover_image_url' => $coverImageUrl]);
+            }
+
+            $draftNfts = array_values($draft['nfts'] ?? []);
+            foreach ($draftNfts as $index => $nftInput) {
+                $imageUrl = $this->moveDraftAssetToCollectionFolder(
+                    (string) ($nftInput['image_temp_path'] ?? ''),
+                    $collectionFolder,
+                    'nft-' . ($index + 1)
+                );
+
+                Nft::create([
+                    'collection_id' => $collection->id,
+                    'slug' => $this->uniqueNftSlug((string) ($nftInput['name'] ?? ('NFT ' . ($index + 1)))),
+                    'name' => $nftInput['name'] ?? ('NFT ' . ($index + 1)),
+                    'description' => $nftInput['description'] ?? null,
+                    'image_url' => $imageUrl,
+                    'editions_total' => (int) ($nftInput['editions_total'] ?? 1),
+                    'editions_remaining' => (int) ($nftInput['editions_total'] ?? 1),
+                    'primary_ref_amount' => (float) ($nftInput['ref_amount'] ?? 0.01),
+                    'primary_ref_currency' => strtoupper((string) ($draft['ref_currency'] ?? 'GBP')),
+                    'is_active' => false,
+                    'submitted_by_user_id' => $user->id,
+                    'approval_status' => Nft::APPROVAL_PENDING,
+                ]);
+            }
+
+            return $collection;
+        });
+    }
+
+    private function moveDraftAssetToCollectionFolder(string $tempPath, string $collectionFolder, string $namePrefix): string
+    {
+        if ($tempPath === '' || ! Storage::disk('local')->exists($tempPath)) {
+            abort(422, 'Collection draft files are missing. Please submit the collection again.');
+        }
+
+        $sourcePath = Storage::disk('local')->path($tempPath);
+        $targetDirectory = public_path("images/nfts/{$collectionFolder}");
+        if (! File::exists($targetDirectory)) {
+            File::makeDirectory($targetDirectory, 0755, true);
+        }
+
+        $extension = strtolower((string) pathinfo($tempPath, PATHINFO_EXTENSION));
+        if ($extension === '') {
+            $extension = 'png';
+        }
+        $filename = $namePrefix . '-' . Str::uuid() . '.' . $extension;
+        $targetPath = $targetDirectory . DIRECTORY_SEPARATOR . $filename;
+
+        if (! File::copy($sourcePath, $targetPath)) {
+            abort(500, 'Failed to prepare collection assets for submission.');
+        }
+
+        return "/images/nfts/{$collectionFolder}/{$filename}";
+    }
+
+    private function cleanupCreatorDraftAssets(array $draft): void
+    {
+        if (! empty($draft['id'])) {
+            Storage::disk('local')->deleteDirectory('creator-drafts/' . $draft['id']);
+        }
+    }
+
+    private function uniqueCollectionSlug(string $name): string
+    {
+        $base = Str::slug($name);
+        $root = $base !== '' ? $base : 'collection';
+        $slug = $root;
+        $i = 1;
+
+        while (Collection::where('slug', $slug)->exists()) {
+            $slug = $root . '-' . $i;
+            $i++;
+        }
+
+        return $slug;
+    }
+
+    private function uniqueNftSlug(string $name): string
+    {
+        $base = Str::slug($name);
+        $root = $base !== '' ? $base : 'nft';
+        $slug = $root;
+        $i = 1;
+
+        while (Nft::where('slug', $slug)->exists()) {
+            $slug = $root . '-' . $i;
+            $i++;
+        }
+
+        return $slug;
     }
 }

@@ -619,7 +619,7 @@
 
     <div class="profile-sections">
       <div class="profile-card">
-        <p class="text-gray-600 mb-6">Set your collection details, add your NFT cards, and submit for admin review. After submission, you will be redirected to checkout to confirm the creation request.</p>
+        <p class="text-gray-600 mb-6">Set your collection details and add your NFT cards. The collection is saved as a draft first, then only submitted for admin review after the £80 checkout is completed.</p>
 
         @if ($errors->any())
           <div class="error-list">
