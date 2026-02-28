@@ -89,6 +89,10 @@ class AdminController extends Controller
         $user = User::findOrFail($id);
         $confirmation = (string) request('confirm_username');
 
+        if (! $actor || ! $actor->isSuperAdmin()) {
+            return redirect()->back()->with('error', 'Only the 9Mint superadmin can delete users.');
+        }
+
         if ($user->id === $actor->id) {
             return redirect()->back()->with('error', 'You cannot delete yourself.');
         }
@@ -108,6 +112,27 @@ class AdminController extends Controller
         $user->delete();
 
         return redirect()->back()->with('success', 'User deleted successfully.');
+    }
+
+    public function unbanUser($id)
+    {
+        $actor = auth()->user();
+        $user = User::findOrFail($id);
+
+        if (! $actor || ! $actor->isSuperAdmin()) {
+            return redirect()->back()->with('error', 'Only the 9Mint superadmin can unban users.');
+        }
+
+        if (! $user->isBanned()) {
+            return redirect()->back()->with('error', 'User is not banned.');
+        }
+
+        $user->update([
+            'banned_at' => null,
+            'banned_by' => null,
+        ]);
+
+        return redirect()->back()->with('success', 'User unbanned successfully.');
     }
 
     // Show the form with current user data

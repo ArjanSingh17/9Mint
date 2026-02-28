@@ -3,11 +3,8 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\Collection;
-use App\Models\Nft;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -40,105 +37,58 @@ class CreatorCollectionController extends Controller
             'nfts.*.image' => ['required', 'image', 'max:5120'],
         ]);
 
-        $user = $request->user();
-
-        $collection = DB::transaction(function () use ($data, $user) {
-            $collectionSlug = $this->uniqueCollectionSlug($data['name']);
-
-            $collection = Collection::create([
-                'slug' => $collectionSlug,
-                'name' => $data['name'],
-                'description' => $data['description'] ?? null,
-                'cover_image_url' => null,
-                'creator_name' => $user->name,
-                'submitted_by_user_id' => $user->id,
-                'approval_status' => Collection::APPROVAL_PENDING,
-                'is_public' => false,
-                'creation_fee_payment_state' => 'unpaid',
-                'creation_fee_refund_state' => 'none',
-                'creation_fee_amount_gbp' => self::CREATION_FEE_GBP,
-            ]);
-
-            $collectionFolder = $collection->uploadFolderName();
-            $targetDirectory = public_path("images/nfts/{$collectionFolder}");
-            if (! File::exists($targetDirectory)) {
-                File::makeDirectory($targetDirectory, 0755, true);
-            }
-
-            if (! empty($data['cover_image'])) {
-                $coverImageUrl = $this->storeUploadedImageToCollectionFolder(
-                    $data['cover_image'],
-                    $collectionFolder,
-                    'cover'
-                );
-                $collection->update(['cover_image_url' => $coverImageUrl]);
-            }
-
-            foreach (array_values($data['nfts']) as $index => $nftInput) {
-                $imageUrl = $this->storeUploadedImageToCollectionFolder(
-                    $nftInput['image'],
-                    $collectionFolder,
-                    'nft-' . ($index + 1)
-                );
-                Nft::create([
-                    'collection_id' => $collection->id,
-                    'slug' => $this->uniqueNftSlug($nftInput['name']),
-                    'name' => $nftInput['name'],
-                    'description' => $nftInput['description'] ?? null,
-                    'image_url' => $imageUrl,
-                    'editions_total' => (int) $nftInput['editions_total'],
-                    'editions_remaining' => (int) $nftInput['editions_total'],
-                    'primary_ref_amount' => (float) $nftInput['ref_amount'],
-                    'primary_ref_currency' => strtoupper((string) $data['ref_currency']),
-                    'is_active' => false,
-                    'submitted_by_user_id' => $user->id,
-                    'approval_status' => Nft::APPROVAL_PENDING,
-                ]);
-            }
-
-            return $collection;
-        });
+        $this->clearExistingCreatorDraft($request);
+        $draft = $this->buildCreatorDraft($data);
 
         $request->session()->forget('checkout_order_id');
-        $request->session()->put('creator_fee_collection_id', $collection->id);
+        $request->session()->forget('creator_fee_collection_id');
+        $request->session()->put('creator_fee_draft', $draft);
 
         return redirect()
             ->route('checkout.index')
-            ->with('status', 'Collection submitted. Complete the £80 creation fee checkout to send it for review.');
+            ->with('status', 'Collection draft saved. Complete the £80 creation fee checkout to submit it for review.');
     }
 
-    private function uniqueCollectionSlug(string $name): string
+    private function buildCreatorDraft(array $data): array
     {
-        $base = Str::slug($name);
-        $slug = $base;
-        $i = 1;
+        $draftId = (string) Str::uuid();
+        $baseDir = "creator-drafts/{$draftId}";
+        $nfts = [];
 
-        while (Collection::where('slug', $slug)->exists()) {
-            $slug = $base.'-'.$i;
-            $i++;
+        foreach (array_values($data['nfts']) as $index => $nftInput) {
+            $imageTempPath = $this->storeUploadedFileToDraft(
+                $nftInput['image'],
+                $baseDir,
+                'nft-' . ($index + 1)
+            );
+
+            $nfts[] = [
+                'name' => $nftInput['name'],
+                'description' => $nftInput['description'] ?? null,
+                'editions_total' => (int) $nftInput['editions_total'],
+                'ref_amount' => (float) $nftInput['ref_amount'],
+                'image_temp_path' => $imageTempPath,
+            ];
         }
 
-        return $slug;
+        return [
+            'id' => $draftId,
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'ref_currency' => strtoupper((string) $data['ref_currency']),
+            'cover_image_temp_path' => ! empty($data['cover_image'])
+                ? $this->storeUploadedFileToDraft($data['cover_image'], $baseDir, 'cover')
+                : null,
+            'nfts' => $nfts,
+            'creation_fee_amount_gbp' => self::CREATION_FEE_GBP,
+            'created_at' => now()->toIso8601String(),
+        ];
     }
 
-    private function uniqueNftSlug(string $name): string
-    {
-        $base = Str::slug($name);
-        $slug = $base;
-        $i = 1;
-
-        while (Nft::where('slug', $slug)->exists()) {
-            $slug = $base.'-'.$i;
-            $i++;
-        }
-
-        return $slug;
-    }
-
-    private function storeUploadedImageToCollectionFolder(
+    private function storeUploadedFileToDraft(
         \Illuminate\Http\UploadedFile $file,
-        string $collectionFolder,
-        string $namePrefix
+        string $baseDir,
+        string $prefix
     ): string {
         $extension = strtolower((string) $file->getClientOriginalExtension());
         if ($extension === '') {
@@ -148,14 +98,17 @@ class CreatorCollectionController extends Controller
             $extension = 'png';
         }
 
-        $filename = $namePrefix . '-' . Str::uuid() . '.' . $extension;
-        $targetDirectory = public_path("images/nfts/{$collectionFolder}");
-        if (! File::exists($targetDirectory)) {
-            File::makeDirectory($targetDirectory, 0755, true);
+        $filename = $prefix . '-' . Str::uuid() . '.' . $extension;
+
+        return (string) $file->storeAs($baseDir, $filename, 'local');
+    }
+
+    private function clearExistingCreatorDraft(Request $request): void
+    {
+        $existing = $request->session()->get('creator_fee_draft');
+        if (is_array($existing) && ! empty($existing['id'])) {
+            Storage::disk('local')->deleteDirectory('creator-drafts/' . $existing['id']);
         }
-
-        $file->move($targetDirectory, $filename);
-
-        return "/images/nfts/{$collectionFolder}/{$filename}";
+        $request->session()->forget('creator_fee_draft');
     }
 }

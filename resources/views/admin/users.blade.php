@@ -28,6 +28,7 @@
 
 <body>
     <h1>User Management</h1>
+    @php $isSuperAdmin = auth()->check() && auth()->user()->isSuperAdmin(); @endphp
 
     @if(session('success'))
         <div style="color: green; margin-bottom: 10px;">{{ session('success') }}</div>
@@ -63,18 +64,26 @@
                         @if($user->name === '9Mint')
                             <span style="color:#666;">Protected superadmin</span>
                         @elseif($user->banned_at)
-                            <form action="{{ route('admin.users.delete', $user->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <input
-                                    type="text"
-                                    name="confirm_username"
-                                    placeholder="Type {{ $user->name }}"
-                                    style="padding: 5px; width: 150px;"
-                                    required
-                                >
-                                <button type="submit" class="btn-delete">Delete</button>
-                            </form>
+                            @if($isSuperAdmin)
+                                <form action="{{ route('admin.users.unban', $user->id) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    <button type="submit" style="background-color: #15803d; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-right: 6px;">Unban</button>
+                                </form>
+                                <form action="{{ route('admin.users.delete', $user->id) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <input
+                                        type="text"
+                                        name="confirm_username"
+                                        placeholder="Type {{ $user->name }}"
+                                        style="padding: 5px; width: 150px;"
+                                        required
+                                    >
+                                    <button type="submit" class="btn-delete">Delete</button>
+                                </form>
+                            @else
+                                <span style="color:#666;">Only superadmin can unban or delete.</span>
+                            @endif
                         @else
                             <form action="{{ route('admin.users.ban', $user->id) }}" method="POST" style="display:inline;">
                                 @csrf

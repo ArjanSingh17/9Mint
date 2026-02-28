@@ -59,58 +59,93 @@
           @php
             $subtotal = 0;
             $displayCurrency = $payCurrency ?? null;
+              $creatorFeeDraftData = is_array($creatorFeeDraft ?? null) ? $creatorFeeDraft : null;
+              $creatorFeeAmount = (float) ($creatorFeeDraftData['creation_fee_amount_gbp'] ?? 80.00);
+              $hasCreatorFeeDraft = !empty($creatorFeeDraftData['id']);
           @endphp
 
-          @if($cartItems->isEmpty())
+          @if($cartItems->isEmpty() && ! $hasCreatorFeeDraft)
             <p style="padding: 20px; text-align: center;">Your basket is empty. <a href="/products">Browse our collections</a></p>
           @else
             {{-- Cards --}}
-            @foreach($cartItems as $item)
-              @php
-                $listing = $item->listing;
-                $nft = $listing?->token?->nft;
-                $quote = $quotes[$item->id] ?? null;
-                $itemTotal = $quote ? ($quote['pay_amount'] * $item->quantity) : 0;
-                $subtotal += $itemTotal;
-                $nftName = $nft?->name ?? 'NFT';
-                $imageUrl = $nft?->image_url ?? '/images/robotman.webp';
-                $currency = $quote['pay_currency'] ?? ($payCurrency ?? 'GBP');
-                $displayCurrency = $displayCurrency ?: $currency;
-                $currencySymbol = $currencySymbols[$currency] ?? null;
-              @endphp
+            @if ($cartItems->isNotEmpty())
+              @foreach($cartItems as $item)
+                @php
+                  $listing = $item->listing;
+                  $nft = $listing?->token?->nft;
+                  $quote = $quotes[$item->id] ?? null;
+                  $itemTotal = $quote ? ($quote['pay_amount'] * $item->quantity) : 0;
+                  $subtotal += $itemTotal;
+                  $nftName = $nft?->name ?? 'NFT';
+                  $imageUrl = $nft?->image_url ?? '/images/robotman.webp';
+                  $currency = $quote['pay_currency'] ?? ($payCurrency ?? 'GBP');
+                  $displayCurrency = $displayCurrency ?: $currency;
+                  $currencySymbol = $currencySymbols[$currency] ?? null;
+                @endphp
 
+                <div class="basket-item">
+                  <img
+                    src="{{ asset(ltrim($imageUrl, '/')) }}"
+                    class="basket-item-thumbnail"
+                    alt="{{ $nftName }}"
+                  />
+
+                  <div class="basket-item-info">
+                    <h3>{{ $nftName }}</h3>
+                    <p>Listing #{{ $listing?->id }}</p>
+                    @if ($listing?->ref_currency && $listing?->ref_currency !== $currency)
+                      <p>Ref currency: {{ $listing->ref_currency }}</p>
+                    @endif
+                  </div>
+
+                  <div class="basket-item-qty">
+                    <span>Quantity: {{ $item->quantity }}</span>
+                  </div>
+
+                  <div class="basket-item-price">
+                    {{ $currencySymbol ? $currencySymbol . number_format($itemTotal, 2) : number_format($itemTotal, 2) . ' ' . $currency }}
+                  </div>
+
+                  <div class="basket-item-remove">
+                    <form method="POST" action="{{ route('cart.destroy', $item->id) }}" style="display: inline;">
+                      @csrf
+                      @method('DELETE')
+                      <button type="submit" class="remove-button" onclick="return confirm('Remove this item from cart?')">Remove</button>
+                    </form>
+                  </div>
+                </div>
+              @endforeach
+            @endif
+
+            @if ($hasCreatorFeeDraft)
+              @php
+                $subtotal += $creatorFeeAmount;
+                $displayCurrency = $displayCurrency ?: 'GBP';
+                $creatorFeeSymbol = $currencySymbols['GBP'] ?? '£';
+                $creatorNftCount = count($creatorFeeDraftData['nfts'] ?? []);
+              @endphp
               <div class="basket-item">
                 <img
-                  src="{{ asset(ltrim($imageUrl, '/')) }}"
+                  src="{{ asset('images/9MintName.png') }}"
                   class="basket-item-thumbnail"
-                  alt="{{ $nftName }}"
+                  alt="Collection creation fee"
                 />
 
                 <div class="basket-item-info">
-                  <h3>{{ $nftName }}</h3>
-                  <p>Listing #{{ $listing?->id }}</p>
-                  @if ($listing?->ref_currency && $listing?->ref_currency !== $currency)
-                    <p>Ref currency: {{ $listing->ref_currency }}</p>
-                  @endif
+                  <h3>Collection Creation Fee</h3>
+                  <p>Collection: {{ $creatorFeeDraftData['name'] ?? 'Untitled collection' }}</p>
+                  <p>{{ $creatorNftCount }} NFTs in draft</p>
                 </div>
 
                 <div class="basket-item-qty">
-                  <span>Quantity: {{ $item->quantity }}</span>
+                  <span>Quantity: 1</span>
                 </div>
 
                 <div class="basket-item-price">
-                  {{ $currencySymbol ? $currencySymbol . number_format($itemTotal, 2) : number_format($itemTotal, 2) . ' ' . $currency }}
-                </div>
-
-                <div class="basket-item-remove">
-                  <form method="POST" action="{{ route('cart.destroy', $item->id) }}" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="remove-button" onclick="return confirm('Remove this item from cart?')">Remove</button>
-                  </form>
+                  {{ $creatorFeeSymbol . number_format($creatorFeeAmount, 2) }}
                 </div>
               </div>
-            @endforeach
+            @endif
           @endif
         </div>
 
@@ -142,7 +177,7 @@
             <span>{{ $summarySymbol ? $summarySymbol . number_format($subtotal, 2) : number_format($subtotal, 2) . ' ' . $summaryCurrency }}</span>
           </div>
 
-          @if(!$cartItems->isEmpty())
+          @if(!$cartItems->isEmpty() || $hasCreatorFeeDraft)
             <a href="/checkout" class="checkout-button">Proceed to Checkout</a>
           @else
             <a href="/products" class="checkout-button">Browse Products</a>

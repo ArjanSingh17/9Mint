@@ -18,7 +18,7 @@
       $creatorFeeCurrency = $creatorFeeCheckout->pay_currency ?? 'GBP';
       $creatorFeeSymbol = $currencySymbols[$creatorFeeCurrency] ?? null;
       $paymentReferenceId = $isCreatorFeeCheckout
-        ? ('CF-' . ($creatorFeeCheckout->collection_id ?? 'NEW'))
+        ? ('CF-' . ($creatorFeeCheckout->collection_id ?? ($creatorFeeCheckout->draft_id ?? 'NEW')))
         : ($order->id ?? 'PENDING');
       $walletNetworkValue = $isCreatorFeeCheckout
         ? $creatorFeeCurrency
@@ -88,7 +88,12 @@
                 <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; margin-bottom: 10px;">
                   <div>
                     <strong>Collection Creation Fee</strong><br>
-                    <small>{{ $creatorFeeCheckout->collection_name ?? 'Pending collection' }}</small>
+                    <small>
+                      {{ $creatorFeeCheckout->collection_name ?? 'Pending collection' }}
+                      @if (!empty($creatorFeeCheckout->nft_count))
+                        | {{ (int) $creatorFeeCheckout->nft_count }} NFTs
+                      @endif
+                    </small>
                   </div>
                   <div>
                     <strong>{{ $creatorFeeSymbol ? $creatorFeeSymbol . number_format($creatorFeeAmount, 2) : number_format($creatorFeeAmount, 2) . ' ' . $creatorFeeCurrency }}</strong>
