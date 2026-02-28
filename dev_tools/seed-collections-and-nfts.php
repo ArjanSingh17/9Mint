@@ -46,7 +46,17 @@ $nineMintUser = User::updateOrCreate(
 
 $vlasUser = User::updateOrCreate(
     ['id' => 2],
-    ['name' => 'Vlas', 'email' => null, 'password' => null, 'role' => 'user']
+    [
+        'name' => 'Vlas',
+        'email' => null,
+        'password' => null,
+        'role' => 'user',
+        'badges' => [[
+            'key' => 'trusted_seller',
+            'label' => 'Trusted Seller',
+            'description' => 'Recognized for consistent verified NFT sales and marketplace reliability.',
+        ]],
+    ]
 );
 
 try {

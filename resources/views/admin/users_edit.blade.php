@@ -33,10 +33,11 @@
         <div class="form-group">
             <label>Role:</label>
             <select name="role">
-                <option value="customer" {{ $user->role == 'customer' ? 'selected' : '' }}>Customer</option>
+                <option value="user" {{ in_array($user->role, ['user', 'customer'], true) ? 'selected' : '' }}>User</option>
                 <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
             </select>
             @error('role') <div class="error">{{ $message }}</div> @enderror
+            <small>Only 9Mint superadmin can assign admin role.</small>
         </div>
 
         <button type="submit">Update User</button>

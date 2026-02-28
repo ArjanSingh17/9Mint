@@ -3,6 +3,11 @@
 @php
     $inventoryUser = $inventoryUser ?? auth()->user();
     $isOwnerInventory = $isOwnerInventory ?? true;
+    $inventoryDisplayName = $isOwnerInventory
+        ? 'My Inventory'
+        : (str_ends_with($inventoryUser->name, 's')
+            ? $inventoryUser->name . "' Inventory"
+            : $inventoryUser->name . "'s Inventory");
     $inventoryTotals = $inventoryTotals ?? [];
     $inventoryValuationBase = $inventoryValuationBase ?? 'GBP';
     $inventoryRateMatrix = $inventoryRateMatrix ?? [];
@@ -16,7 +21,7 @@
     ];
 @endphp
 
-@section('title', $isOwnerInventory ? 'My Tokens' : ($inventoryUser->name . "'s Inventory"))
+@section('title', $inventoryDisplayName)
 
 @push('styles')
     @vite('resources/css/pages/app-pages.css')
@@ -97,8 +102,9 @@
 
         .inventory-profile-card__link img {
             width: 100%;
-            aspect-ratio: 1 / 1.2;
-            object-fit: cover;
+            aspect-ratio: 1 / 1.4;
+            object-fit: contain;
+            background: color-mix(in srgb, var(--surface-input) 70%, #000 30%);
             display: block;
         }
 
@@ -164,7 +170,27 @@
             cursor: pointer;
         }
 
+        .inventory-profile-card__button--list {
+            background: color-mix(in srgb, var(--surface-input) 78%, #000 22%);
+            color: var(--subtext-color);
+            cursor: not-allowed;
+        }
+
+        .inventory-profile-card__button--list.is-ready {
+            background: var(--link-hover);
+            color: #fff;
+            cursor: pointer;
+        }
+
         .inventory-profile-card__button:hover {
+            background: color-mix(in srgb, var(--link-hover) 85%, #000 15%);
+        }
+
+        .inventory-profile-card__button--list:hover {
+            background: color-mix(in srgb, var(--surface-input) 78%, #000 22%);
+        }
+
+        .inventory-profile-card__button--list.is-ready:hover {
             background: color-mix(in srgb, var(--link-hover) 85%, #000 15%);
         }
 
@@ -178,7 +204,7 @@
 
 @section('content')
     <section class="inventory-page">
-        <h1>{{ $isOwnerInventory ? 'My Tokens' : ($inventoryUser->name . "'s Inventory") }}</h1>
+        <h1>{{ $inventoryDisplayName }}</h1>
 
         @if (session('status'))
             <div class="orders-status">{{ session('status') }}</div>
@@ -224,7 +250,7 @@
                         <a href="{{ route('nfts.show', $nft->slug) }}" class="inventory-profile-card__link">
                             <img src="{{ asset(ltrim($nft->image_url, '/')) }}" alt="{{ $nft->name }}">
                             <span class="inventory-profile-card__name">{{ $nft->name }}</span>
-                            <span class="inventory-profile-card__token">Token #{{ $token->serial_number }}</span>
+                            <span class="inventory-profile-card__token">Edition #{{ $token->serial_number }}</span>
                         </a>
 
                         <div class="inventory-profile-card__actions">
@@ -242,12 +268,12 @@
                                     @if (! $isEligible)
                                         <p class="inventory-profile-card__price">Only paid NFTs can be listed.</p>
                                     @else
-                                        <form method="POST" action="{{ route('inventory.listing.store') }}">
+                                        <form method="POST" action="{{ route('inventory.listing.store') }}" data-listing-form>
                                             @csrf
                                             <input type="hidden" name="token_id" value="{{ $token->id }}">
                                             <label class="inventory-profile-card__field">
                                                 <span>Price</span>
-                                                <input type="number" step="0.01" min="0" name="ref_amount" placeholder="Price" required>
+                                                <input type="number" step="0.01" min="0" name="ref_amount" placeholder="Price" required data-listing-price>
                                             </label>
                                             <label class="inventory-profile-card__field">
                                                 <span>Currency</span>
@@ -257,8 +283,8 @@
                                                     @endforeach
                                                 </select>
                                             </label>
-                                            <button type="submit" class="inventory-profile-card__button">List</button>
-                                            <p class="inventory-profile-card__hint">9Mint fee: 2.5% (you receive 97.5%).</p>
+                                            <button type="submit" class="inventory-profile-card__button inventory-profile-card__button--list" data-listing-submit disabled>List</button>
+                                            <p class="inventory-profile-card__hint">Fees: 1.5% to 9Mint, 1.0% to creator (you receive 97.5%).</p>
                                         </form>
                                     @endif
                                 @endif
@@ -278,3 +304,29 @@
         @endif
     </section>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-listing-form]').forEach((form) => {
+                const priceInput = form.querySelector('[data-listing-price]');
+                const submitButton = form.querySelector('[data-listing-submit]');
+
+                if (!priceInput || !submitButton) {
+                    return;
+                }
+
+                const updateButtonState = () => {
+                    const priceValue = Number.parseFloat(priceInput.value);
+                    const isReady = Number.isFinite(priceValue) && priceValue > 0;
+
+                    submitButton.disabled = !isReady;
+                    submitButton.classList.toggle('is-ready', isReady);
+                };
+
+                priceInput.addEventListener('input', updateButtonState);
+                updateButtonState();
+            });
+        });
+    </script>
+@endpush
