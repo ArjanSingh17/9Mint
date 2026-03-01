@@ -24,7 +24,7 @@
         </div>
       @endif
 
-      <form method="POST" action="{{ route('password.update') }}">
+      <form method="POST" action="{{ route('password.store') }}">
         @csrf
         {{-- The secure hidden token from the email link --}}
         <input type="hidden" name="token" value="{{ $token }}">

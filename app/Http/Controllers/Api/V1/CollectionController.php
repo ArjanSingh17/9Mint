@@ -10,7 +10,7 @@ class CollectionController extends Controller
 {
     public function index()
     {
-        $collections = Collection::whereNull('deleted_at')
+        $collections = Collection::approved()->whereNull('deleted_at')
             ->orderBy('id')
             ->paginate(12);
 
@@ -19,7 +19,7 @@ class CollectionController extends Controller
 
     public function show(string $slug)
     {
-        $collection = Collection::where('slug', $slug)->firstOrFail();
+        $collection = Collection::approved()->where('slug', $slug)->firstOrFail();
 
         return new CollectionResource($collection);
     }

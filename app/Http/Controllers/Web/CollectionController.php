@@ -12,15 +12,15 @@ class CollectionController extends Controller
     // Show all collections
     public function index()
     {
-        $collections = Collection::whereNull('deleted_at')->get();
+        $collections = Collection::approved()->whereNull('deleted_at')->get();
         return view('collections.index', compact('collections'));
     }
 
     // Show NFTs for a single collection
     public function show($slug)
     {
-        $collection = Collection::where('slug', $slug)->firstOrFail();
-        $nfts = $collection->nfts()->where('is_active', 1)->get();
+        $collection = Collection::approved()->where('slug', $slug)->firstOrFail();
+        $nfts = $collection->nfts()->marketVisible()->get();
 
         $nftIds = $nfts->pluck('id')->all();
         $activeListings = Listing::query()

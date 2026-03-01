@@ -17,7 +17,6 @@ class PaymentService
             $walletService = app(WalletService::class);
             $walletAddressService = app(WalletAddressService::class);
             $platformUserId = User::where('name', '9Mint')->value('id');
-            $feeRate = Listing::SERVICE_FEE_RATE;
             $intent = PaymentIntent::create([
                 'order_id' => $order->id,
                 'provider' => $provider,
@@ -69,8 +68,9 @@ class PaymentService
                                 'metadata' => ['source' => 'sale'],
                             ]);
                         } else {
-                            $sellerNet = $gross * (1 - $feeRate);
-                            $platformFee = $gross * $feeRate;
+                            $sellerNet = $gross * (1 - Listing::SERVICE_FEE_RATE);
+                            $platformFee = $gross * Listing::PLATFORM_FEE_RATE;
+                            $creatorFee = $gross * Listing::CREATOR_FEE_RATE;
 
                             if ($sellerId) {
                                 if ($sellerId !== $platformUserId) {
@@ -85,6 +85,30 @@ class PaymentService
                                     'listing_id' => $item->listing_id,
                                     'metadata' => ['source' => 'sale'],
                                 ]);
+                            }
+
+                            $creatorUserId = null;
+                            $collection = $item->listing->token?->nft?->collection;
+                            if ($collection) {
+                                $creatorUserId = $collection->submitted_by_user_id;
+                                if (!$creatorUserId && !empty($collection->creator_name)) {
+                                    $creatorUserId = User::where('name', $collection->creator_name)->value('id');
+                                }
+                            }
+
+                            if ($creatorUserId && $creatorUserId !== $platformUserId) {
+                                $creator = User::whereKey($creatorUserId)->lockForUpdate()->first();
+                                if ($creator && empty($creator->wallet_address)) {
+                                    $walletAddressService->assignGeneratedAddress($creator);
+                                }
+
+                                $walletService->credit($creatorUserId, $currency, $creatorFee, [
+                                    'order_id' => $order->id,
+                                    'listing_id' => $item->listing_id,
+                                    'metadata' => ['source' => 'creator_fee'],
+                                ]);
+                            } else {
+                                $platformFee += $creatorFee;
                             }
 
                             if ($platformUserId) {

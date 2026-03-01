@@ -11,8 +11,8 @@
   <div class="auth-section" style="justify-content: center;">
 
     <div class="auth-form">
-      <h2>Reset Password</h2>
-      <p style="text-align: center; margin-bottom: 20px; color: #666; font-size: 0.9rem;">
+      <h2 style="text-align: center; margin-bottom: 10px;">Reset Password</h2>
+      <p style="text-align: center; margin: 0 0 20px; color: #fff; font-size: 0.9rem;">
         Enter your email address and we will send you a link to reset your password.
       </p>
 

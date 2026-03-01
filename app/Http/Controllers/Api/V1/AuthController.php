@@ -10,7 +10,9 @@ use App\Http\Requests\RegisterRequest;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 use App\Services\WalletAddressService;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -108,6 +110,7 @@ class AuthController extends Controller
         )){
             return back()
                 ->withErrors(['name' => 'Invalid credentials'], 'login')
+                ->with('show_forgot_password', true)
                 ->withInput();
         }
 
@@ -147,6 +150,7 @@ class AuthController extends Controller
 
         $rules = [
             'name' => [
+                'sometimes',
                 'required',
                 'string',
                 'max:80',
@@ -154,12 +158,14 @@ class AuthController extends Controller
                 Rule::unique('users', 'name')->ignore($user->id),
             ],
             'email' => [
+                'sometimes',
                 'required',
                 'email',
                 'max:255',
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
             'wallet_address' => [
+                'sometimes',
                 'nullable',
                 'string',
                 'max:255',
@@ -167,18 +173,83 @@ class AuthController extends Controller
                 'regex:/^(0x[a-f0-9]{40}|[A-Za-z0-9]{26,255})$/',
                 Rule::unique('users', 'wallet_address')->ignore($user->id),
             ],
+            'profile_image' => [
+                'sometimes',
+                'nullable',
+                'image',
+                'max:5120',
+            ],
+            'remove_profile_image' => [
+                'sometimes',
+                'nullable',
+                'boolean',
+            ],
         ];
 
         // Backward-compatible for environments where this migration isn't applied yet.
+        if (Schema::hasColumn('users', 'description')) {
+            $rules['description'] = ['sometimes', 'nullable', 'string', 'max:1000'];
+        }
+
+        // Backward-compatible for environments where this migration isn't applied yet.
         if (Schema::hasColumn('users', 'nfts_public')) {
-            $rules['nfts_public'] = ['required', 'boolean'];
+            $rules['nfts_public'] = ['sometimes', 'required', 'boolean'];
         }
 
         $data = $r->validate($rules);
 
+        $shouldRemoveProfileImage = (bool) ($data['remove_profile_image'] ?? false);
+        unset($data['remove_profile_image']);
+
+        if ($shouldRemoveProfileImage && ! $r->hasFile('profile_image')) {
+            $this->deleteExistingProfileImage($user);
+            $data['profile_image_url'] = null;
+        }
+
+        if ($r->hasFile('profile_image')) {
+            $this->deleteExistingProfileImage($user);
+
+            $directory = public_path('images/pfp');
+            if (!File::exists($directory)) {
+                File::makeDirectory($directory, 0755, true);
+            }
+
+            $uploaded = $r->file('profile_image');
+            $extension = strtolower((string) $uploaded->getClientOriginalExtension());
+            if ($extension === '') {
+                $extension = strtolower((string) $uploaded->extension());
+            }
+            if ($extension === '') {
+                $extension = 'png';
+            }
+
+            $filename = 'user-' . $user->id . '-' . Str::uuid() . '.' . $extension;
+            $uploaded->move($directory, $filename);
+            $data['profile_image_url'] = '/images/pfp/' . $filename;
+        }
+
         $user->update($data);
 
         return back()->with('status', 'Profile updated successfully.');
+    }
+
+    private function deleteExistingProfileImage(User $user): void
+    {
+        $existingPath = $user->profile_image_url
+            ? public_path(ltrim((string) $user->profile_image_url, '/'))
+            : null;
+        $basePfpPath = realpath(public_path('images/pfp'));
+
+        if (! $existingPath || ! $basePfpPath) {
+            return;
+        }
+
+        $normalizedExisting = str_replace('\\', '/', $existingPath);
+        $normalizedBase = str_replace('\\', '/', $basePfpPath);
+
+        if (str_starts_with($normalizedExisting, $normalizedBase) && File::exists($existingPath)) {
+            File::delete($existingPath);
+        }
     }
 
     public function updatePassword(Request $r)

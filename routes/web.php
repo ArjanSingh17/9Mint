@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Http\Controllers\Web\CartController as WebCartController;
 use App\Http\Controllers\Web\CheckoutController as WebCheckoutController;
 use App\Http\Controllers\Web\CollectionController as WebCollection;
+use App\Http\Controllers\Web\CreatorCollectionController;
 use App\Http\Controllers\Web\FavouritePageController;
 use App\Http\Controllers\NftReviewController;
 
@@ -48,6 +49,11 @@ Route::middleware('guest')->group(function () {
     
     // 'throttle:6,1' -> allows 6 tries per 1 minute
     Route::post('/login', [AuthController::class, 'loginWeb'])->middleware('throttle:6,1');
+
+    Route::get('/forgot-password', [PasswordResetController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.store');
     
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'registerWeb']); // You can add it here too!
@@ -58,8 +64,8 @@ Route::middleware('guest')->group(function () {
 // STATIC PAGES
 // ------------------------------
 Route::get('/', [HomeController::class, 'index'])->name('root');
-Route::get('/cart', [WebCartController::class, 'index'])->middleware('auth')->name('cart.index');
-Route::get('/checkout', [WebCheckoutController::class, 'index'])->middleware('auth')->name('checkout.index');
+Route::get('/cart', [WebCartController::class, 'index'])->middleware(['auth', 'not_banned'])->name('cart.index');
+Route::get('/checkout', [WebCheckoutController::class, 'index'])->middleware(['auth', 'not_banned'])->name('checkout.index');
 Route::get('/pricing', fn() => view('pricing'));
 Route::livewire('/contactUs', 'pages::contact-us');
 Route::get('/contactUs/terms', fn() => view('terms-and-conditions'));
@@ -112,8 +118,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profile/settings', [AuthController::class, 'profile'])->name('profile.settings');
     Route::get('/my-favourites', [FavouritePageController::class, 'index'])->name('favourites.index');
-    Route::post('/nfts/{nft}/toggle-like', [FavouriteController::class, 'toggle'])->name('nfts.toggle');
-    Route::post('/chat/start/{receiverId}', [ConversationController::class, 'startConversation'])->middleware('auth')->name('chat.start');
+    Route::post('/nfts/{nft}/toggle-like', [FavouriteController::class, 'toggle'])->middleware('not_banned')->name('nfts.toggle');
+    Route::post('/chat/start/{receiverId}', [ConversationController::class, 'startConversation'])->middleware(['auth', 'not_banned'])->name('chat.start');
     Route::patch('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
     Route::patch('/profile/password', [AuthController::class, 'updatePassword'])->name('password.update');
     Route::get('/chat/enter/{receiverId}', [ConversationController::class, 'enterConversation'])->middleware('auth')->name('chat.enter');
@@ -137,13 +143,16 @@ Route::middleware('auth')->group(function () {
         return view('orders.index', compact('orders', 'sales'));
     })->name('orders.index');
 
-    Route::post('/cart', [WebCartController::class, 'store'])->name('cart.store');
-    Route::delete('/cart/{id}', [WebCartController::class, 'destroy'])->name('cart.destroy');
-    Route::post('/orders', [WebCheckoutController::class, 'store'])->name('orders.store');
-    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
-    Route::post('/inventory/listings', [InventoryController::class, 'store'])->name('inventory.listing.store');
-    Route::delete('/inventory/listings/{listing}', [InventoryController::class, 'destroy'])->name('inventory.listing.destroy');
-    Route::post('/conversations/start-user/{user}', [ConversationController::class, 'startWithUser'])->name('conversations.start-user');
+    Route::post('/cart', [WebCartController::class, 'store'])->middleware('not_banned')->name('cart.store');
+    Route::delete('/cart/{id}', [WebCartController::class, 'destroy'])->middleware('not_banned')->name('cart.destroy');
+    Route::post('/orders', [WebCheckoutController::class, 'store'])->middleware('not_banned')->name('orders.store');
+    Route::get('/inventory', [InventoryController::class, 'index'])->middleware('not_banned')->name('inventory.index');
+    Route::get('/listings', [InventoryController::class, 'listings'])->middleware('not_banned')->name('listings.index');
+    Route::post('/inventory/listings', [InventoryController::class, 'store'])->middleware('not_banned')->name('inventory.listing.store');
+    Route::delete('/inventory/listings/{listing}', [InventoryController::class, 'destroy'])->middleware('not_banned')->name('inventory.listing.destroy');
+    Route::post('/conversations/start-user/{user}', [ConversationController::class, 'startWithUser'])->middleware('not_banned')->name('conversations.start-user');
+    Route::get('/creator/collections/create', [CreatorCollectionController::class, 'create'])->middleware('not_banned')->name('creator.collections.create');
+    Route::post('/creator/collections', [CreatorCollectionController::class, 'store'])->middleware('not_banned')->name('creator.collections.store');
 
     // view and update details
     //  Route::get('/profile', [UserProfileController::class, 'showSelf'])->name('profile.show');
@@ -178,7 +187,7 @@ Route::livewire('/chat/user/{user}/{conversation}', 'pages::chat.user.index')
     ->name('chat.user');
 
 Route::post('/conversations/start/{listing}', [ConversationController::class, 'start'])
-    ->middleware('auth')
+    ->middleware(['auth', 'not_banned'])
     ->name('conversations.start');
 
 Route::livewire('/chat/{query}', 'pages::chat.index')
@@ -189,14 +198,23 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     // Dashboard
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/approvals', [AdminController::class, 'approvals'])->name('admin.approvals.index');
+    Route::get('/admin/approvals/{collection}', [AdminController::class, 'reviewCollection'])->name('admin.approvals.show');
+    Route::post('/admin/collections/{collection}/approve', [AdminController::class, 'approveCollection'])->name('admin.collections.approve');
+    Route::post('/admin/collections/{collection}/reject', [AdminController::class, 'rejectCollection'])->name('admin.collections.reject');
+    Route::post('/admin/nfts/{nft}/approve', [AdminController::class, 'approveNft'])->name('admin.nfts.approve');
+    Route::post('/admin/nfts/{nft}/reject', [AdminController::class, 'rejectNft'])->name('admin.nfts.reject');
 
     //tickets
     Route::livewire('/admin/tickets', 'pages::tickets');
     // Inventory
     Route::get('/admin/inventory', [AdminController::class, 'inventory'])->name('admin.inventory');
+    Route::get('/admin/orders', [AdminController::class, 'orders'])->name('admin.orders');
 
     // User Management
     Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::post('/admin/users/{id}/ban', [AdminController::class, 'banUser'])->name('admin.users.ban');
+    Route::post('/admin/users/{id}/unban', [AdminController::class, 'unbanUser'])->name('admin.users.unban');
     Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
 
     //Show the edit form
