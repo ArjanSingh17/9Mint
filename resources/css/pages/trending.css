@@ -1,0 +1,126 @@
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+}
+
+#trending-section {
+    text-align: center;
+    padding: 40px 20px;
+    max-width: 980px;
+    margin: 0 auto;
+}
+#trending-section h2 {
+    margin-bottom: 8px;
+    font-size: 3rem;
+    color: var(--text-main);
+}
+.trending-subtitle {
+    font-size: 1.1rem;
+    color: var(--subtext-color);
+    margin-bottom: 30px;
+}
+
+.trending-empty {
+    color: var(--subtext-color);
+    font-size: 1.1rem;
+    margin-top: 40px;
+}
+
+.trending-table-wrap {
+    overflow-x: auto;
+}
+
+.trending-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    text-align: left;
+}
+
+.trending-table thead th {
+    padding: 10px 8px;
+    border-bottom: 2px solid var(--border-soft);
+    color: var(--subtext-color);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.trending-table tbody tr {
+    transition: background 0.15s ease;
+}
+
+.trending-table tbody tr:hover {
+    background: var(--surface-panel);
+}
+
+.trending-table tbody td {
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--border-soft);
+    vertical-align: middle;
+}
+
+.trending-rank {
+    font-weight: 700;
+    font-size: 1.1rem;
+    width: 40px;
+    text-align: center;
+    color: var(--text-main);
+}
+
+.trending-image {
+    width: 60px;
+}
+
+.trending-image img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+}
+
+.trending-name a {
+    color: var(--text-main);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.trending-name a:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
+}
+
+.trending-collection a {
+    color: var(--subtext-color);
+    text-decoration: none;
+}
+
+.trending-collection a:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
+}
+
+.trending-sales {
+    font-weight: 700;
+    color: var(--price-color);
+    text-align: center;
+    width: 60px;
+}
+
+@media (max-width: 600px) {
+    .trending-col-collection,
+    .trending-collection {
+        display: none;
+    }
+
+    .trending-table {
+        font-size: 0.85rem;
+    }
+
+    .trending-image img {
+        width: 40px;
+        height: 40px;
+    }
+}

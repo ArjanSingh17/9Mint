@@ -61,8 +61,10 @@ body {
 
 .collection-preview {
     width: 185px;
-    height: 230px;
-    object-fit: cover;
+    aspect-ratio: 1 / 1.4;
+    height: auto;
+    object-fit: contain;
+    background: color-mix(in srgb, var(--surface-input) 70%, #000 30%);
     border-radius: 8px;
     box-shadow: var(--shadow-elevated);
 }
@@ -85,6 +87,7 @@ body {
 
     .collection-preview {
         width: 150px;
-        height: 190px;
+        aspect-ratio: 1 / 1.4;
+        height: auto;
     }
 }

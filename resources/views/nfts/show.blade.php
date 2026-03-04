@@ -55,7 +55,7 @@
             <p class="nft-detail__description">{{ $nft->description }}</p>
 
             <p class="nft-detail__editions">
-                Editions remaining: {{ $nft->editions_remaining }} / {{ $nft->editions_total }}
+                Editions listed: {{ (int) ($listedEditionsCount ?? 0) }} / {{ $nft->editions_total }}
             </p>
 
             @if ($listing)

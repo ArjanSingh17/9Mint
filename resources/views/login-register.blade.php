@@ -43,7 +43,7 @@
         <a href="#" id="show-register-link">Sign up now.</a>
       </p>
 
-      @if (Route::has('password.request'))
+      @if (session('show_forgot_password') && Route::has('password.request'))
         <a class="forgot-password" href="{{ route('password.request') }}" style="display: block; text-align: center; margin-top: 15px; color: #555; text-decoration: none; font-size: 0.9rem;">
           Forgot Password?
         </a>

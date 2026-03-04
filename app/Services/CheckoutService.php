@@ -96,8 +96,6 @@ class CheckoutService
                 ]);
             }
 
-            CartItem::where('user_id', $user->id)->delete();
-
             return $order->load('items');
         });
     }

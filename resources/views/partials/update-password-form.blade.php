@@ -1,9 +1,7 @@
 <section>
-    {{-- Header --}}
-    <h2 class="text-2xl font-semibold mb-4">Change Password</h2>
+    <h3 class="text-xl font-semibold mb-3">Change Password</h3>
     <p class="text-gray-600 mb-6">Ensure your account is secure by using a long, random password.</p>
 
-    {{-- Targets the dedicated password update route --}}
     <form method="POST" action="{{ route('password.update') }}" class="space-y-4">
         @csrf
         @method('patch')
@@ -28,7 +26,6 @@
                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
         </div>
 
-        {{-- Submit --}}
         <button type="submit" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md">
             Update Password
         </button>

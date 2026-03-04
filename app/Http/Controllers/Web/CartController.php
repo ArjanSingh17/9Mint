@@ -14,6 +14,7 @@ class CartController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        $creatorFeeDraft = $request->session()->get('creator_fee_draft');
         $items = CartItem::with('listing.token.nft')
             ->where('user_id', $user->id)
             ->get();
@@ -30,6 +31,7 @@ class CartController extends Controller
             'cartItems' => $items,
             'quotes' => $quotes,
             'payCurrency' => $payCurrency,
+            'creatorFeeDraft' => $creatorFeeDraft,
         ]);
     }
 

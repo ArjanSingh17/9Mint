@@ -55,7 +55,7 @@
                                     : 'Unavailable' }}
                             </p>
                             <p class="nft-collection-stock">
-                                Editions remaining: {{ $nft->editions_remaining }} / {{ $nft->editions_total }}
+                                Editions listed: {{ (int) ($nft->listed_editions_count ?? 0) }} / {{ $nft->editions_total }}
                             </p>
                         </div>
                     </a>

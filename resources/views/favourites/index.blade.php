@@ -6,12 +6,10 @@
 
 @section('content')
 <div class="container" style="padding: 100px 20px; text-align: center;">
-    <h1 style="color: white; margin-bottom: 30px;">My Favourites</h1>
-
     @if($favourites->isEmpty())
-        <p style="color: #aaa;">You haven't liked any NFTs yet.</p>
-        <a href="{{ route('products.index') }}" class="btn btn-primary" style="margin-top: 20px;">Go Explore</a>
+        <p style="color: #aaa;">You have no favourited NFTs yet.</p>
     @else
+        <h1 style="color: white; margin-bottom: 30px;">My Favourites</h1>
         <div class="nft-collection-grid {{ $favourites->count() < 4 ? 'nft-collection-grid--center' : 'nft-collection-grid--start' }}">
             @foreach($favourites as $nft)
                 @php
