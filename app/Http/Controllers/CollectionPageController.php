@@ -25,8 +25,8 @@ class CollectionPageController extends Controller
         }
 
         $nfts = $isPubliclyVisible
-            ? $collection->nfts()->marketVisible()->get()
-            : $collection->nfts()->get();
+            ? $collection->nfts()->marketVisible()->withAvg('reviews', 'rating')->get()
+            : $collection->nfts()->withAvg('reviews', 'rating')->get();
 
         $nftIds = $nfts->pluck('id')->all();
         $activeListings = Listing::query()
