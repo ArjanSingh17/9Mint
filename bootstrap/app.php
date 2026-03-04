@@ -17,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => AdminMiddleware::class,
             'not_banned' => EnsureUserNotBanned::class,
         ]);
+
+        $middleware->append(\App\Http\Middleware\SecureHeaders::class);
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
