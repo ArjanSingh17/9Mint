@@ -14,7 +14,8 @@ class NftResource extends JsonResource
             'slug' => $this->slug,
             'name' => $this->name,
             'description' => $this->description,
-            'image_url' => $this->image_url,
+            'image_url' => $this->thumbnail_url ?? $this->image_url,
+            'thumbnail_url' => $this->thumbnail_url,
             'editions' => ['total'=>$this->editions_total, 'remaining'=>$this->editions_remaining],
             'collection' => ['id'=>$this->collection_id],
         ];

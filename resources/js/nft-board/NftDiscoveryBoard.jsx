@@ -1,5 +1,5 @@
 import '../../css/nft-board.css';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, memo } from 'react';
 
 import {
     PRESETS,
@@ -8,6 +8,7 @@ import {
     pickPreset,
     computeVisibleRange,
     buildWindowColumns,
+    clearColumnCaches,
 } from './engine';
 
 import NftCard from './components/NftCard';
@@ -16,39 +17,59 @@ import useHeaderHeightCssVar from './hooks/useHeaderHeightCssVar';
 import useNftFlyout from './hooks/useNftFlyout';
 
 // Motion (tweak values)
-const AMBIENT_SPEED = 0.5; // idle speed
-const MAX_WHEEL_SPEED = 5; // max wheel speed
-const ACCEL_FACTOR = 0.08; // ease factor
-const FRICTION = 0.98; // damping
+const AMBIENT_SPEED = 0.5;
+const MAX_WHEEL_SPEED = 45;
+const WHEEL_IMPULSE = 0.055;
+const LOW_SPEED_DRAG = 0.9;
+const HIGH_SPEED_DRAG = 0.995;
+const DRAG_CURVE = 1.4;
+const ACCEL_FACTOR = 0.05;
+
+// Memoized column wrapper — only re-renders when its items actually change
+const MemoColumn = memo(function MemoColumn({ col, onHoverStart, onHoverEnd }) {
+    return (
+        <div
+            className={`nft-board__col${col.isStaggered ? ' nft-board__col--stagger' : ''}`}
+        >
+            {col.items.map((item) =>
+                item.isPlaceholder ? (
+                    <div key={item._key} className="nft-board__placeholder" />
+                ) : (
+                    <NftCard
+                        key={item._key}
+                        nft={item}
+                        onHoverStart={onHoverStart}
+                        onHoverEnd={onHoverEnd}
+                    />
+                ),
+            )}
+        </div>
+    );
+});
 
 export default function NftDiscoveryBoard({ nfts, currencies = [], csrfToken, isAuthed, loginUrl }) {
     const containerRef = useRef(null);
     const rafRef = useRef(null);
     const laneRef = useRef(null);
 
-    // Core state for virtual window approach
     const scrollXRef = useRef(0);
     const velocityRef = useRef(AMBIENT_SPEED);
     const targetVelocityRef = useRef(AMBIENT_SPEED);
+    const wheelMomentumRef = useRef(0);
     const pitchRef = useRef(0);
     const viewportWidthRef = useRef(0);
 
     const uniqueNftsRef = useRef([]);
     const [displayNfts, setDisplayNfts] = useState(nfts || []);
 
-    // Pause/hover state
     const isPointerInsideRef = useRef(false);
     const pauseTokensRef = useRef(0);
 
-    // React state (only updates when range changes)
     const [preset, setPreset] = useState(PRESETS[0]);
     const [range, setRange] = useState({ leftIndex: 0, rightIndex: 10 });
 
-    // keep DOM + RAF in sync (prevents snap on window advance)
     const renderedRangeRef = useRef(range);
-    useLayoutEffect(() => {
-        renderedRangeRef.current = range;
-    }, [range]);
+    useLayoutEffect(() => { renderedRangeRef.current = range; }, [range]);
 
     useHeaderHeightCssVar();
 
@@ -59,42 +80,36 @@ export default function NftDiscoveryBoard({ nfts, currencies = [], csrfToken, is
 
     const releasePause = useCallback(() => {
         pauseTokensRef.current = Math.max(0, pauseTokensRef.current - 1);
-        if (pauseTokensRef.current === 0) {
-            targetVelocityRef.current = AMBIENT_SPEED;
-        }
+        if (pauseTokensRef.current === 0) targetVelocityRef.current = AMBIENT_SPEED;
     }, []);
 
     const {
-        hoveredNft,
-        hoverRect,
-        hoverSide,
-        hoverCardSize,
-        flyoutPhase,
-        presetTiltDeg,
-        handleCardHoverStart,
-        handleCardHoverEnd,
-        handleFlyoutMouseEnter,
-        handleFlyoutMouseLeave,
-        handleBoardMouseLeaveSafetyClose,
-        syncHoverRectNow,
+        hoveredNft, hoverRect, hoverSide, hoverCardSize, flyoutPhase, presetTiltDeg,
+        handleCardHoverStart, handleCardHoverEnd,
+        handleFlyoutMouseEnter, handleFlyoutMouseLeave,
+        handleBoardMouseLeaveSafetyClose, syncHoverRectNow,
     } = useNftFlyout({ preset, acquirePause, releasePause });
 
-    // Track hoveredNft in a ref so animation loop can access it
     const hoveredNftRef = useRef(null);
+    useEffect(() => { hoveredNftRef.current = hoveredNft; }, [hoveredNft]);
+
+    // Build a stable id→nft lookup so flyout can resolve without .find()
+    const nftByIdRef = useRef(new Map());
     useEffect(() => {
-        hoveredNftRef.current = hoveredNft;
-    }, [hoveredNft]);
+        const map = new Map();
+        for (const nft of displayNfts) {
+            if (nft.id != null) map.set(nft.id, nft);
+        }
+        nftByIdRef.current = map;
+    }, [displayNfts]);
 
     const activeFlyoutNft = useMemo(() => {
         if (!hoveredNft) return null;
-        return displayNfts.find((nft) => nft.id === hoveredNft.id) || hoveredNft;
-    }, [displayNfts, hoveredNft]);
+        return nftByIdRef.current.get(hoveredNft.id) || hoveredNft;
+    }, [displayNfts, hoveredNft]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Track syncHoverRectNow in a ref so animation loop can call it
     const syncHoverRectNowRef = useRef(syncHoverRectNow);
-    useEffect(() => {
-        syncHoverRectNowRef.current = syncHoverRectNow;
-    }, [syncHoverRectNow]);
+    useEffect(() => { syncHoverRectNowRef.current = syncHoverRectNow; }, [syncHoverRectNow]);
 
     useEffect(() => {
         const mapped = (nfts || []).map((nft) => ({
@@ -104,84 +119,68 @@ export default function NftDiscoveryBoard({ nfts, currencies = [], csrfToken, is
         setDisplayNfts(mapped);
     }, [nfts]);
 
-    // Initialize unique NFTs when display NFTs change
+    // Compute unique NFTs and clear caches when the list changes
     useEffect(() => {
         if (!displayNfts || displayNfts.length === 0) {
             uniqueNftsRef.current = [];
+            clearColumnCaches();
             return;
         }
-
-        const uniqueNfts = uniqueByKey(displayNfts);
-        uniqueNftsRef.current = uniqueNfts;
+        const unique = uniqueByKey(displayNfts);
+        if (unique !== uniqueNftsRef.current) {
+            uniqueNftsRef.current = unique;
+            clearColumnCaches();
+        }
     }, [displayNfts]);
 
+    // Quotes refresh
     useEffect(() => {
         if (!nfts || nfts.length === 0) return;
-
         let cancelled = false;
 
         const refreshQuotes = async () => {
             const preferredCurrency = localStorage.getItem('walletCurrency');
             const currencyList = currencies.length ? currencies : ['GBP'];
             const listings = nfts
-                .map((nft) => ({
-                    id: nft.listing_id,
-                    currency: preferredCurrency || nft.currency || 'GBP',
-                }))
+                .map((nft) => ({ id: nft.listing_id, currency: preferredCurrency || nft.currency || 'GBP' }))
                 .filter((entry) => entry.id);
-
             if (listings.length === 0) return;
 
             try {
                 const items = listings.flatMap((entry) =>
-                    currencyList.map((currency) => ({
-                        listing_id: entry.id,
-                        currency,
-                    }))
+                    currencyList.map((currency) => ({ listing_id: entry.id, currency })),
                 );
-
                 const res = await fetch('/api/v1/quotes/bulk', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        items,
-                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ items }),
                 });
-
                 if (cancelled) return;
 
                 const quoteMap = new Map();
                 if (res.ok) {
                     const payload = await res.json();
-                    const data = payload?.data || [];
-                    data.forEach((quote) => {
+                    (payload?.data || []).forEach((quote) => {
                         if (!quote?.listing_id) return;
-                        if (!quoteMap.has(quote.listing_id)) {
-                            quoteMap.set(quote.listing_id, {});
-                        }
-                        const entryMap = quoteMap.get(quote.listing_id);
-                        entryMap[quote.display_currency] = quote.display_amount;
+                        if (!quoteMap.has(quote.listing_id)) quoteMap.set(quote.listing_id, {});
+                        quoteMap.get(quote.listing_id)[quote.display_currency] = quote.display_amount;
                     });
                 }
 
                 setDisplayNfts((prev) => prev.map((nft) => {
-                    const quoteMapForListing = quoteMap.get(nft.listing_id);
-                    if (!quoteMapForListing) return nft;
+                    const m = quoteMap.get(nft.listing_id);
+                    if (!m) return nft;
                     const preferred = preferredCurrency || nft.currency || 'GBP';
-                    const preferredAmount = quoteMapForListing[preferred];
+                    const preferredAmount = m[preferred];
                     return {
                         ...nft,
                         price: preferredAmount ?? nft.price,
                         currency: preferredAmount !== undefined ? preferred : nft.currency,
-                        pricesByCurrency: quoteMapForListing,
-                        priceCurrencies: currencyList.filter((cur) => quoteMapForListing[cur] !== undefined),
+                        pricesByCurrency: m,
+                        priceCurrencies: currencyList.filter((cur) => m[cur] !== undefined),
                     };
                 }));
-            } catch (e) {
-
-            }
+            } catch (_) { /* swallow */ }
         };
 
         const handleWalletChange = () => refreshQuotes();
@@ -196,39 +195,27 @@ export default function NftDiscoveryBoard({ nfts, currencies = [], csrfToken, is
     }, [nfts, currencies]);
 
     const handleToggleLike = useCallback(async (nftId, currentLiked) => {
-        if (!isAuthed) {
-            window.location.href = loginUrl || '/login';
-            return;
-        }
-
-        setDisplayNfts((prev) => prev.map((nft) => (
-            nft.id === nftId ? { ...nft, isLiked: !currentLiked } : nft
-        )));
-
+        if (!isAuthed) { window.location.href = loginUrl || '/login'; return; }
+        setDisplayNfts((prev) => prev.map((nft) =>
+            nft.id === nftId ? { ...nft, isLiked: !currentLiked } : nft,
+        ));
         try {
             const res = await fetch(`/nfts/${nftId}/toggle-like`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken || '',
-                },
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken || '' },
             });
-
-            if (!res.ok) {
-                throw new Error('Failed to toggle favourite');
-            }
-        } catch (e) {
-            setDisplayNfts((prev) => prev.map((nft) => (
-                nft.id === nftId ? { ...nft, isLiked: currentLiked } : nft
-            )));
+            if (!res.ok) throw new Error('Failed');
+        } catch (_) {
+            setDisplayNfts((prev) => prev.map((nft) =>
+                nft.id === nftId ? { ...nft, isLiked: currentLiked } : nft,
+            ));
         }
     }, [csrfToken, isAuthed, loginUrl]);
 
-    // Update preset on resize
+    // Preset on resize
     useEffect(() => {
         const el = containerRef.current;
         if (!el) return;
-
         const updatePreset = () => {
             const rect = el.getBoundingClientRect();
             const nextPreset = pickPreset(rect.width);
@@ -240,64 +227,57 @@ export default function NftDiscoveryBoard({ nfts, currencies = [], csrfToken, is
             el.style.setProperty('--rows', String(nextPreset.rows));
             el.style.setProperty('--tilt', `${nextPreset.tiltDeg}deg`);
         };
-
         updatePreset();
         const onResize = () => requestAnimationFrame(updatePreset);
         window.addEventListener('resize', onResize);
         return () => window.removeEventListener('resize', onResize);
     }, []);
 
-    // Measure pitch and viewport width
+    // Measure pitch + viewport
     useEffect(() => {
         const measure = () => {
             const lane = laneRef.current;
             const container = containerRef.current;
             if (!lane || !container) return;
-
             const firstCol = lane.querySelector('.nft-board__col');
             if (!firstCol) return;
-
-            const firstCard =
-                firstCol.querySelector('.nft-board__card-image') ||
-                firstCol.querySelector('.nft-board__placeholder');
+            const firstCard = firstCol.querySelector('.nft-board__card-image') || firstCol.querySelector('.nft-board__placeholder');
             if (!firstCard) return;
-
-            const containerStyles = window.getComputedStyle(container);
-            const cardW =
-                parseFloat(containerStyles.getPropertyValue('--card-width') || '0')
-                || firstCard.offsetWidth
-                || 0;
-            const gap =
-                parseFloat(containerStyles.getPropertyValue('--gap') || '0')
-                || parseFloat(window.getComputedStyle(firstCol).marginRight || '0')
-                || 0;
+            const cs = window.getComputedStyle(container);
+            const cardW = parseFloat(cs.getPropertyValue('--card-width') || '0') || firstCard.offsetWidth || 0;
+            const gap = parseFloat(cs.getPropertyValue('--gap') || '0') || parseFloat(window.getComputedStyle(firstCol).marginRight || '0') || 0;
             pitchRef.current = Math.max(1, cardW + gap);
-
             const rect = container.getBoundingClientRect();
             const theta = Math.abs((preset.tiltDeg || 0) * Math.PI / 180);
-            const effectiveWidth = rect.width * Math.cos(theta) + rect.height * Math.sin(theta);
-            viewportWidthRef.current = effectiveWidth;
+            viewportWidthRef.current = rect.width * Math.cos(theta) + rect.height * Math.sin(theta);
         };
-
         const raf = requestAnimationFrame(measure);
         const onResize = () => requestAnimationFrame(measure);
         window.addEventListener('resize', onResize);
-
-        return () => {
-            cancelAnimationFrame(raf);
-            window.removeEventListener('resize', onResize);
-        };
+        return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); };
     }, [preset]);
 
+    // Animation loop — NO dependency on displayNfts so it never restarts on data changes
     useEffect(() => {
         const animate = () => {
-            const diff = targetVelocityRef.current - velocityRef.current;
-            velocityRef.current += diff * ACCEL_FACTOR;
+            if (pauseTokensRef.current === 0) {
+                const momentumAbs = Math.abs(wheelMomentumRef.current);
+                const speedRatio = Math.min(1, momentumAbs / MAX_WHEEL_SPEED);
+                const easedRatio = Math.pow(speedRatio, DRAG_CURVE);
+                const dynamicDecay = LOW_SPEED_DRAG + (HIGH_SPEED_DRAG - LOW_SPEED_DRAG) * easedRatio;
 
-            if (targetVelocityRef.current === AMBIENT_SPEED && Math.abs(velocityRef.current) > AMBIENT_SPEED * 1.5) {
-                velocityRef.current *= FRICTION;
+                wheelMomentumRef.current *= dynamicDecay;
+                if (Math.abs(wheelMomentumRef.current) < 0.001) {
+                    wheelMomentumRef.current = 0;
+                }
+                targetVelocityRef.current = Math.max(
+                    -MAX_WHEEL_SPEED,
+                    Math.min(MAX_WHEEL_SPEED, AMBIENT_SPEED + wheelMomentumRef.current),
+                );
             }
 
+            const diff = targetVelocityRef.current - velocityRef.current;
+            velocityRef.current += diff * ACCEL_FACTOR;
             scrollXRef.current += velocityRef.current;
 
             const pitch = pitchRef.current;
@@ -305,61 +285,40 @@ export default function NftDiscoveryBoard({ nfts, currencies = [], csrfToken, is
             const lane = laneRef.current;
 
             if (lane && pitch > 0 && viewportWidth > 0) {
-                const newRange = computeVisibleRange({
-                    scrollX: scrollXRef.current,
-                    pitch,
-                    viewportWidth,
-                    bufferCols: BUFFER_COLS,
-                });
-
-                setRange((prevRange) => {
-                    if (prevRange.leftIndex === newRange.leftIndex && prevRange.rightIndex === newRange.rightIndex) {
-                        return prevRange;
-                    }
+                const newRange = computeVisibleRange({ scrollX: scrollXRef.current, pitch, viewportWidth, bufferCols: BUFFER_COLS });
+                setRange((prev) => {
+                    if (prev.leftIndex === newRange.leftIndex && prev.rightIndex === newRange.rightIndex) return prev;
                     return newRange;
                 });
-
                 const committedLeftIndex = renderedRangeRef.current.leftIndex;
-                const laneShiftPx = scrollXRef.current - committedLeftIndex * pitch;
-                lane.style.transform = `translate3d(${-laneShiftPx}px, 0, 0)`;
-
-                if (hoveredNftRef.current) {
-                    syncHoverRectNowRef.current?.();
-                }
+                lane.style.transform = `translate3d(${-(scrollXRef.current - committedLeftIndex * pitch)}px, 0, 0)`;
+                if (hoveredNftRef.current) syncHoverRectNowRef.current?.();
             }
-
             rafRef.current = requestAnimationFrame(animate);
         };
-
         rafRef.current = requestAnimationFrame(animate);
-        return () => {
-            if (rafRef.current) cancelAnimationFrame(rafRef.current);
-        };
-    }, [displayNfts]);
+        return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+    }, []); // ← stable, never restarts
 
     const handleBoardMouseEnter = useCallback(() => {
         isPointerInsideRef.current = true;
-        if (pauseTokensRef.current === 0) {
-            targetVelocityRef.current = AMBIENT_SPEED;
-        }
+        if (pauseTokensRef.current === 0) targetVelocityRef.current = AMBIENT_SPEED;
     }, []);
 
     const handleBoardMouseLeave = useCallback(() => {
         isPointerInsideRef.current = false;
-        if (pauseTokensRef.current === 0) {
-            targetVelocityRef.current = AMBIENT_SPEED;
-        }
+        if (pauseTokensRef.current === 0) targetVelocityRef.current = AMBIENT_SPEED;
         handleBoardMouseLeaveSafetyClose();
     }, [handleBoardMouseLeaveSafetyClose]);
 
     const handleWheel = useCallback((e) => {
         if (!isPointerInsideRef.current) return;
-
         e.preventDefault();
-    const delta = e.deltaY * 0.02; // wheel sensitivity
-        targetVelocityRef.current = Math.max(
-            -MAX_WHEEL_SPEED,
-            Math.min(MAX_WHEEL_SPEED, targetVelocityRef.current + delta)
+        const magnitude = Math.pow(Math.abs(e.deltaY), 1.03);
+        const delta = Math.sign(e.deltaY) * magnitude * WHEEL_IMPULSE;
+        wheelMomentumRef.current = Math.max(
+            -MAX_WHEEL_SPEED - AMBIENT_SPEED,
+            Math.min(MAX_WHEEL_SPEED - AMBIENT_SPEED, wheelMomentumRef.current + delta),
         );
     }, []);
 
@@ -370,14 +329,15 @@ export default function NftDiscoveryBoard({ nfts, currencies = [], csrfToken, is
         return () => container.removeEventListener('wheel', handleWheel);
     }, [handleWheel]);
 
-    const columnsToRender = buildWindowColumns({
+    // Memoize column build — only recomputes when range, uniqueNfts, or preset change
+    const columnsToRender = useMemo(() => buildWindowColumns({
         leftIndex: range.leftIndex,
         rightIndex: range.rightIndex,
         uniqueNfts: uniqueNftsRef.current,
         rows: preset.rows,
-        seed: 1337, // shuffle seed
-        colsPerCycle: Math.max(8, preset.cols + BUFFER_COLS * 2), // cycle width
-    });
+        seed: 1337,
+        colsPerCycle: Math.max(8, preset.cols + BUFFER_COLS * 2),
+    }), [range.leftIndex, range.rightIndex, preset.rows, preset.cols, displayNfts]); // displayNfts triggers uniqueNfts refresh
 
     return (
         <>
@@ -395,23 +355,12 @@ export default function NftDiscoveryBoard({ nfts, currencies = [], csrfToken, is
                 <div className="nft-board__lane-tilt">
                     <div ref={laneRef} className="nft-board__lane">
                         {columnsToRender.map((col) => (
-                            <div
-                                className={`nft-board__col${col.isStaggered ? ' nft-board__col--stagger' : ''}`}
+                            <MemoColumn
                                 key={`col-${col.colIndex}`}
-                            >
-                                {col.items.map((item) => (
-                                    item.isPlaceholder ? (
-                                        <div key={item._key} className="nft-board__placeholder" />
-                                    ) : (
-                                        <NftCard
-                                            key={item._key}
-                                            nft={item}
-                                            onHoverStart={handleCardHoverStart}
-                                            onHoverEnd={handleCardHoverEnd}
-                                        />
-                                    )
-                                ))}
-                            </div>
+                                col={col}
+                                onHoverStart={handleCardHoverStart}
+                                onHoverEnd={handleCardHoverEnd}
+                            />
                         ))}
                     </div>
                 </div>

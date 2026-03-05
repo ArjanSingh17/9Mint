@@ -7,6 +7,7 @@ use App\Http\Requests\StoreNftRequest;
 use App\Models\Listing;
 use App\Models\Nft;
 use App\Models\NftToken;
+use App\Services\ThumbnailService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -37,6 +38,13 @@ class AdminNftController extends Controller
         $path = $request->file('image')->store('nfts', 'public');
         $imageUrl = Storage::url($path);
 
+        // Generate 720px WebP thumbnail
+        $thumbnailUrl = ThumbnailService::generate(
+            storage_path('app/public/' . $path),
+            'storage/nfts/thumbs',
+            'thumb'
+        );
+
         $baseSlug = Str::slug($data['name']);
         $slug = $baseSlug;
         $counter = 1;
@@ -46,7 +54,7 @@ class AdminNftController extends Controller
             $counter++;
         }
 
-        $nft = DB::transaction(function () use ($data, $slug, $imageUrl, $user) {
+        $nft = DB::transaction(function () use ($data, $slug, $imageUrl, $thumbnailUrl, $user) {
             $nft = Nft::create([
                 'name' => $data['name'],
                 'slug' => $slug,
@@ -54,6 +62,7 @@ class AdminNftController extends Controller
                 'editions_total' => $data['editions_total'],
                 'editions_remaining' => $data['editions_total'],
                 'image_url' => $imageUrl,
+                'thumbnail_url' => $thumbnailUrl,
                 'is_active' => true,
             ]);
 

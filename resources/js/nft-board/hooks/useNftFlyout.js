@@ -22,7 +22,6 @@ export default function useNftFlyout({ preset, acquirePause, releasePause }) {
     const hoverSyncRafRef = useRef(null);
 
     const cardHoverActiveRef = useRef(false);
-    const hoverLogCountRef = useRef(0);
 
     const clearHoverDatasets = useCallback((el) => {
         if (!el?.dataset) return;
@@ -55,12 +54,6 @@ export default function useNftFlyout({ preset, acquirePause, releasePause }) {
     const handleCardHoverEnd = useCallback((elToken) => {
         const token = elToken || hoveredElRef.current;
         if (!token) return;
-
-        if (hoverLogCountRef.current < 6) {
-            hoverLogCountRef.current += 1;
-            fetch('http://127.0.0.1:7243/ingest/d0a22aaf-237c-44e3-b6ae-01ddc8de8397',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'design-run1',hypothesisId:'A',location:'useNftFlyout.js:hoverEnd',message:'flyout_hover_end',data:{hadNft:Boolean(hoveredNft),phase:flyoutPhase},timestamp:Date.now()})}).catch(()=>{});
-        }
-        // #endregion
 
         if (hoverReleaseTimerRef.current) {
             clearTimeout(hoverReleaseTimerRef.current);
@@ -103,11 +96,6 @@ export default function useNftFlyout({ preset, acquirePause, releasePause }) {
     const handleCardHoverStart = useCallback((nft, el) => {
         if (!el) return;
         cancelTimers();
-
-        if (hoverLogCountRef.current < 6) {
-            hoverLogCountRef.current += 1;
-            fetch('http://127.0.0.1:7243/ingest/d0a22aaf-237c-44e3-b6ae-01ddc8de8397',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'design-run1',hypothesisId:'D',location:'useNftFlyout.js:hoverStart',message:'flyout_hover_start',data:{nftId:nft?.id,hasCollectionUrl:Boolean(nft?.collection_url),viewportW:window.innerWidth,viewportH:window.innerHeight},timestamp:Date.now()})}).catch(()=>{});
-        }
 
         const prevEl = hoveredElRef.current;
         if (prevEl && prevEl !== el) {

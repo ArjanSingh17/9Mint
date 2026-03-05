@@ -31,7 +31,7 @@
            <td class="trending-rank">{{ $index + 1 }}</td>
                <td class="trending-image">
                    <a href="{{ route('nfts.show', ['slug' => $nft->slug]) }}">
-                      <img src="{{ asset(ltrim($nft->image_url, '/')) }}" alt="{{ $nft->name }}" />
+                      <img src="{{ asset(ltrim($nft->thumbnail_url ?? $nft->image_url, '/')) }}" alt="{{ $nft->name }}" />
                        </a>
                        </td>
                        <td class="trending-name">

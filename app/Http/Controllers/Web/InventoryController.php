@@ -10,8 +10,10 @@ use App\Models\OrderItem;
 use App\Models\SalesHistory;
 use App\Models\User;
 use App\Services\Pricing\CurrencyCatalogInterface;
+use App\Services\ThumbnailService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class InventoryController extends Controller
 {
@@ -256,6 +258,74 @@ class InventoryController extends Controller
         ]);
     }
 
+    public function downloadOwnedTokenImage(Request $request, NftToken $token)
+    {
+        $user = $request->user();
+        if (! $user || (int) $token->owner_user_id !== (int) $user->id) {
+            abort(403, 'You can only download images for tokens you own.');
+        }
+
+        $token->loadMissing(['nft.collection']);
+        $nft = $token->nft;
+        if (! $nft) {
+            abort(404, 'NFT not found for this token.');
+        }
+
+        $sourcePath = ThumbnailService::resolveAbsolutePath((string) $nft->image_url);
+        if (! $sourcePath) {
+            abort(404, 'Original NFT image file not found.');
+        }
+
+        $metadata = [
+            'Store' => '9Mint',
+            'Owner' => $user->name,
+            'NFT_ID' => (string) $nft->id,
+            'Token_ID' => (string) $token->id,
+            'Edition' => (string) ($token->serial_number ?? ''),
+            'NFT_Name' => (string) $nft->name,
+            'NFT_Slug' => (string) $nft->slug,
+            'Collection' => (string) ($nft->collection?->name ?? ''),
+            'Downloaded_At' => now()->toIso8601String(),
+            'Source_Image_URL' => (string) $nft->image_url,
+        ];
+
+        $extension = strtolower((string) pathinfo($sourcePath, PATHINFO_EXTENSION));
+        $extension = $extension !== '' ? $extension : 'bin';
+        if ($extension === 'jpeg') {
+            $extension = 'jpg';
+        }
+
+        $binary = @file_get_contents($sourcePath);
+        if ($binary === false) {
+            abort(500, 'Unable to read original NFT image.');
+        }
+
+        // Keep original format; embed metadata directly when source is PNG.
+        if ($extension === 'png') {
+            $binary = $this->appendPngTextChunks($binary, $metadata);
+        }
+
+        $mime = match ($extension) {
+            'png' => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'avif' => 'image/avif',
+            'bmp' => 'image/bmp',
+            default => 'application/octet-stream',
+        };
+
+        $base = Str::slug((string) ($nft->slug ?: $nft->name ?: 'nft'));
+        $edition = (string) ($token->serial_number ?: $token->id);
+        $filename = "{$base}-edition-{$edition}.{$extension}";
+
+        return response($binary, 200, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+        ]);
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -327,5 +397,62 @@ class InventoryController extends Controller
         }
 
         return back()->with('status', 'Listing removed.');
+    }
+
+    private function appendPngTextChunks(string $pngBinary, array $metadata): string
+    {
+        $pngSignature = "\x89PNG\r\n\x1a\n";
+        if (! str_starts_with($pngBinary, $pngSignature)) {
+            return $pngBinary;
+        }
+
+        $insertOffset = $this->findPngIendOffset($pngBinary);
+        if ($insertOffset === null) {
+            return $pngBinary;
+        }
+
+        $chunks = '';
+        foreach ($metadata as $key => $value) {
+            $keyword = preg_replace('/[^A-Za-z0-9_\- ]/', '', (string) $key) ?: 'Meta';
+            $text = str_replace("\0", '', (string) $value);
+            $data = $keyword . "\0" . $text;
+            $chunks .= $this->makePngChunk('tEXt', $data);
+        }
+
+        return substr($pngBinary, 0, $insertOffset) . $chunks . substr($pngBinary, $insertOffset);
+    }
+
+    private function findPngIendOffset(string $pngBinary): ?int
+    {
+        $offset = 8;
+        $length = strlen($pngBinary);
+
+        while ($offset + 12 <= $length) {
+            $chunkLength = unpack('N', substr($pngBinary, $offset, 4))[1];
+            $chunkType = substr($pngBinary, $offset + 4, 4);
+            $fullSize = 12 + $chunkLength;
+
+            if ($offset + $fullSize > $length) {
+                return null;
+            }
+
+            if ($chunkType === 'IEND') {
+                return $offset;
+            }
+
+            $offset += $fullSize;
+        }
+
+        return null;
+    }
+
+    private function makePngChunk(string $type, string $data): string
+    {
+        $crc = crc32($type . $data);
+        if ($crc < 0) {
+            $crc += 4294967296;
+        }
+
+        return pack('N', strlen($data)) . $type . $data . pack('N', $crc);
     }
 }
