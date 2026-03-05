@@ -81,10 +81,11 @@
 
     return [
       'href' => route('nfts.show', ['slug' => $nft->slug]),
-      'image_url' => $nft->image_url,
+      'image_url' => $nft->thumbnail_url ?? $nft->image_url,
       'name' => $nft->name,
       'edition_label' => 'Edition #' . ($token->serial_number ?? '-'),
       'subline' => 'Listed for ' . $priceLabel,
+      'unlist_action' => route('inventory.listing.destroy', $listing->id),
     ];
   })->values();
 @endphp

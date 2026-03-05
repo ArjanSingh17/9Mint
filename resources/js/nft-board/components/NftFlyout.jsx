@@ -35,6 +35,7 @@ export default function NftFlyout({
     const rotateDeg = isOpen ? 0 : (presetTiltDeg || 0);
 
     const href = nft?.collection_url || '#';
+    const displayImage = (nft?.thumbnail_url || nft?.image_url || '').replace(/^\//, '');
 
     return createPortal(
         <div
@@ -66,7 +67,7 @@ export default function NftFlyout({
                 >
                     <img
                         className="nft-board__flyout-image"
-                        src={nft.image_url}
+                        src={`/img/${displayImage}?w=330&h=460&fit=crop&fm=webp`}
                         alt={nft.name}
                         draggable={false}
                         style={{

@@ -57,7 +57,7 @@ class HomeController extends Controller
             return [
                 'id' => $nft->id,
                 'name' => $nft->name,
-                'image_url' => $nft->image_url,
+                'image_url' => $nft->thumbnail_url ?? $nft->image_url,
                 'editions_remaining' => $nft->editions_remaining,
                 'editions_total' => $nft->editions_total,
                 'listing_id' => $listing?->id,

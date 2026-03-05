@@ -245,10 +245,13 @@
                         $nft = $token->nft;
                         $listing = $token->listing;
                         $isEligible = in_array($token->id, $eligibleTokenIds ?? [], true);
+                        $cardHref = $isOwnerInventory
+                            ? route('inventory.token.download', ['token' => $token->id])
+                            : route('nfts.show', $nft->slug);
                     @endphp
                     <article class="inventory-profile-card">
-                        <a href="{{ route('nfts.show', $nft->slug) }}" class="inventory-profile-card__link">
-                            <img src="{{ asset(ltrim($nft->image_url, '/')) }}" alt="{{ $nft->name }}">
+                        <a href="{{ $cardHref }}" class="inventory-profile-card__link">
+                            <img src="{{ asset(ltrim($nft->thumbnail_url ?? $nft->image_url, '/')) }}" alt="{{ $nft->name }}">
                             <span class="inventory-profile-card__name">{{ $nft->name }}</span>
                             <span class="inventory-profile-card__token">Edition #{{ $token->serial_number }}</span>
                         </a>

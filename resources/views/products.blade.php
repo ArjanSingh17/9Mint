@@ -20,8 +20,10 @@
             {{-- Cards --}}
             @foreach ($collections as $collection)
                 @php
-                    $imageUrls = $collection->nfts->pluck('image_url')->values();
-                    $coverImageUrl = $collection->cover_image_url;
+                    $imageUrls = $collection->nfts
+                        ->map(fn ($nft) => $nft->thumbnail_url ?? $nft->image_url)
+                        ->values();
+                    $coverImageUrl = $imageUrls[0] ?? $collection->cover_image_url;
                     $totalEditions = $collection->nfts->sum('editions_total');
                     $listedEditions = (int) ($collection->listed_editions_count ?? 0);
                 @endphp

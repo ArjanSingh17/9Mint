@@ -11,6 +11,7 @@ use App\Models\PaymentIntent;
 use App\Models\Wallet;
 use App\Services\CheckoutService;
 use App\Services\PaymentService;
+use App\Services\ThumbnailService;
 use App\Services\WalletService;
 use App\Services\Pricing\CurrencyCatalogInterface;
 use Illuminate\Support\Str;
@@ -350,10 +351,9 @@ class CheckoutController extends Controller
             $collectionFolder = $collection->uploadFolderName();
 
             if (! empty($draft['cover_image_temp_path'])) {
-                $coverImageUrl = $this->moveDraftAssetToCollectionFolder(
+                $coverImageUrl = $this->moveDraftCoverToCollectionThumbs(
                     (string) $draft['cover_image_temp_path'],
-                    $collectionFolder,
-                    'cover'
+                    $collectionFolder
                 );
                 $collection->update(['cover_image_url' => $coverImageUrl]);
             }
@@ -372,6 +372,11 @@ class CheckoutController extends Controller
                     'name' => $nftInput['name'] ?? ('NFT ' . ($index + 1)),
                     'description' => $nftInput['description'] ?? null,
                     'image_url' => $imageUrl,
+                    'thumbnail_url' => ThumbnailService::generate(
+                        public_path(ltrim($imageUrl, '/')),
+                        "images/nfts/{$collectionFolder}/thumbs",
+                        'thumb'
+                    ),
                     'editions_total' => (int) ($nftInput['editions_total'] ?? 1),
                     'editions_remaining' => (int) ($nftInput['editions_total'] ?? 1),
                     'primary_ref_amount' => (float) ($nftInput['ref_amount'] ?? 0.01),
@@ -410,6 +415,26 @@ class CheckoutController extends Controller
         }
 
         return "/images/nfts/{$collectionFolder}/{$filename}";
+    }
+
+    private function moveDraftCoverToCollectionThumbs(string $tempPath, string $collectionFolder): string
+    {
+        if ($tempPath === '' || ! Storage::disk('local')->exists($tempPath)) {
+            abort(422, 'Collection draft cover image is missing. Please submit the collection again.');
+        }
+
+        $sourcePath = Storage::disk('local')->path($tempPath);
+        $coverImageUrl = ThumbnailService::generateCover(
+            $sourcePath,
+            "images/nfts/{$collectionFolder}/thumbs",
+            'cover'
+        );
+
+        if (! $coverImageUrl) {
+            abort(500, 'Failed to prepare collection cover for submission.');
+        }
+
+        return $coverImageUrl;
     }
 
     private function cleanupCreatorDraftAssets(array $draft): void

@@ -31,7 +31,7 @@
                     </button>
                     <a href="{{ route('nfts.show', ['slug' => $nft->slug]) }}">
                         <div class="nft-collection-thumb">
-                            <img src="{{ asset(ltrim($nft->image_url, '/')) }}" alt="{{ $nft->name }}" />
+                            <img src="{{ asset(ltrim($nft->thumbnail_url ?? $nft->image_url, '/')) }}" alt="{{ $nft->name }}" />
                         </div>
                         <div class="nft-collection-meta">
                             <h3>{{ $nft->name }}</h3>
