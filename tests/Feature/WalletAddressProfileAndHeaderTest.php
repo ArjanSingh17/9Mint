@@ -5,10 +5,12 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Illuminate\Foundation\Testing\WithoutVite;
 
 class WalletAddressProfileAndHeaderTest extends TestCase
 {
     use RefreshDatabase;
+    use WithoutVite;
 
     public function test_profile_update_rejects_duplicate_wallet_address(): void
     {
@@ -61,6 +63,7 @@ class WalletAddressProfileAndHeaderTest extends TestCase
 
     public function test_linked_wallet_shows_header_switcher_with_zero_balances(): void
     {
+        
         $user = User::create([
             'name' => 'header-wallet-user',
             'email' => 'header-wallet@example.com',

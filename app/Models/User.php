@@ -27,6 +27,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'banned_at',
+        'banned_by',
+        'badges',
+        'profile_image_url',
+        'description',
         'wallet_address',
         'nfts_public',
 
@@ -53,7 +59,79 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'nfts_public' => 'boolean',
+            'banned_at' => 'datetime',
+            'badges' => 'array',
         ];
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->name === '9Mint';
+    }
+
+    public function isBanned(): bool
+    {
+        return ! is_null($this->banned_at);
+    }
+
+    /**
+     * @return array<int, array{key:string,label:string,description:string}>
+     */
+    public function profileBadges(): array
+    {
+        $result = [];
+
+        $pushBadge = function (string $key, string $label, string $description) use (&$result): void {
+            if (isset($result[$key])) {
+                return;
+            }
+
+            $result[$key] = [
+                'key' => $key,
+                'label' => $label,
+                'description' => $description,
+            ];
+        };
+
+        if ($this->isSuperAdmin()) {
+            $pushBadge('superadmin', 'Superadmin', 'Full platform control, including assigning other admins.');
+        } elseif (strtolower((string) $this->role) === 'admin') {
+            $pushBadge('admin', 'Admin', 'Can moderate submissions and manage platform operations.');
+        }
+
+        if ($this->isBanned()) {
+            $pushBadge('banned', 'Banned', 'Account is restricted from trading, purchases, and wallet actions.');
+        }
+
+        foreach ((array) ($this->badges ?? []) as $index => $badge) {
+            if (is_string($badge)) {
+                $label = trim($badge);
+                if ($label === '') {
+                    continue;
+                }
+
+                $key = 'custom_' . str($label)->slug('_')->toString();
+                $pushBadge($key, $label, 'Community badge.');
+                continue;
+            }
+
+            if (is_array($badge)) {
+                $label = trim((string) ($badge['label'] ?? $badge['name'] ?? ''));
+                if ($label === '') {
+                    continue;
+                }
+
+                $key = trim((string) ($badge['key'] ?? ''));
+                if ($key === '') {
+                    $key = 'custom_' . str($label)->slug('_')->toString() . '_' . $index;
+                }
+
+                $description = trim((string) ($badge['description'] ?? 'Community badge.'));
+                $pushBadge($key, $label, $description === '' ? 'Community badge.' : $description);
+            }
+        }
+
+        return array_values($result);
     }
 
     public function orders(): HasMany

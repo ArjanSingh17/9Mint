@@ -7,9 +7,13 @@ use App\Models\WalletTransaction;
 use App\Services\Pricing\CurrencyCatalogInterface;
 use App\Services\Pricing\RateProviderInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class WalletService
 {
+    private const CREATOR_FEE_HOLD_SOURCE = 'creator_fee_hold';
+    private const CREATOR_FEE_HOLD_RELEASE_SOURCE = 'creator_fee_hold_release';
+
     public function __construct(
         private RateProviderInterface $rateProvider,
         private CurrencyCatalogInterface $currencyCatalog
@@ -40,6 +44,118 @@ class WalletService
         array $meta = []
     ): WalletTransaction {
         return $this->applyTransaction($userId, $currency, $amount, 'debit', $meta);
+    }
+
+    /**
+     * Place a creator-fee hold by debiting wallet balance and tagging transaction metadata.
+     *
+     * @return array{transaction:\App\Models\WalletTransaction,hold_reference:string}
+     */
+    public function placeHold(
+        int $userId,
+        string $currency,
+        float $amount,
+        array $context = []
+    ): array {
+        $holdReference = $context['hold_reference'] ?? (string) Str::uuid();
+
+        $existing = $this->findHoldTransaction($holdReference);
+        if ($existing) {
+            return [
+                'transaction' => $existing,
+                'hold_reference' => $holdReference,
+            ];
+        }
+
+        $transaction = $this->debit($userId, $currency, $amount, [
+            'order_id' => $context['order_id'] ?? null,
+            'fx_provider' => $context['fx_provider'] ?? null,
+            'fx_rate' => $context['fx_rate'] ?? null,
+            'fx_rated_at' => $context['fx_rated_at'] ?? null,
+            'metadata' => array_filter([
+                'source' => self::CREATOR_FEE_HOLD_SOURCE,
+                'hold_reference' => $holdReference,
+                'hold_status' => 'held',
+                'collection_id' => $context['collection_id'] ?? null,
+                'pay_currency' => $context['pay_currency'] ?? null,
+                'pay_amount' => $context['pay_amount'] ?? null,
+            ], fn ($v) => !is_null($v)),
+        ]);
+
+        return [
+            'transaction' => $transaction,
+            'hold_reference' => $holdReference,
+        ];
+    }
+
+    public function releaseHold(string $holdReference): WalletTransaction
+    {
+        return DB::transaction(function () use ($holdReference) {
+            $holdTx = $this->findHoldTransaction($holdReference, true);
+            if (! $holdTx) {
+                throw new \RuntimeException('Hold transaction not found');
+            }
+
+            $holdMeta = $holdTx->metadata ?? [];
+            $status = $holdMeta['hold_status'] ?? 'held';
+            if ($status === 'released') {
+                return $holdTx;
+            }
+            if ($status === 'captured') {
+                throw new \RuntimeException('Hold already captured');
+            }
+
+            $creditTx = $this->credit(
+                (int) $holdTx->user_id,
+                (string) $holdTx->currency,
+                (float) $holdTx->amount,
+                [
+                    'order_id' => $holdTx->order_id,
+                    'fx_provider' => $holdTx->fx_provider,
+                    'fx_rate' => $holdTx->fx_rate,
+                    'fx_rated_at' => $holdTx->fx_rated_at,
+                    'metadata' => array_filter([
+                        'source' => self::CREATOR_FEE_HOLD_RELEASE_SOURCE,
+                        'hold_reference' => $holdReference,
+                        'collection_id' => $holdMeta['collection_id'] ?? null,
+                    ], fn ($v) => !is_null($v)),
+                ]
+            );
+
+            $holdMeta['hold_status'] = 'released';
+            $holdMeta['released_transaction_id'] = $creditTx->id;
+            $holdMeta['released_at'] = now()->toIso8601String();
+            $holdTx->metadata = $holdMeta;
+            $holdTx->save();
+
+            return $holdTx->fresh();
+        });
+    }
+
+    public function captureHold(string $holdReference): WalletTransaction
+    {
+        return DB::transaction(function () use ($holdReference) {
+            $holdTx = $this->findHoldTransaction($holdReference, true);
+            if (! $holdTx) {
+                throw new \RuntimeException('Hold transaction not found');
+            }
+
+            $holdMeta = $holdTx->metadata ?? [];
+            $status = $holdMeta['hold_status'] ?? 'held';
+            if ($status === 'captured') {
+                return $holdTx;
+            }
+            if ($status === 'released') {
+                throw new \RuntimeException('Hold already released');
+            }
+
+            $holdMeta['hold_status'] = 'captured';
+            $holdMeta['captured_at'] = now()->toIso8601String();
+            $holdTx->metadata = $holdMeta;
+            $holdTx->save();
+
+            return $holdTx->fresh();
+        });
     }
 
     /**
@@ -143,5 +259,20 @@ class WalletService
         }
 
         return round($amount, $decimals);
+    }
+
+    private function findHoldTransaction(string $holdReference, bool $forUpdate = false): ?WalletTransaction
+    {
+        $query = WalletTransaction::query()
+            ->where('type', 'debit')
+            ->where('metadata->source', self::CREATOR_FEE_HOLD_SOURCE)
+            ->where('metadata->hold_reference', $holdReference)
+            ->latest('id');
+
+        if ($forUpdate) {
+            $query->lockForUpdate();
+        }
+
+        return $query->first();
     }
 }

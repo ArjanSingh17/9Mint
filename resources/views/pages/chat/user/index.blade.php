@@ -6,6 +6,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
 use App\Events\MessageSent;
+use App\Notifications\MessageRead;
 
 new class extends Component {
 
@@ -162,40 +163,46 @@ new class extends Component {
 }
 
     // LOAD MESSAGES
-    public function loadMessages()
-    {
-        $userId = auth()->id();
-        $conversationId = $this->selectedConversation->id;
+   public function loadMessages()
+{
+    $userId = auth()->id();
+    $conversationId = $this->selectedConversation->id;
 
-        $baseQuery = Message::where('conversation_id', $conversationId)
-            ->where(function ($query) use ($userId) {
-                $query
-                    ->where(function ($q) use ($userId) {
-                        $q->where('sender_id', $userId)
-                          ->whereNull('sender_deleted_at');
-                    })
-                    ->orWhere(function ($q) use ($userId) {
-                        $q->where('receiver_id', $userId)
-                          ->whereNull('receiver_deleted_at');
-                    });
-            });
+    // Every poll, mark any unread incoming messages as read
+    Message::where('conversation_id', $conversationId)
+        ->where('sender_id', '!=', $userId)
+        ->whereNull('read_at')
+        ->update(['read_at' => now()]);
 
-        $count = $baseQuery->count();
+    $baseQuery = Message::where('conversation_id', $conversationId)
+        ->where(function ($query) use ($userId) {
+            $query
+                ->where(function ($q) use ($userId) {
+                    $q->where('sender_id', $userId)
+                      ->whereNull('sender_deleted_at');
+                })
+                ->orWhere(function ($q) use ($userId) {
+                    $q->where('receiver_id', $userId)
+                      ->whereNull('receiver_deleted_at');
+                });
+        });
 
-        $this->loadedMessages = $baseQuery
-            ->orderBy('created_at', 'asc')
-            ->skip(max(0, $count - $this->paginate_var))
-            ->take($this->paginate_var)
-            ->get();
+    $count = $baseQuery->count();
 
-        if ($count > $this->previousMessageCount) {
-            $this->dispatch('scroll-to-bottom');
-        }
+    $this->loadedMessages = $baseQuery
+        ->orderBy('created_at', 'asc')
+        ->skip(max(0, $count - $this->paginate_var))
+        ->take($this->paginate_var)
+        ->get();
 
-        $this->previousMessageCount = $count;
-
-        return $this->loadedMessages;
+    if ($count > $this->previousMessageCount) {
+        $this->dispatch('scroll-to-bottom');
     }
+
+    $this->previousMessageCount = $count;
+
+    return $this->loadedMessages;
+}
 
     // SEND MESSAGE
     public function sendMessage()
@@ -347,7 +354,7 @@ new class extends Component {
 
                         <!-- Messages -->
 <div class="flex-1 overflow-auto chat-messages-area"
-     wire:poll.0.1s="loadMessages"
+     wire:poll.0.2s="loadMessages"
      id="chat-container"
      x-data="{
          scrollToBottom() {

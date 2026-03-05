@@ -25,6 +25,14 @@
         margin: 0 auto 20px;
     }
 
+    .profile-show-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+    }
+
     .profile-show-name {
         font-size: 26px;
         font-weight: 700;
@@ -97,6 +105,23 @@
         color: var(--link-hover);
     }
 
+    .profile-show-badges {
+        margin-top: 20px;
+        background: var(--surface-panel);
+        color: var(--text-main);
+        border: 1px solid var(--border-soft);
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        padding: 16px 20px;
+        text-align: left;
+    }
+
+    .profile-show-badges h2 {
+        margin: 0;
+        font-size: 18px;
+        color: var(--text-main);
+    }
+
     .profile-show-nfts {
         margin-top: 30px;
         text-align: left;
@@ -140,8 +165,9 @@
 
     .profile-show-nft-card img {
         width: 100%;
-        aspect-ratio: 1 / 1.2;
-        object-fit: cover;
+        aspect-ratio: 1 / 1.4;
+        object-fit: contain;
+        background: color-mix(in srgb, var(--surface-input) 70%, #000 30%);
         display: block;
     }
 
@@ -154,7 +180,7 @@
 
     .profile-show-nft-token-id {
         padding: 0 12px 12px;
-        margin-top: -18px;
+        margin-top: 0;
         font-size: 12px;
         font-weight: 500;
         color: var(--subtext-color);
@@ -204,7 +230,11 @@
 @section('content')
 <div class="profile-show">
     <div class="profile-show-avatar">
-        {{ strtoupper(substr($user->name, 0, 1)) }}
+        @if (!empty($user->profile_image_url))
+            <img src="{{ asset(ltrim($user->profile_image_url, '/')) }}" alt="{{ $user->name }} avatar">
+        @else
+            {{ strtoupper(substr($user->name, 0, 1)) }}
+        @endif
     </div>
 
     <h1 class="profile-show-name">{{ $user->name }}</h1>
@@ -240,14 +270,29 @@
         </div>
     </div>
 
+    <div class="profile-show-badges">
+        <h2>Badges</h2>
+        <x-profile-badges :user="$user" />
+    </div>
+
     @if (($isOwner ?? false) || ($user->nfts_public ?? false))
         @php
             $isOwnerView = (($isOwner ?? false) === true);
-            $ownedTokens = \App\Models\NftToken::with('nft')
+            $ownedTokens = \App\Models\NftToken::with(['nft', 'listing'])
                 ->where('owner_user_id', $user->id)
+                ->whereDoesntHave('listing', function ($q) {
+                    $q->whereIn('status', ['active', 'reserved']);
+                })
                 ->get();
-            $showInventoryCta = $isOwnerView && $ownedTokens->count() > 8;
-            $visibleTokens = $showInventoryCta ? $ownedTokens->take(12) : $ownedTokens;
+            $previewItems = $ownedTokens->map(function ($token) {
+                $nft = $token->nft;
+                return [
+                    'href' => route('nfts.show', $nft->slug),
+                    'image_url' => $nft->image_url,
+                    'name' => $nft->name,
+                    'edition_label' => 'Edition #' . $token->serial_number,
+                ];
+            })->values();
         @endphp
 
         <div class="profile-show-nfts">
@@ -263,32 +308,12 @@
                     <a href="{{ route('inventory.show', ['username' => $user->name]) }}" class="profile-show-inventory-btn">View inventory</a>
                 </p>
             @endif
-            @if($ownedTokens->isEmpty())
-                <p class="profile-show-empty">No NFTs owned yet.</p>
-            @else
-                <div class="profile-show-nft-grid">
-                    @foreach($visibleTokens as $index => $token)
-                        @if ($showInventoryCta && $index >= 8)
-                            <div class="profile-show-nft-card profile-show-nft-card--faded" aria-hidden="true">
-                                <img src="{{ $token->nft->image_url }}" alt="{{ $token->nft->name }}" loading="lazy">
-                                <span>{{ $token->nft->name }}</span>
-                                <span class="profile-show-nft-token-id">Token #{{ $token->serial_number }}</span>
-                            </div>
-                        @else
-                            <a href="{{ route('nfts.show', $token->nft->slug) }}" class="profile-show-nft-card">
-                                <img src="{{ $token->nft->image_url }}" alt="{{ $token->nft->name }}" loading="lazy">
-                                <span>{{ $token->nft->name }}</span>
-                                <span class="profile-show-nft-token-id">Token #{{ $token->serial_number }}</span>
-                            </a>
-                        @endif
-                    @endforeach
-                </div>
-                @if ($showInventoryCta)
-                    <div class="profile-show-inventory-cta">
-                        <a href="{{ route('inventory.show', ['username' => $user->name]) }}" class="profile-show-inventory-btn">View inventory</a>
-                    </div>
-                @endif
-            @endif
+            <x-profile-nft-preview-grid
+                :items="$previewItems"
+                empty-text="No NFTs owned yet."
+                :cta-label="$isOwnerView ? 'View inventory' : null"
+                :cta-href="$isOwnerView ? route('inventory.show', ['username' => $user->name]) : null"
+            />
         </div>
     @else
         <div class="profile-show-nfts">

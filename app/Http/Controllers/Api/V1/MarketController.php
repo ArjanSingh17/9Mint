@@ -18,7 +18,7 @@ class MarketController extends Controller
         $displayCurrency = strtoupper($request->query('currency', $currencyCatalog->defaultDisplayCurrency()));
         $range = $request->query('range', 'month');
 
-        $nft = Nft::where('slug', $slug)->where('is_active', true)->firstOrFail();
+        $nft = Nft::marketVisible()->where('slug', $slug)->firstOrFail();
 
         $listings = Listing::with(['token.nft', 'seller'])
             ->whereHas('token', function ($query) use ($nft) {
@@ -70,7 +70,7 @@ class MarketController extends Controller
         $displayCurrency = strtoupper($request->query('currency', $currencyCatalog->defaultDisplayCurrency()));
         $range = $request->query('range', 'month');
 
-        $nft = Nft::where('slug', $slug)->where('is_active', true)->firstOrFail();
+        $nft = Nft::marketVisible()->where('slug', $slug)->firstOrFail();
 
         return response()->json([
             'data' => [

@@ -11,7 +11,7 @@ class NftController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Nft::query()->where('is_active', true);
+        $query = Nft::query()->marketVisible();
 
         if ($search = $request->query('search')) {
             $query->where('name', 'like', '%'.$search.'%');
@@ -30,8 +30,7 @@ class NftController extends Controller
 
     public function show(string $slug)
     {
-        $nft = Nft::where('slug', $slug)
-            ->where('is_active', true)
+        $nft = Nft::marketVisible()->where('slug', $slug)
             ->firstOrFail();
 
         return new NftResource($nft);

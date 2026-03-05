@@ -19,6 +19,22 @@ class NftController extends Controller
         ->where('is_active', 1)
         ->firstOrFail();
         $collection = $nft->collection;
+        $viewer = auth()->user();
+        $canManage = $viewer && (
+            $viewer->role === 'admin'
+            || (int) $nft->submitted_by_user_id === (int) $viewer->id
+            || ($collection && (int) $collection->submitted_by_user_id === (int) $viewer->id)
+            || ($collection && empty($collection->submitted_by_user_id) && !empty($collection->creator_name) && $collection->creator_name === $viewer->name)
+        );
+        $isPubliclyVisible = $collection
+            && $collection->approval_status === \App\Models\Collection::APPROVAL_APPROVED
+            && (bool) $collection->is_public
+            && $nft->approval_status === Nft::APPROVAL_APPROVED
+            && (bool) $nft->is_active;
+
+        if (! $isPubliclyVisible && ! $canManage) {
+            abort(404);
+        }
 
         $listing = Listing::with('seller')->whereHas('token', function ($query) use ($nft) {
             $query->where('nft_id', $nft->id);
@@ -30,6 +46,17 @@ class NftController extends Controller
             })
             ->orderBy('ref_amount', 'asc')
             ->first();
+
+        $listedEditionsCount = Listing::query()
+            ->whereHas('token', function ($query) use ($nft) {
+                $query->where('nft_id', $nft->id);
+            })
+            ->where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('reserved_until')
+                    ->orWhere('reserved_until', '<', now());
+            })
+            ->count();
 
         $quotes = [];
         $currencies = [];
@@ -83,6 +110,6 @@ if (auth()->check()) {
 }
 
 
-        return view('nfts.show', compact('nft', 'collection', 'listing', 'quotes', 'currencies', 'ownedTokens', 'eligibleTokenIds' , 'averageRating', 'reviewCount', 'userReview'));
+        return view('nfts.show', compact('nft', 'collection', 'listing', 'listedEditionsCount', 'quotes', 'currencies', 'ownedTokens', 'eligibleTokenIds', 'averageRating', 'reviewCount', 'userReview'));
     }
 }

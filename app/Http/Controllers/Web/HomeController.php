@@ -13,10 +13,10 @@ class HomeController extends Controller
         $likedIds = auth()->check()
             ? auth()->user()->favourites()->pluck('nfts.id')->all()
             : [];
-        $nfts = Nft::where('is_active', 1)->get();
+        $nfts = Nft::marketVisible()->get();
 
         // Board NFTs: in-stock, active, not soft-deleted
-        $baseQuery = Nft::where('is_active', true)
+        $baseQuery = Nft::marketVisible()
             ->where('editions_remaining', '>', 0)
             ->whereNull('deleted_at')
             ->with('collection');
