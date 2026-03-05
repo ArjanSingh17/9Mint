@@ -74,8 +74,8 @@
                     <strong>Editions:</strong> {{ $nft->editions_total }}
                 </p>
                 <p style="margin:0 0 8px;"><strong>Description:</strong> {{ $nft->description ?: 'N/A' }}</p>
-                @if($nft->image_url)
-                    <img src="{{ asset(ltrim($nft->image_url, '/')) }}" alt="{{ $nft->name }}" style="max-width: 220px; max-height: 300px; object-fit: contain; border:1px solid #ccc;">
+                @if($nft->thumbnail_url || $nft->image_url)
+                    <img src="{{ asset(ltrim($nft->thumbnail_url ?? $nft->image_url, '/')) }}" alt="{{ $nft->name }}" style="max-width: 220px; max-height: 300px; object-fit: contain; border:1px solid #ccc;">
                 @endif
                 <p style="margin-top:8px;">
                     <a href="{{ route('nfts.show', ['slug' => $nft->slug]) }}" target="_blank" rel="noopener noreferrer">

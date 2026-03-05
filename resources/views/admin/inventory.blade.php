@@ -28,7 +28,7 @@
             @foreach($nfts as $nft)
                 <tr>
                     <td>{{ $nft->id }}</td>
-                    <td><img src="{{ $nft->image_url }}" width="50" alt="nft"></td>
+                    <td><img src="{{ $nft->thumbnail_url ?? $nft->image_url }}" width="50" alt="nft"></td>
                     <td>{{ $nft->name }}</td>
                     <td>{{ $nft->collection->name ?? 'N/A' }}</td>
                     <td>{{ $nft->editions_remaining }} / {{ $nft->editions_total }}</td>

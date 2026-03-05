@@ -15,7 +15,7 @@
 @section('content')
     <section class="nft-detail">
         <div class="nft-detail__media">
-            <img src="{{ asset(ltrim($nft->image_url, '/')) }}" alt="{{ $nft->name }}">
+            <img src="{{ asset(ltrim($nft->thumbnail_url ?? $nft->image_url, '/')) }}" alt="{{ $nft->name }}">
         </div>
         <div class="nft-detail__info nft-detail__info-panel">
             <h1>{{ $nft->name }}</h1>

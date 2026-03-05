@@ -77,7 +77,7 @@
                   $itemTotal = $quote ? ($quote['pay_amount'] * $item->quantity) : 0;
                   $subtotal += $itemTotal;
                   $nftName = $nft?->name ?? 'NFT';
-                  $imageUrl = $nft?->image_url ?? '/images/robotman.webp';
+                  $imageUrl = $nft?->thumbnail_url ?? $nft?->image_url ?? '/images/robotman.webp';
                   $currency = $quote['pay_currency'] ?? ($payCurrency ?? 'GBP');
                   $displayCurrency = $displayCurrency ?: $currency;
                   $currencySymbol = $currencySymbols[$currency] ?? null;

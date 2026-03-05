@@ -15,7 +15,7 @@ class Nft extends Model
     public const APPROVAL_REJECTED = 'rejected';
 
     protected $fillable = [
-        'slug','name','description','image_url',
+        'slug','name','description','image_url','thumbnail_url',
         'primary_ref_amount','primary_ref_currency',
         'editions_total','editions_remaining',
         'is_active','collection_id',
