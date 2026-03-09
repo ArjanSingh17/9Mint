@@ -1,3 +1,34 @@
+<style>
+ .profile-show-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--link-hover);
+        color: #fff;
+        font-size: 20px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+.header {
+    margin-top: 10px;
+        margin-bottom: 10px;
+}
+
+.contacts {
+    margin: 0 auto 20px;
+}
+
+    .profile-show-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+    }
+</style>
 <?php
 namespace App\Http\Livewire\Chat;
 
@@ -142,7 +173,7 @@ new class extends Component {
         return redirect(route('chat.ticket.index'));
     }
 
-    // REALTIME BROADCAST HANDLER
+    
      public function broadcastedNotifications($event)
 {
     if ($event['type'] == MessageSent::class) {
@@ -269,8 +300,13 @@ new class extends Component {
                         <!-- Header -->
                         <div class="py-2 px-3 flex flex-row justify-between items-center chat-sidebar-header">
                             <div class="flex items-center gap-2">
-        <img class="w-10 h-10 rounded-full"
-             src="https://images.macrumors.com/t/n4CqVR2eujJL-GkUPhv1oao_PmI=/1600x/article-new/2019/04/guest-user-250x250.jpg"/>
+                    <div class="profile-show-avatar header">
+                        @if (!empty(auth()->user()->profile_image_url))
+                        <img src="{{ asset(ltrim(auth()->user()->profile_image_url, '/')) }}" alt="{{ auth()->user()->name }} avatar">
+                        @else
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                        @endif
+                    </div>
         <span class="chat-sidebar-username">{{ auth()->user()->name }}</span>
     </div>
                           
@@ -295,8 +331,19 @@ new class extends Component {
      wire:key="conversation-{{ $conversation->id }}" x-data
      @update-url.window="history.pushState({}, '', $event.detail.url)">
                                 <div class="flex-shrink-0 h-12 w-12">
-                                    <img class="h-12 w-12 rounded-full object-cover flex-shrink-0"
-                                         src="https://images.macrumors.com/t/n4CqVR2eujJL-GkUPhv1oao_PmI=/1600x/article-new/2019/04/guest-user-250x250.jpg"/>
+                                    <div class="profile-show-avatar contacts">
+                      @php
+    $otherUser = $conversation->sender_id === auth()->id()
+        ? $conversation->receiver
+        : $conversation->sender;
+@endphp
+
+@if (!empty($otherUser->profile_image_url))
+    <img src="{{ asset(ltrim($otherUser->profile_image_url, '/')) }}" alt="{{ $otherUser->name }} avatar">
+@else
+    {{ strtoupper(substr($otherUser->name, 0, 1)) }}
+@endif
+                    </div>
                                 </div>
                                 <div class="ml-4 flex-1  py-4">
                                     <div class="flex items-bottom justify-between">
@@ -309,9 +356,26 @@ new class extends Component {
                                             {{ $conversation->lastMessage?->created_at?->format('g:i a') }}
                                         </p>
                                     </div>
-                                    <p class="mt-1 text-sm conversation-preview">
-                                       {{ \Illuminate\Support\Str::limit($conversation->lastMessage?->body, 30) }}
-                                    </p>
+                                   <p class="mt-1 text-sm conversation-preview">
+    {{ \Illuminate\Support\Str::limit($conversation->lastMessage?->body, 30) }}
+    @if($conversation->lastMessage?->sender_id === auth()->id())
+        @if($conversation->lastMessage?->read_at)
+            <span class="chat-tick-read">✓✓</span>
+        @else
+            <span class="chat-tick-sent">✓</span>
+        @endif
+    @else
+        @php
+            $unread = $conversation->messages()
+                ->where('sender_id', '!=', auth()->id())
+                ->whereNull('read_at')
+                ->count();
+        @endphp
+        @if($unread > 0)
+            <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-blue-500 rounded-full">{{ $unread }}</span>
+        @endif
+    @endif
+</p>
                                 </div>
                             </div> 
                             @endforeach
@@ -327,11 +391,20 @@ new class extends Component {
                          <div class="py-2 px-3 flex flex-row justify-between items-center chat-main-header">
                             <div class="flex items-center">
                                 <div>
-                                    @if(auth()->user()->role === 'admin')
-                                   <img class="w-10 h-10 rounded-full" src="https://images.macrumors.com/t/n4CqVR2eujJL-GkUPhv1oao_PmI=/1600x/article-new/2019/04/guest-user-250x250.jpg"/>
-                                        @else 
-                                         <img class="w-10 h-10 rounded-full" src="https://images.macrumors.com/t/n4CqVR2eujJL-GkUPhv1oao_PmI=/1600x/article-new/2019/04/guest-user-250x250.jpg"/>
-                                @endif
+                                    
+                    <div class="profile-show-avatar header">
+                      @php
+    $otherUser = $selectedConversation->sender_id === auth()->id()
+        ? $selectedConversation->receiver
+        : $selectedConversation->sender;
+@endphp
+
+@if (!empty($otherUser->profile_image_url))
+    <img src="{{ asset(ltrim($otherUser->profile_image_url, '/')) }}" alt="{{ $otherUser->name }} avatar">
+@else
+    {{ strtoupper(substr($otherUser->name, 0, 1)) }}
+@endif
+                    </div>
                             </div>
                                 <div class="ml-4">
                                    <p class="text-xs mt-1 pb-2.5 chat-contact-name">
