@@ -288,7 +288,7 @@
                 $nft = $token->nft;
                 return [
                     'href' => route('nfts.show', $nft->slug),
-                    'image_url' => $nft->image_url,
+                    'image_url' => $nft->thumbnail_url ?? $nft->image_url,
                     'name' => $nft->name,
                     'edition_label' => 'Edition #' . $token->serial_number,
                 ];

@@ -22,7 +22,8 @@ class ListingResource extends JsonResource
                 'id' => $nft->id,
                 'slug' => $nft->slug,
                 'name' => $nft->name,
-                'image_url' => $nft->image_url,
+                'image_url' => $nft->thumbnail_url ?? $nft->image_url,
+                'thumbnail_url' => $nft->thumbnail_url,
                 'collection_id' => $nft->collection_id,
             ] : null,
         ];

@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\FavouriteController;
 use App\Http\Controllers\CollectionPageController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\Web\PasswordResetController;
 
 // FRONTEND NFT CONTROLLERS
@@ -59,6 +60,11 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'registerWeb']); // You can add it here too!
 });
 
+
+// ------------------------------
+// IMAGE SERVING (Glide)
+// ------------------------------
+Route::get('/img/{path}', [ImageController::class, 'show'])->where('path', '.*')->name('img');
 
 // ------------------------------
 // STATIC PAGES
@@ -147,6 +153,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/cart/{id}', [WebCartController::class, 'destroy'])->middleware('not_banned')->name('cart.destroy');
     Route::post('/orders', [WebCheckoutController::class, 'store'])->middleware('not_banned')->name('orders.store');
     Route::get('/inventory', [InventoryController::class, 'index'])->middleware('not_banned')->name('inventory.index');
+    Route::get('/inventory/tokens/{token}/download', [InventoryController::class, 'downloadOwnedTokenImage'])->middleware('not_banned')->name('inventory.token.download');
     Route::get('/listings', [InventoryController::class, 'listings'])->middleware('not_banned')->name('listings.index');
     Route::post('/inventory/listings', [InventoryController::class, 'store'])->middleware('not_banned')->name('inventory.listing.store');
     Route::delete('/inventory/listings/{listing}', [InventoryController::class, 'destroy'])->middleware('not_banned')->name('inventory.listing.destroy');

@@ -28,10 +28,17 @@
                 text-decoration: none;
                 color: var(--text-main);
                 transition: transform 0.2s ease;
+                position: relative;
             }
 
             .profile-preview-card:hover {
                 transform: translateY(-4px);
+            }
+
+            .profile-preview-card__link {
+                display: block;
+                text-decoration: none;
+                color: inherit;
             }
 
             .profile-preview-card img {
@@ -50,8 +57,8 @@
             }
 
             .profile-preview-card__edition {
-                padding: 0 12px 12px;
-                margin-top: 0;
+                padding: 0 12px 10px;
+                margin-top: -15px;
                 font-size: 12px;
                 font-weight: 500;
                 color: var(--subtext-color);
@@ -59,11 +66,46 @@
 
             .profile-preview-card__subline {
                 padding: 0 12px 12px;
-                margin-top: -10px;
+                margin-top: -20px;
                 font-size: 12px;
                 font-weight: 500;
                 color: var(--subtext-color);
                 text-align: left;
+            }
+
+            .profile-preview-card__hover-action {
+                position: absolute;
+                left: 8px;
+                right: 8px;
+                bottom: 12px;
+                opacity: 0;
+                transform: translateY(8px);
+                pointer-events: none;
+                transition: opacity 0.18s ease, transform 0.18s ease;
+                z-index: 2;
+            }
+
+            .profile-preview-card:hover .profile-preview-card__hover-action,
+            .profile-preview-card:focus-within .profile-preview-card__hover-action {
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            .profile-preview-card__hover-btn {
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 12px 14px;
+                font-weight: 600;
+                font-size: 1rem;
+                background: #b91c1c;
+                color: #fff;
+                cursor: pointer;
+            }
+
+            .profile-preview-card__hover-btn:hover {
+                background: #991b1b;
             }
 
             .profile-preview-card--faded {
@@ -182,14 +224,32 @@
     <div data-preview-root data-expanded="0">
         <div class="profile-preview-grid">
             @foreach ($rows as $row)
-                <a href="{{ $row['href'] }}" class="profile-preview-card" data-preview-card>
-                    <img src="{{ asset(ltrim($row['image_url'], '/')) }}" alt="{{ $row['name'] }}" loading="lazy">
-                    <span>{{ $row['name'] }}</span>
-                    <span class="profile-preview-card__edition">{{ $row['edition_label'] }}</span>
-                    @if (!empty($row['subline']))
-                        <span class="profile-preview-card__subline">{{ $row['subline'] }}</span>
-                    @endif
-                </a>
+                @if (!empty($row['unlist_action']))
+                    <article class="profile-preview-card" data-preview-card>
+                        <a href="{{ $row['href'] }}" class="profile-preview-card__link">
+                            <img src="{{ asset(ltrim($row['thumbnail_url'] ?? $row['image_url'], '/')) }}" alt="{{ $row['name'] }}" loading="lazy">
+                            <span>{{ $row['name'] }}</span>
+                            <span class="profile-preview-card__edition">{{ $row['edition_label'] }}</span>
+                            @if (!empty($row['subline']))
+                                <span class="profile-preview-card__subline">{{ $row['subline'] }}</span>
+                            @endif
+                        </a>
+                        <form method="POST" action="{{ $row['unlist_action'] }}" class="profile-preview-card__hover-action" onsubmit="return confirm('Unlist this NFT edition?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="profile-preview-card__hover-btn">Unlist</button>
+                        </form>
+                    </article>
+                @else
+                    <a href="{{ $row['href'] }}" class="profile-preview-card" data-preview-card>
+                        <img src="{{ asset(ltrim($row['thumbnail_url'] ?? $row['image_url'], '/')) }}" alt="{{ $row['name'] }}" loading="lazy">
+                        <span>{{ $row['name'] }}</span>
+                        <span class="profile-preview-card__edition">{{ $row['edition_label'] }}</span>
+                        @if (!empty($row['subline']))
+                            <span class="profile-preview-card__subline">{{ $row['subline'] }}</span>
+                        @endif
+                    </a>
+                @endif
             @endforeach
         </div>
 
