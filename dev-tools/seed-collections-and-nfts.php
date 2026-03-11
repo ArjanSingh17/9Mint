@@ -4,12 +4,16 @@
  * Simple seeding script for local/dev use.
  *
  * Usage (from project root):
- *   php tools/seed-collections-and-nfts.php
+ * php tools/seed-collections-and-nfts.php
  *
  * It will create (or update) the following:
  * - collections:
- *     - glossy-collection
- *     - superhero-collection
+ * - glossy-collection
+ * - superhero-collection
+ * - geotennis-collection
+ * - characters-collection
+ * - fish-collection
+ * - faces-collection
  * - nfts belonging to those collections, matching your hard-coded views.
  */
 
@@ -71,16 +75,16 @@ $sellerUserId = $vlasUser->id;
 // --- Collections ---
 $collections = [
     'glossy-collection' => [
-        'name'         => 'Glossy Collection',
-        'description'  => 'Glossy animal NFTs created by Vlas.',
+        'name'            => 'Glossy Collection',
+        'description'     => 'Glossy animal NFTs created by Vlas.',
         'cover_image_url' => '/images/nfts/glossy/GlossyDuckNFT.png',
-        'creator_name' => 'Vlas',
+        'creator_name'    => 'Vlas',
     ],
     'superhero-collection' => [
-        'name'         => 'Superhero Collection',
-        'description'  => 'Iconic superhero NFTs.',
+        'name'            => 'Superhero Collection',
+        'description'     => 'Iconic superhero NFTs.',
         'cover_image_url' => '/images/nfts/superhero/Superman.png',
-        'creator_name' => 'Vlas',
+        'creator_name'    => 'Vlas',
     ],
     'geotennis-collection' => [
         'name'            => 'Geo Tennis',
@@ -94,6 +98,18 @@ $collections = [
         'cover_image_url' => '/images/nfts/characters/carl.png',
         'creator_name'    => 'Vlas',
     ],
+    'fish-collection' => [
+        'name'            => 'Fish Collection',
+        'description'     => 'A collection of aquatic fish.',
+        'cover_image_url' => '/images/nfts/fish/fish1.png',
+        'creator_name'    => 'Vlas',
+    ],
+    'faces-collection' => [
+        'name'            => 'Faces Collection',
+        'description'     => 'A collection of distinct faces.',
+        'cover_image_url' => '/images/nfts/faces/face1.png',
+        'creator_name'    => 'Vlas',
+    ],
 ];
 
 foreach ($collections as $slug => $data) {
@@ -101,15 +117,16 @@ foreach ($collections as $slug => $data) {
         ['slug' => $slug],
         $data
     );
-
 }
 
 $glossy = Collection::where('slug', 'glossy-collection')->first();
 $superhero = Collection::where('slug', 'superhero-collection')->first();
 $geotennis = Collection::where('slug', 'geotennis-collection')->first();
 $characters = Collection::where('slug', 'characters-collection')->first();
+$fish = Collection::where('slug', 'fish-collection')->first();
+$faces = Collection::where('slug', 'faces-collection')->first();
 
-if (!$glossy || !$superhero || !$geotennis || !$characters) {
+if (!$glossy || !$superhero || !$geotennis || !$characters || !$fish || !$faces) {
     echo "Error: collections not found after seeding. Aborting NFT creation.\n";
     exit(1);
 }
@@ -200,17 +217,14 @@ foreach ($glossyNfts as $data) {
             'status' => 'listed',
         ]);
 
-        $listing = Listing::create([
+        Listing::create([
             'token_id' => $token->id,
             'seller_user_id' => $sellerUserId,
             'status' => 'active',
             'ref_amount' => $refPrice,
             'ref_currency' => $defaultCurrency,
         ]);
-
-
     }
-
 }
 
 // --- Superhero NFTs (matching SuperheroCollection.blade.php) ---
@@ -289,17 +303,14 @@ foreach ($superheroNfts as $data) {
             'status' => 'listed',
         ]);
 
-        $listing = Listing::create([
+        Listing::create([
             'token_id' => $token->id,
             'seller_user_id' => $sellerUserId,
             'status' => 'active',
             'ref_amount' => $refPrice,
             'ref_currency' => $defaultCurrency,
         ]);
-
-
     }
-
 }
 
 // --- Geo Tennis NFTs ---
@@ -372,7 +383,7 @@ foreach ($geotennisNfts as $data) {
             'status' => 'listed',
         ]);
 
-        $listing = Listing::create([
+        Listing::create([
             'token_id' => $token->id,
             'seller_user_id' => $sellerUserId,
             'status' => 'active',
@@ -452,7 +463,97 @@ foreach ($charactersNfts as $data) {
             'status' => 'listed',
         ]);
 
-        $listing = Listing::create([
+        Listing::create([
+            'token_id' => $token->id,
+            'seller_user_id' => $sellerUserId,
+            'status' => 'active',
+            'ref_amount' => $refPrice,
+            'ref_currency' => $defaultCurrency,
+        ]);
+    }
+}
+
+// --- Fish NFTs ---
+$fishNfts = [];
+for ($i = 1; $i <= 7; $i++) {
+    $fishNfts[] = [
+        'slug'        => "fish-$i",
+        'name'        => "fish$i",
+        'description' => "Fish NFT $i from the Fish Collection.",
+        'image_url'   => "/images/nfts/fish/fish{$i}.png",
+    ];
+}
+
+foreach ($fishNfts as $data) {
+    $refPrice = refPriceGbp($data['slug']);
+    $nft = Nft::updateOrCreate(
+        ['slug' => $data['slug']],
+        [
+            'collection_id'      => $fish->id,
+            'name'               => $data['name'],
+            'description'        => $data['description'],
+            'image_url'          => $data['image_url'],
+            'editions_total'     => $editionsTotal,
+            'editions_remaining' => $editionsTotal,
+            'is_active'          => true,
+        ]
+    );
+
+    $existingTokens = NftToken::where('nft_id', $nft->id)->count();
+    for ($i = $existingTokens + 1; $i <= $editionsTotal; $i++) {
+        $token = NftToken::create([
+            'nft_id' => $nft->id,
+            'serial_number' => $i,
+            'owner_user_id' => $vlasUser->id,
+            'status' => 'listed',
+        ]);
+
+        Listing::create([
+            'token_id' => $token->id,
+            'seller_user_id' => $sellerUserId,
+            'status' => 'active',
+            'ref_amount' => $refPrice,
+            'ref_currency' => $defaultCurrency,
+        ]);
+    }
+}
+
+// --- Faces NFTs ---
+$facesNfts = [];
+for ($i = 1; $i <= 7; $i++) {
+    $facesNfts[] = [
+        'slug'        => "face-$i",
+        'name'        => "face$i",
+        'description' => "Face NFT $i from the Faces Collection.",
+        'image_url'   => "/images/nfts/faces/face{$i}.png",
+    ];
+}
+
+foreach ($facesNfts as $data) {
+    $refPrice = refPriceGbp($data['slug']);
+    $nft = Nft::updateOrCreate(
+        ['slug' => $data['slug']],
+        [
+            'collection_id'      => $faces->id,
+            'name'               => $data['name'],
+            'description'        => $data['description'],
+            'image_url'          => $data['image_url'],
+            'editions_total'     => $editionsTotal,
+            'editions_remaining' => $editionsTotal,
+            'is_active'          => true,
+        ]
+    );
+
+    $existingTokens = NftToken::where('nft_id', $nft->id)->count();
+    for ($i = $existingTokens + 1; $i <= $editionsTotal; $i++) {
+        $token = NftToken::create([
+            'nft_id' => $nft->id,
+            'serial_number' => $i,
+            'owner_user_id' => $vlasUser->id,
+            'status' => 'listed',
+        ]);
+
+        Listing::create([
             'token_id' => $token->id,
             'seller_user_id' => $sellerUserId,
             'status' => 'active',
@@ -463,5 +564,3 @@ foreach ($charactersNfts as $data) {
 }
 
 echo "Done.\n";
-
-
