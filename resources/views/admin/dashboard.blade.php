@@ -19,6 +19,7 @@
     @endif
 
     <ul>
+        <li><a href="/homepage">Homepage</a></li>
         <li><a href="{{ route('admin.inventory') }}">Manage Inventory</a></li>
         <li><a href="{{ route('admin.users') }}">Manage Users</a></li>
         

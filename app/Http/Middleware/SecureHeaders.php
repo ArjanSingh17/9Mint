@@ -25,7 +25,7 @@ class SecureHeaders
 
         $csp = "default-src 'self'; " .
             // Allow scripts from your Vite dev server (IPv4, IPv6, and localhost names)
-            "script-src 'self' 'unsafe-inline' http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173; " .
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173; " .
             // Allow styles from Vite
             "style-src 'self' 'unsafe-inline' http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173; " .
             "img-src 'self' data: https:; " .

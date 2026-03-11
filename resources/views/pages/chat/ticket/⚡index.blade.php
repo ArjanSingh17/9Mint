@@ -1,3 +1,27 @@
+<style>
+ .profile-show-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--link-hover);
+        color: #fff;
+        font-size: 19px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .profile-show-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+    }
+</style>
 
 <?php
 namespace App\Http\Livewire\Chat;
@@ -12,10 +36,6 @@ new class extends Component {
  
     public string $content = '';
  
-
-
-
-
   protected $listeners = [
     'refreshMessages' => '$refresh',
     'messageRead' => 'handleMessageRead'
@@ -32,7 +52,6 @@ new class extends Component {
 
     public function handleMessageRead($messageId)
 {
-    // Find and update the message in loaded messages
     $messageIndex = $this->loadedMessages->search(function($msg) use ($messageId) {
         return $msg->id == $messageId;
     });
@@ -55,9 +74,6 @@ public function markAsRead()
 
     $userId= auth()->id();
     $conversation= Conversation::find(decrypt($id));
-
-
-
 
     $conversation->messages()->each(function($message) use($userId){
 
@@ -95,20 +111,10 @@ public function markAsRead()
         
     }
 
-
-
     return redirect(route('chat.ticket.index'));
-
-    
-    
    }
 
-
-
-
-  
-
-    public function broadcastedNotifications($event)
+  public function broadcastedNotifications($event)
 {
     if ($event['type'] == MessageSent::class) {
         if ($event['conversation_id'] == $this->selectedConversation->id) {
@@ -122,7 +128,7 @@ public function markAsRead()
             $this->selectedConversation->getReceiver()
                 ->notify(new MessageRead($this->selectedConversation->id));
 
-            $this->dispatch('scroll-to-bottom');
+            $this->js("document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight");
         }
     }
 }
@@ -132,12 +138,10 @@ public function markAsRead()
 {
     $userId = auth()->id();
 
-    // Get total count of messages
     $count = Message::where('conversation_id', $this->selectedConversation->id)
         ->whereNull('sender_deleted_at')
         ->count();
 
-    // Load messages
     $this->loadedMessages = Message::where('conversation_id', $this->selectedConversation->id)
         ->whereNull('sender_deleted_at')
         ->orderBy('created_at', 'asc')
@@ -145,15 +149,12 @@ public function markAsRead()
         ->take($this->paginate_var)
         ->get();
 
-    // Detect new messages
     if ($count > $this->previousMessageCount) {
-        $this->dispatch('scroll-to-bottom');
+        $this->js("document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight");
     }
 
-    //  Update stored count after comparison
     $this->previousMessageCount = $count;
 
-    // Mark unread messages as read
     Message::where('conversation_id', $this->selectedConversation->id)
         ->where('sender_id', '!=', $userId)
         ->whereNull('read_at')
@@ -179,14 +180,12 @@ public function markAsRead()
     $this->selectedConversation->updated_at = now();
     $this->selectedConversation->save();
     
-    // Force scroll to bottom
-    $this->dispatch('scroll-to-bottom');
+    $this->js("document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight");
 }
 
 public function updatedLoadedMessages()
 {
-    // Automatically scroll to bottom when messages update
-    $this->dispatch('scroll-to-bottom');
+    $this->js("document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight");
 }
 
    public function mount()
@@ -199,7 +198,6 @@ public function updatedLoadedMessages()
     
     $ticket = $this->selectedConversation->ticket;
     
-    // Authorization check
     $isAdmin = auth()->user()->role === 'admin';
     $isTicketOwner = $ticket && $ticket->user_id === auth()->id();
     
@@ -207,7 +205,6 @@ public function updatedLoadedMessages()
         abort(403, 'You do not have permission to view this ticket.');
     }
     
-    // Mark messages as read and notify sender
     $unreadMessages = Message::where('conversation_id', $this->selectedConversation->id)
         ->where('sender_id', '!=', auth()->id())
         ->whereNull('read_at')
@@ -215,9 +212,6 @@ public function updatedLoadedMessages()
     
     foreach ($unreadMessages as $message) {
         $message->update(['read_at' => now()]);
-        
-        // Dispatch event to update sender's view
-        $this->dispatch('messageRead', messageId: $message->id)->to('chat.ticket.index');
     }
         
     $this->loadMessages();
@@ -251,7 +245,17 @@ public function getUserNameById(int $id)
                             <div class="flex items-center">
                                 <div>
                                     @if(auth()->user()->role === 'admin')
-                                   <img class="w-10 h-10 rounded-full" src="https://images.macrumors.com/t/n4CqVR2eujJL-GkUPhv1oao_PmI=/1600x/article-new/2019/04/guest-user-250x250.jpg"/>
+                   <div class="profile-show-avatar">
+    @php
+        $otherUser = $selectedConversation->sender;
+    @endphp
+
+    @if (!empty($otherUser?->profile_image_url))
+        <img src="{{ asset(ltrim($otherUser->profile_image_url, '/')) }}" alt="{{ $otherUser->name }} avatar">
+    @else
+        {{ strtoupper(substr($otherUser?->name ?? '?', 0, 1)) }}
+    @endif
+</div>
                                         @else 
                                          <img class="w-10 h-10 rounded-full" src="https://i.pinimg.com/474x/aa/dd/1a/aadd1a84088cfa777014394359482d9a.jpg?nii=t"/>
                                 @endif
@@ -264,8 +268,6 @@ public function getUserNameById(int $id)
                                         Administrator
                                         @endif
                                     </p>
-                                   
-                                    
                                 </div>
                             </div> 
                             <p class="absolute left-1/2 -translate-x-1/2 pt-2.5 chat-contact-name">
@@ -279,9 +281,9 @@ public function getUserNameById(int $id)
                             
                         </div>
     
-    <!-- Messages -->
+<!-- Messages -->
 <div class="flex-1 overflow-auto chat-messages-area"
-     wire:poll.0.1s="loadMessages"
+     wire:poll.2s="loadMessages"
      id="chat-container"
      x-data="{ 
          scrollToBottom() { 
@@ -304,7 +306,6 @@ public function getUserNameById(int $id)
 
         @foreach($loadedMessages as $message)
             @if($message->sender_id === auth()->id())
-                {{-- My message (right side) --}}
                 <div class="flex justify-end mb-2">
                     <div class="rounded py-2 px-3 max-w-[45%] break-words chat-bubble-out">
                         <p class="text-sm mt-1">
@@ -321,7 +322,6 @@ public function getUserNameById(int $id)
                     </div>
                 </div>
             @else
-                {{-- Their message (left side) --}}
                 <div class="flex mb-2">
                     <div class="rounded py-2 px-3 max-w-[45%] break-words chat-bubble-in">
                         <p class="text-sm bubble-sender-name">

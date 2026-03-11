@@ -1,3 +1,26 @@
+<style>
+ .profile-show-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--link-hover);
+        color: #fff;
+        font-size: 30px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+
+    .profile-show-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+    }
+</style>
 <?php
 $users = auth()->user()->getOtherUsers();
 
@@ -31,9 +54,13 @@ $users = auth()->user()->getOtherUsers();
         ?>
             <div class="rounded-2xl shadow-md p-6 flex flex-col items-center text-center gap-3 user-card">
                 
-                <img class="h-16 w-16 rounded-full object-cover flex-shrink-0"
-                     src="https://images.macrumors.com/t/n4CqVR2eujJL-GkUPhv1oao_PmI=/1600x/article-new/2019/04/guest-user-250x250.jpg"
-                     alt="{{ $user->name }}"/>
+                <div class="profile-show-avatar">
+    @if (!empty($user->profile_image_url))
+        <img src="{{ asset(ltrim($user->profile_image_url, '/')) }}" alt="{{ $user->name }} avatar">
+    @else
+        {{ strtoupper(substr($user->name, 0, 1)) }}
+    @endif
+</div>
 
                 <div>
                     <p class="font-semibold text-lg user-card-name">{{ $user->name }}</p>
