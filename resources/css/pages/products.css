@@ -1,0 +1,90 @@
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+}
+
+#NFT_collections {
+    text-align: left;
+    padding: 40px 20px;
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+#NFT_collections h2 {
+    margin-bottom: 30px;
+    font-size: 3rem;
+    text-align: center;
+    width: 100%;
+    color: var(--text-main);
+}
+
+.collection-card {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    text-align: left;
+    padding: 22px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.collection-card h3 {
+    text-decoration: underline;
+    margin: 0 0 10px;
+}
+
+.collection-content {
+    flex: 1;
+    text-align: center;
+}
+
+.collection-content p {
+    margin: 10px 0;
+}
+
+.collection-stock {
+    margin-top: 8px;
+    font-size: 0.95rem;
+    color: var(--subtext-color);
+}
+
+.collection-image-wrapper {
+    display: flex;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+.collection-preview {
+    width: 185px;
+    height: 230px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: var(--shadow-elevated);
+}
+
+.collection-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-elevated);
+}
+
+@media (max-width: 720px) {
+    .collection-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .collection-image-wrapper {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .collection-preview {
+        width: 150px;
+        height: 190px;
+    }
+}

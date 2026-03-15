@@ -1,0 +1,339 @@
+:root {
+  --bg-main: #040457;
+  --text-main: #ffffff;
+  --section-bg: #040457;
+  --card-bg: #000000f9;
+  --subtext-color: rgba(255,255,255,0.7);
+}
+
+.about-us-page-container,
+.about-us-container {
+  --bg-main: #040457;
+  --card-bg: #c8c8c8f9;
+  --text-main: #000000;
+  --subtext-color: rgba(177, 173, 173, 0.7);
+  --button-bg: #000000;
+  --button-text: #ffffff;
+  --section-bg: #040457;
+
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  transition: background-color 0.3s ease, color 0.2s ease;
+}
+.contact-page-container {
+  --bg-main: #040457;
+  --card-bg: #3b3636f9;
+  --text-main: #ffffff;
+  --subtext-color: rgba(255,255,255,0.7);
+  --button-bg: #000000;
+  --button-text: #ffffff;
+  --section-bg: #040457;
+  --accent-color: #000000;
+
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  transition: background-color 0.3s ease, color 0.2s ease;
+}
+
+html.light-mode .contact-page-container,
+html.light-mode .about-us-page-container,
+html.light-mode .about-us-container {
+  --bg-main: #d9d9de;
+  --button-text:rgb(255, 255, 255);
+  --button-bg: #ffffff;
+  --section-bg: #ffffff;
+  --text-main: #000000;
+  --card-bg: #ffffff;
+  --accent-color: #222222;
+}
+.contactUs-section {
+    display: flex;
+    flex-direction: column;
+    justify-content:space-around;
+    
+}
+.contactUs-section h2 {
+    color: white;
+    font-size: large;
+    font-weight: bold;
+    margin-right: 20px;
+
+}
+
+ .contactUs-form {
+    width: 320px;
+    display: flex;  
+    flex-direction: column;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+   align-items: center; 
+   justify-content:space-around;
+   padding: 25px ;
+
+ }  
+    .contactUs-form label {
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: 333;
+        text-align: left;
+    }
+    .contactUs-form input,
+    .contactUs-form textarea {
+        width: 80%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid var(--accent-color);
+        border-radius: 5px;
+        font-size: 14px;
+        
+    }
+
+.contactUs-form button {
+    background-color:black;
+    color: white;
+    padding: 10px;
+    width: 60%;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+
+.footer {
+    background-color: #222;
+    color: white;
+    text-align: center;
+    padding: 15px 0;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+.footer-links a {
+    color: white;
+    margin-bottom: 10px;
+    margin: 0 15px;
+
+}
+
+p{
+    margin-top: 10px;
+    font-size: 14px;
+    color: var(--subtext-color);
+    text-align: center;
+}
+.nft-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 40px;
+  
+  
+}
+.nft-grid img {
+    width: 100%;
+   height: 220px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.about-section {
+    padding: 40px;
+    text-align: center;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+
+}
+.about-section h2 {
+    font-size: 32px;
+    margin-bottom: 15px;
+}
+
+.team-section {
+    padding: 40px;
+    text-align: center;
+    background-color: var(--section-bg);
+    color: var(--text-main);
+    text-align: center;
+
+}
+.team-grid {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+    justify-content: center;
+}
+.team-card {
+    background-color: var(--card-bg);
+   padding: 20px;
+   border-radius: 10px;
+    width: 200px;
+    
+}
+.team-card img {
+    width: 100%;
+    height: 200px;
+    border-radius: 12px;    
+    object-fit: cover;
+}
+.contct-link {
+    color: white;
+    font-weight: bold;
+}
+.contact-link:hover {
+    color: rgb(26, 146, 215);
+    text-decoration: underline;
+}
+
+
+
+<!--css for checkout page-->
+.checkout-container {
+  max-width: 500px;
+  margin: 40px;
+  padding: 10px;
+  background: #ffffff;
+ font-family: Arial, sans-serif;
+}
+
+.checkout-container h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.checkout-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f8f8;
+  border-radius: 10px;
+}
+
+.checkout-section h2 {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 20px;
+}
+
+.checkout-section form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checkout-section input {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.checkout-section input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Order summary section */
+.results,
+.order-summary {
+  margin-top: 15px;
+}
+
+.order-summary p {
+  color: #777;
+}
+
+/* Checkout button */
+.checkout-container button {
+  width: 100%;
+  padding: 15px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  cursor: not-allowed;     /* because it's disabled for now */
+  opacity: 0.6;
+  margin-top: 10px;
+}
+
+.checkout-container button:active {
+  transform: scale(0.98);
+}
+
+/* Responsive styling */
+@media (max-width: 600px) {
+  .checkout-container {
+    padding: 15px;
+  }
+
+  .checkout-section {
+    padding: 15px;
+  }
+
+  .checkout-container button {
+    font-size: 16px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+    .team-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* adjusting sizes for mobile devices*/
+.contact-page-container > .flex{
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 30px;
+  
+}
+
+.tickets-section,
+.contactUs-section > .flex > div:first-child{
+  flex: 1 1 500px;
+  box-sizing: border-box;
+  max-width: 600px;
+}
+
+.contactUs-form {
+  padding: 20px;
+  width: 100%;
+  border-radius: 10px;
+  background-color: var(--card-bg);
+}
+
+.tickets-section .rounded {
+  padding: 20px;
+  overflow-x: auto;
+  border-radius: 10px;
+  background-color: var(--card-bg);
+}
+@media (max-width: 900px) {
+  .contact-page-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tickets-section,
+  .contactUs-section {
+    width: 90%;;
+    max-width: 600px;
+  }
+
+  .tickets-section .rounded, .contactUs-form {
+    width: 100%;
+  }
+}

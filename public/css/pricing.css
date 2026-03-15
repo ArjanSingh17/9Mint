@@ -1,0 +1,90 @@
+body {
+
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+}
+
+.Pricing-info {
+    background-color: var(--card-bg);
+    color: var(--text-main);
+    text-align: center;
+    padding: 30px 40px;
+    width: 60%;
+    max-width: 700px;
+    border-radius: 10px;
+    margin-left: 200px;
+}
+
+.Pricing-info p {
+    color: var(--text-main);
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+#Pricing_sizes {
+    background-color: var(--card-bg);
+    color: var(--text-main) !important;
+    width: 60%;
+    max-width: 700px;
+
+    margin: 40px auto 0;
+    padding: 30px 40px;
+
+    border-radius: 10px;
+    text-align: center;
+}
+
+.pricing-grid {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 30px;
+    gap: 30px;
+}
+
+.pricing-item.pricing-small img {
+    width: 150px;  
+    height: auto;
+}
+
+.pricing-item.pricing-medium img {
+    width: 250px;   
+    height: auto;
+}
+
+.pricing-item.pricing-large img {
+    width: 350px;  
+    height: auto;
+}
+
+.pricing-small, 
+.pricing-medium, 
+.pricing-large {
+    text-align: center;
+}
+
+.pricing-item {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 10px;
+
+}
+
+.pricing-content {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.pricing-text h4 {
+    margin: 0 0 10px;
+    color: var(--text-main);
+}
+
+.pricing-text p {
+    margin: 0;
+    color: var(--subtext-color);
+}

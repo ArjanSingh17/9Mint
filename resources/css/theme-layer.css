@@ -1,0 +1,21 @@
+/*
+ * Temporary migration shim.
+ * Keep this file tiny while legacy selectors are phased out.
+ */
+
+body.app-shell .page-container {
+  background: transparent !important;
+}
+
+body.app-shell .nft-market__row.header {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+body.app-shell .nft-market__cell.name span {
+  color: var(--text-secondary);
+}
+
+html:not(.light-mode) body.app-shell .navbar {
+  border-bottom: 1px solid var(--border-soft);
+}
