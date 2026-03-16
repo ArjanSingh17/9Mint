@@ -151,7 +151,7 @@
         @endif
       </a>
     @else
-      <a href="{{ route('login') }}" class="nav-btn signin">Login / Register Hellooooo !!</a>
+      <a href="{{ route('login') }}" class="nav-btn signin">Login / Register</a>
     @endauth
   </div>
 </nav>
