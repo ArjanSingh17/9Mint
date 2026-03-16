@@ -28,3 +28,5 @@ composer.lock
 package-lock.json
 package.json
 9Mint/
+vite.config.js
+package.json
