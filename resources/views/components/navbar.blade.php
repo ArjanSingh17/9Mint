@@ -68,6 +68,10 @@
     </div>
   </form>
 
+{{-- <button type="button" class="nav-searchoption" data-search-type="nft" data-search-scope="NFTs">Search NFTs</button>
+      <button type="button" class="nav-searchoption" data-search-type="collection" data-search-scope="NFT collections">Search NFT collections</button>
+      <button type="button" class="nav-search__option" data-search-type="user" data-search-scope="users">Search users</button>--}}
+
   {{-- Cart/auth --}}
   <div class="nav-auth">
     @php
