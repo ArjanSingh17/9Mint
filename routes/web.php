@@ -46,20 +46,18 @@ Route::middleware('guest')->group(function () {
 });
 */
 Route::middleware('guest')->group(function () {
+    // Authentication
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    
-    // 'throttle:6,1' -> allows 6 tries per 1 minute
     Route::post('/login', [AuthController::class, 'loginWeb'])->middleware('throttle:6,1');
-
-    Route::get('/forgot-password', [PasswordResetController::class, 'showLinkRequestForm'])->name('password.request');
-    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
-    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
-    Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.store');
-    
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'registerWeb']); // You can add it here too!
-});
+    Route::post('/register', [AuthController::class, 'registerWeb']); 
 
+    // Password Reset
+    Route::get('/forgot-password', [PasswordResetController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'store'])->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'edit'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.store');
+});
 
 // ------------------------------
 // IMAGE SERVING (Glide)

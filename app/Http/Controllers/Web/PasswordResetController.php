@@ -18,7 +18,7 @@ class PasswordResetController extends Controller
     }
 
     // 2. Send the email with the secure link
-    public function sendResetLinkEmail(Request $request)
+    public function store(Request $request)
     {
         $request->validate(['email' => 'required|email']);
 
@@ -34,7 +34,7 @@ class PasswordResetController extends Controller
     }
 
     // 3. Show the "Enter your new password" form (after clicking the link)
-    public function showResetForm(Request $request, $token = null)
+    public function edit(Request $request, $token = null)
     {
         return view('auth.reset-password', ['token' => $token, 'email' => $request->email]);
     }
