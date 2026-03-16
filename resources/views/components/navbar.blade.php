@@ -319,4 +319,32 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!root.contains(e.target)) openMenu(false);
   });
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+
+  const navDropdowns = document.querySelectorAll('.nav-dropdown');
+
+  // Only allow one dropdown open at a time
+  navDropdowns.forEach(function (dropdown) {
+    dropdown.addEventListener('toggle', function () {
+      if (!dropdown.open) return;
+
+      navDropdowns.forEach(function (other) {
+        if (other !== dropdown) {
+          other.open = false;
+        }
+      });
+    });
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function (event) {
+    navDropdowns.forEach(function (dropdown) {
+      if (!dropdown.contains(event.target)) {
+        dropdown.open = false;
+      }
+    });
+  });
+
+});
 </script>
