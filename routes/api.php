@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\PriceController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\AdminNftController;
 use App\Http\Controllers\Api\V1\ReviewController;
+use App\Http\Controllers\SearchController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -38,6 +39,10 @@ Route::prefix('v1')->group(function () {
     Route::post('/reviews', [ReviewController::class, 'store']);
 Route::get('/reviews/high', [ReviewController::class, 'highRated']);
     
+    // Search routes
+    Route::get('search/nfts', [SearchController::class, 'nfts']);
+    Route::get('search/suggestions', [SearchController::class, 'suggestions']);
+
     // Authenticated
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
