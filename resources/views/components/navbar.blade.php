@@ -41,25 +41,37 @@
     @endauth
   </div>
 
-  {{-- Center search (UI only) --}}
-  <div class="nav-search" data-nav-search>
+  {{-- Center search (LIVE RESULTS + NFT + COLLECTION routing) --}}
+  <form class="nav-search" data-nav-search method="GET" action="#">
     <div class="nav-search__input-wrap">
       <span class="nav-search__icon" aria-hidden="true">🔍</span>
+
       <input
         type="text"
+        name="q"
         class="nav-search__input"
-        placeholder="Search..."
+        placeholder="Search NFTs or collections..."
         autocomplete="off"
         data-nav-search-input
       >
-      <button type="button" class="nav-search__clear" data-nav-search-clear aria-label="Clear search">✕</button>
+
+      <button
+        type="button"
+        class="nav-search__clear"
+        data-nav-search-clear
+        aria-label="Clear search"
+      >✕</button>
     </div>
+
     <div class="nav-search__menu" data-nav-search-menu>
-      <button type="button" class="nav-search__option" data-search-type="nft" data-search-scope="NFTs">Search NFTs</button>
-      <button type="button" class="nav-search__option" data-search-type="collection" data-search-scope="NFT collections">Search NFT collections</button>
-      <button type="button" class="nav-search__option" data-search-type="user" data-search-scope="users">Search users</button>
+      {{-- <button type="button" class="nav-searchoption" data-search-type="nft" data-search-scope="NFTs">Search NFTs</button>
+      <button type="button" class="nav-searchoption" data-search-type="collection" data-search-scope="NFT collections">Search NFT collections</button>
+      <button type="button" class="nav-search__option" data-search-type="user" data-search-scope="users">Search users</button>--}}
+      <div class="nav-search__results" data-nav-search-results></div>
     </div>
-  </div>
+  </form>
+
+
 
   {{-- Cart/auth --}}
   <div class="nav-auth">
@@ -157,83 +169,187 @@
 </nav>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const navDropdowns = document.querySelectorAll('.nav-dropdown');
+document.addEventListener('DOMContentLoaded', function () {
+  const root = document.querySelector('[data-nav-search]');
+  if (!root) return;
+
+  const form = root; // the form itself
+  const input = root.querySelector('[data-nav-search-input]');
+  const menu = root.querySelector('[data-nav-search-menu]');
+  const resultsEl = root.querySelector('[data-nav-search-results]');
+  const clearBtn = root.querySelector('[data-nav-search-clear]');
+
+  if (!input || !menu || !resultsEl || !clearBtn) return;
+
+  let debounceTimer = null;
+  let lastResults = null;
+
+  function openMenu(show) {
+    menu.classList.toggle('is-open', !!show);
+  }
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  function renderResults(data, query) {
+    const nfts = data?.nfts || [];
+    const collections = data?.collections || [];
+
+    if (!nfts.length && !collections.length) {
+      resultsEl.innerHTML = `<div class="nav-search__empty">No results for "${escapeHtml(query)}"</div>`;
+      return;
+    }
+
+    let html = '';
+
+    if (nfts.length) {
+      html += `<div class="nav-search__section">
+        <div class="nav-search__section-title">NFTs</div>`;
+
+      nfts.forEach(nft => {
+        const nftUrl = nft?.nft_url || '';
+        html += `
+          <button type="button" class="nav-search__result" data-url="${escapeHtml(nftUrl)}">
+            <div class="nav-search__result-title">${escapeHtml(nft.name)}</div>
+            <div class="nav-search__result-sub">${escapeHtml(nft.collection?.name || '')}</div>
+          </button>`;
+      });
+
+      html += `</div>`;
+    }
+
+    if (collections.length) {
+      html += `<div class="nav-search__section">
+        <div class="nav-search__section-title">Collections</div>`;
+
+      collections.forEach(col => {
+        const colUrl = col?.collection_url || '';
+        html += `
+          <button type="button" class="nav-search__result" data-url="${escapeHtml(colUrl)}">
+            <div class="nav-search__result-title">${escapeHtml(col.name)}</div>
+            <div class="nav-search__result-sub">Collection</div>
+          </button>`;
+      });
+
+      html += `</div>`;
+    }
+
+    resultsEl.innerHTML = html;
+
+    resultsEl.querySelectorAll('[data-url]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const url = btn.dataset.url;
+        if (url) window.location.href = url;
+      });
+    });
+  }
+
+  async function fetchSuggestions(query) {
+    const url = `/api/v1/search/suggestions?q=${encodeURIComponent(query)}`;
+    const res = await fetch(url, { headers: { Accept: 'application/json' } });
+    if (!res.ok) return null;
+    return await res.json();
+  }
+
+  async function onInput() {
+    const query = input.value.trim();
+
+    clearBtn.classList.toggle('is-visible', !!query);
+
+    if (!query) {
+      openMenu(false);
+      resultsEl.innerHTML = '';
+      lastResults = null;
+      return;
+    }
+
+    openMenu(true);
+    resultsEl.innerHTML = `<div class="nav-search__loading">Searching...</div>`;
+
+    try {
+      const data = await fetchSuggestions(query);
+      lastResults = data || { nfts: [], collections: [] };
+      renderResults(lastResults, query);
+    } catch (e) {
+      resultsEl.innerHTML = `<div class="nav-search__empty">Search error</div>`;
+      lastResults = null;
+    }
+  }
+
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(onInput, 200);
+  });
+
+  input.addEventListener('focus', onInput);
+
+  clearBtn.addEventListener('click', () => {
+    input.value = '';
+    input.focus();
+    openMenu(false);
+    resultsEl.innerHTML = '';
+    lastResults = null;
+  });
+
+  // Press Enter: go to first NFT result, else first collection, else fallback
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const query = input.value.trim();
+    if (!query) return;
+
+    const firstNFT = lastResults?.nfts?.[0]?.nft_url;
+    const firstCollection = lastResults?.collections?.[0]?.collection_url;
+
+    if (firstNFT) {
+      window.location.href = firstNFT;
+      return;
+    }
+
+    if (firstCollection) {
+      window.location.href = firstCollection;
+      return;
+    }
+
+    window.location.href = `/products?q=${encodeURIComponent(query)}`;
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!root.contains(e.target)) openMenu(false);
+  });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+
+  const navDropdowns = document.querySelectorAll('.nav-dropdown');
+
+  // Only allow one dropdown open at a time
+  navDropdowns.forEach(function (dropdown) {
+    dropdown.addEventListener('toggle', function () {
+      if (!dropdown.open) return;
+
+      navDropdowns.forEach(function (other) {
+        if (other !== dropdown) {
+          other.open = false;
+        }
+      });
+    });
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function (event) {
     navDropdowns.forEach(function (dropdown) {
-      dropdown.addEventListener('toggle', function () {
-        if (!dropdown.open) return;
-        navDropdowns.forEach(function (other) {
-          if (other !== dropdown) {
-            other.open = false;
-          }
-        });
-      });
-    });
-
-    document.addEventListener('click', function (event) {
-      navDropdowns.forEach(function (dropdown) {
-        if (!dropdown.contains(event.target)) {
-          dropdown.open = false;
-        }
-      });
-    });
-
-    const searchRoot = document.querySelector('[data-nav-search]');
-    if (!searchRoot) return;
-
-    const input = searchRoot.querySelector('[data-nav-search-input]');
-    const menu = searchRoot.querySelector('[data-nav-search-menu]');
-    const clearBtn = searchRoot.querySelector('[data-nav-search-clear]');
-    const options = searchRoot.querySelectorAll('.nav-search__option');
-
-    if (!input || !menu || !clearBtn) return;
-
-    const escapeHtml = function (value) {
-      return value
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    };
-
-    const syncMenuState = function () {
-      const query = input.value.trim();
-      const hasText = query.length > 0;
-      menu.classList.toggle('is-open', hasText && document.activeElement === input);
-      clearBtn.classList.toggle('is-visible', hasText);
-
-      options.forEach(function (option) {
-        const scope = option.dataset.searchScope || 'results';
-        if (!hasText) {
-          option.innerHTML = `<span class="nav-search__option-muted">Search</span> ${scope}`;
-          return;
-        }
-
-        const safeQuery = escapeHtml(query);
-        option.innerHTML = `<span class="nav-search__option-muted">Search</span> '<span class="nav-search__option-query">${safeQuery}</span>' <span class="nav-search__option-muted">${scope}</span>`;
-      });
-    };
-
-    input.addEventListener('focus', syncMenuState);
-    input.addEventListener('input', syncMenuState);
-
-    clearBtn.addEventListener('click', function () {
-      input.value = '';
-      input.focus();
-      syncMenuState();
-    });
-
-    options.forEach(function (option) {
-      option.addEventListener('click', function () {
-        menu.classList.remove('is-open');
-      });
-    });
-
-    document.addEventListener('click', function (event) {
-      if (!searchRoot.contains(event.target)) {
-        menu.classList.remove('is-open');
+      if (!dropdown.contains(event.target)) {
+        dropdown.open = false;
       }
     });
   });
+
+});
 </script>
