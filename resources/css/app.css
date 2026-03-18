@@ -112,6 +112,27 @@
     background: color-mix(in srgb, var(--surface-main) 40%, transparent);
 }
 
+.nav-dropdown--notifications > summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    line-height: 1;
+    padding: 4px 6px;
+}
+
+.nav-links__menu--notifications {
+    min-width: 320px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.nav-notification-empty {
+    display: block;
+    padding: 10px 12px;
+    text-align: center;
+}
+
 .nav-auth {
     display: flex;
     gap: 12px; /* tweak spacing */
@@ -189,7 +210,7 @@
     text-align: left;
     border: none;
     background: transparent;
-    color: var(--text-main);
+    color: var(--text-secondary);
     padding: 12px 14px;
     font-size: 14px;
     cursor: pointer;
@@ -201,7 +222,7 @@
 
 .nav-search__option-query {
     color: var(--text-main);
-    font-weight: 600;
+    font-weight: 400;
 }
 
 .nav-search__option + .nav-search__option {
@@ -212,13 +233,29 @@
     background: color-mix(in srgb, var(--surface-main) 35%, transparent);
 }
 
+.nav-search__option.is-active {
+    color: var(--text-secondary);
+    background: color-mix(in srgb, var(--surface-main) 45%, transparent);
+    font-weight: 500;
+}
+
 .basket-btn {
     position: relative;
     background: transparent;
     border: none;
     cursor: pointer;
-    font-size: 22px;
-    padding: 4px;
+    font-size: 28px;
+    padding: 6px;
+    line-height: 1;
+}
+
+.nav-auth__basket-link {
+    display: inline-flex;
+    align-items: center;
+}
+
+.nav-dropdown--notifications {
+    margin-left: -5px;
 }
 
 @media (max-width: 1120px) {

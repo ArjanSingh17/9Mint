@@ -25,6 +25,7 @@
         
        
         <li><a href="{{ route('admin.orders') }}">View Orders</a></li>
+        <li><a href="{{ route('admin.refunds') }}">Refund Requests ({{ (int) ($pendingRefundRequestsCount ?? 0) }})</a></li>
         <li><a href="tickets">View Tickets</a></li>
         <li><a href="{{ route('admin.approvals.index') }}">View NFT Collections approvals ({{ (int) ($pendingCollectionsCount ?? 0) }})</a></li>
     </ul>

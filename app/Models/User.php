@@ -9,13 +9,16 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\Friendship;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
     use HasApiTokens;
+    use SoftDeletes;
     use HasRoles;
 
     /**
@@ -35,6 +38,7 @@ class User extends Authenticatable
         'description',
         'wallet_address',
         'nfts_public',
+        'search_public',
 
     ];
 
@@ -59,7 +63,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'nfts_public' => 'boolean',
+            'search_public' => 'boolean',
             'banned_at' => 'datetime',
+            'deleted_at' => 'datetime',
             'badges' => 'array',
         ];
     }
@@ -155,6 +161,11 @@ class User extends Authenticatable
         return $this->hasMany(Wallet::class);
     }
 
+    public function appNotifications(): HasMany
+    {
+        return $this->hasMany(UserNotification::class);
+    }
+
     public function conversations(): HasMany
 {
     return $this->hasMany(Conversation::class, 'sender_id')
@@ -175,7 +186,16 @@ class User extends Authenticatable
            public function getOtherUsers()
 {
     return User::where('id', '!=', auth()->id())
+        ->where(function ($query) {
+            $query->where('search_public', true)
+                ->orWhereNull('search_public');
+        })
         ->select('id', 'name', 'email') 
         ->get();
 }
+
+    public function friendshipStateWith(int $otherUserId): string
+    {
+        return Friendship::stateForViewer((int) $this->id, (int) $otherUserId);
+    }
 }

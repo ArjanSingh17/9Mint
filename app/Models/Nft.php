@@ -64,7 +64,7 @@ class Nft extends Model
         return $this->hasMany(NftToken::class);
     }
 
-    public function listings(): HasMany
+    public function listings(): HasManyThrough
     {
         return $this->hasManyThrough(Listing::class, NftToken::class, 'nft_id', 'token_id');
     }

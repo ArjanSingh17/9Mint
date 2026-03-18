@@ -33,6 +33,20 @@
             @error('wallet_address') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
         </div>
 
+        <div>
+            <input type="hidden" name="search_public" value="0">
+            <label class="inline-flex items-center gap-2 font-medium text-gray-700">
+                <input
+                    type="checkbox"
+                    name="search_public"
+                    value="1"
+                    {{ old('search_public', Auth::user()->search_public ?? true) ? 'checked' : '' }}
+                >
+                Allow my profile to appear in user search
+            </label>
+            @error('search_public') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
+        </div>
+
         <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md">
             Save Details
         </button>

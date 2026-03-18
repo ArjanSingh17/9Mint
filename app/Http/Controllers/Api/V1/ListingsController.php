@@ -62,6 +62,32 @@ class ListingsController extends Controller
             abort(422, 'Only paid NFTs can be listed for resale');
         }
 
+        $latestOrderItem = OrderItem::query()
+            ->with('order')
+            ->where('token_id', $token->id)
+            ->whereHas('order', function ($q) use ($user) {
+                $q->where('status', 'paid')
+                    ->where('user_id', $user->id);
+            })
+            ->orderByDesc('id')
+            ->first();
+
+        if ($latestOrderItem) {
+            $releaseAt = $latestOrderItem->holdReleaseAt();
+            $isLocked = $latestOrderItem->lifecycle_status === OrderItem::LIFECYCLE_REFUND_APPROVED
+                || $latestOrderItem->lifecycle_status === OrderItem::LIFECYCLE_REFUND_REQUESTED
+                || (
+                    in_array($latestOrderItem->lifecycle_status, [
+                        OrderItem::LIFECYCLE_HOLD_PENDING,
+                        OrderItem::LIFECYCLE_REFUND_DENIED,
+                    ], true) && $releaseAt && $releaseAt->isFuture()
+                );
+
+            if ($isLocked) {
+                abort(422, 'NFT is hold-locked and cannot be listed yet');
+            }
+        }
+
         $existing = Listing::where('token_id', $token->id)
             ->whereIn('status', ['active', 'reserved'])
             ->first();

@@ -245,8 +245,11 @@
                         $nft = $token->nft;
                         $listing = $token->listing;
                         $isEligible = in_array($token->id, $eligibleTokenIds ?? [], true);
+                        $lifecycle = ($tokenLifecycleMap ?? [])[$token->id] ?? ['locked' => false, 'status' => null, 'release_at' => null];
+                        $isLocked = (bool) ($lifecycle['locked'] ?? false);
+                        $releaseAt = !empty($lifecycle['release_at']) ? \Illuminate\Support\Carbon::parse($lifecycle['release_at']) : null;
                         $cardHref = $isOwnerInventory
-                            ? route('inventory.token.download', ['token' => $token->id])
+                            ? ($isLocked ? route('nfts.show', $nft->slug) : route('inventory.token.download', ['token' => $token->id]))
                             : route('nfts.show', $nft->slug);
                     @endphp
                     <article class="inventory-profile-card">
@@ -268,7 +271,12 @@
                                         <button type="submit" class="inventory-profile-card__button">Unlist</button>
                                     </form>
                                 @else
-                                    @if (! $isEligible)
+                                    @if ($isLocked)
+                                        <p class="inventory-profile-card__price">
+                                            Pending - Tradable/Marketable After {{ optional($releaseAt)->format('Y-m-d H:i') }}
+                                        </p>
+                                        <p class="inventory-profile-card__hint">Downloads and listing are locked until hold completion.</p>
+                                    @elseif (! $isEligible)
                                         <p class="inventory-profile-card__price">Only paid NFTs can be listed.</p>
                                     @else
                                         <form method="POST" action="{{ route('inventory.listing.store') }}" data-listing-form>

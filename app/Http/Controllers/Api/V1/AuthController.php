@@ -195,6 +195,9 @@ class AuthController extends Controller
         if (Schema::hasColumn('users', 'nfts_public')) {
             $rules['nfts_public'] = ['sometimes', 'required', 'boolean'];
         }
+        if (Schema::hasColumn('users', 'search_public')) {
+            $rules['search_public'] = ['sometimes', 'required', 'boolean'];
+        }
 
         $data = $r->validate($rules);
 
