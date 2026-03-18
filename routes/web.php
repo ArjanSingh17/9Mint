@@ -6,11 +6,13 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\FavouriteController;
 use App\Http\Controllers\CollectionPageController;
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Web\PasswordResetController;
 
 // FRONTEND NFT CONTROLLERS
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\FriendshipController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\TrendingController;
 use App\Http\Controllers\UserProfileController;
@@ -27,7 +29,10 @@ use App\Http\Controllers\NftReviewController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\InventoryController;
 use App\Http\Controllers\Web\NftController as WebNft;
+use App\Http\Controllers\Web\NotificationController;
+use App\Http\Controllers\Web\OrderActionController;
 use App\Models\Conversation;
+use App\Models\Friendship;
 use App\Models\Order;
 
 use Illuminate\Http\Request;
@@ -74,7 +79,9 @@ Route::get('/pricing', fn() => view('pricing'));
 Route::livewire('/contactUs', 'pages::contact-us');
 Route::get('/contactUs/terms', fn() => view('terms-and-conditions'));
 Route::get('/contactUs/faqs', fn() => view('faqs'));
-Route::get('/users', function () {return view('users');})->middleware('auth');
+Route::get('/users', [SearchController::class, 'usersPage'])->middleware('auth')->name('users.index');
+Route::get('/search/nfts', [SearchController::class, 'nftsPage'])->name('search.nfts');
+Route::get('/search/collections', [SearchController::class, 'collectionsPage'])->name('search.collections');
 
 
 // ------------------------------
@@ -124,6 +131,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-favourites', [FavouritePageController::class, 'index'])->name('favourites.index');
     Route::post('/nfts/{nft}/toggle-like', [FavouriteController::class, 'toggle'])->middleware('not_banned')->name('nfts.toggle');
     Route::post('/chat/start/{receiverId}', [ConversationController::class, 'startConversation'])->middleware(['auth', 'not_banned'])->name('chat.start');
+    Route::get('/chat/user', [ConversationController::class, 'inbox'])->middleware('auth')->name('chat.user.inbox');
     Route::patch('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
     Route::patch('/profile/password', [AuthController::class, 'updatePassword'])->name('password.update');
     Route::get('/chat/enter/{receiverId}', [ConversationController::class, 'enterConversation'])->middleware('auth')->name('chat.enter');
@@ -150,12 +158,21 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart', [WebCartController::class, 'store'])->middleware('not_banned')->name('cart.store');
     Route::delete('/cart/{id}', [WebCartController::class, 'destroy'])->middleware('not_banned')->name('cart.destroy');
     Route::post('/orders', [WebCheckoutController::class, 'store'])->middleware('not_banned')->name('orders.store');
+    Route::get('/orders/{order}/refund-form', [OrderActionController::class, 'showRefundForm'])->middleware('not_banned')->name('orders.refund.form');
+    Route::post('/orders/{order}/refund-request', [OrderActionController::class, 'requestRefund'])->middleware('not_banned')->name('orders.refund-request');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::get('/inventory', [InventoryController::class, 'index'])->middleware('not_banned')->name('inventory.index');
     Route::get('/inventory/tokens/{token}/download', [InventoryController::class, 'downloadOwnedTokenImage'])->middleware('not_banned')->name('inventory.token.download');
     Route::get('/listings', [InventoryController::class, 'listings'])->middleware('not_banned')->name('listings.index');
     Route::post('/inventory/listings', [InventoryController::class, 'store'])->middleware('not_banned')->name('inventory.listing.store');
     Route::delete('/inventory/listings/{listing}', [InventoryController::class, 'destroy'])->middleware('not_banned')->name('inventory.listing.destroy');
     Route::post('/conversations/start-user/{user}', [ConversationController::class, 'startWithUser'])->middleware('not_banned')->name('conversations.start-user');
+    Route::post('/friends/{user}/request', [FriendshipController::class, 'sendRequest'])->middleware('not_banned')->name('friends.request');
+    Route::delete('/friends/{user}/request', [FriendshipController::class, 'cancelRequest'])->middleware('not_banned')->name('friends.request.cancel');
+    Route::post('/friends/{user}/accept', [FriendshipController::class, 'acceptRequest'])->middleware('not_banned')->name('friends.accept');
+    Route::delete('/friends/{user}/decline', [FriendshipController::class, 'declineRequest'])->middleware('not_banned')->name('friends.decline');
+    Route::delete('/friends/{user}', [FriendshipController::class, 'unfriend'])->middleware('not_banned')->name('friends.unfriend');
     Route::get('/creator/collections/create', [CreatorCollectionController::class, 'create'])->middleware('not_banned')->name('creator.collections.create');
     Route::post('/creator/collections', [CreatorCollectionController::class, 'store'])->middleware('not_banned')->name('creator.collections.store');
 
@@ -178,10 +195,39 @@ Route::get('/profile', function () {
 Route::get('/profile/{username}', function (string $username) {
     $profileUser = User::where('name', $username)->firstOrFail();
     $isOwner = auth()->check() && auth()->id() === $profileUser->id;
+    $friendshipState = 'none';
+    $existingConversationId = null;
+
+    if (auth()->check() && ! $isOwner) {
+        $viewerId = (int) auth()->id();
+        $profileUserId = (int) $profileUser->id;
+
+        $friendshipState = Friendship::stateForViewer($viewerId, $profileUserId);
+
+        if ($friendshipState === 'friends') {
+            $conversation = Conversation::query()
+                ->where('type', 'user')
+                ->whereNull('ticket_id')
+                ->where(function ($q) use ($viewerId, $profileUserId) {
+                    $q->where(function ($sub) use ($viewerId, $profileUserId) {
+                        $sub->where('sender_id', $viewerId)
+                            ->where('receiver_id', $profileUserId);
+                    })->orWhere(function ($sub) use ($viewerId, $profileUserId) {
+                        $sub->where('sender_id', $profileUserId)
+                            ->where('receiver_id', $viewerId);
+                    });
+                })
+                ->first();
+
+            $existingConversationId = $conversation?->id;
+        }
+    }
 
     return view('profile.show', [
         'user' => $profileUser,
         'isOwner' => $isOwner,
+        'friendshipState' => $friendshipState,
+        'existingConversationId' => $existingConversationId,
     ]);
 })->name('profile.show');
 
@@ -215,6 +261,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Inventory
     Route::get('/admin/inventory', [AdminController::class, 'inventory'])->name('admin.inventory');
     Route::get('/admin/orders', [AdminController::class, 'orders'])->name('admin.orders');
+    Route::get('/admin/refunds', [AdminController::class, 'refunds'])->name('admin.refunds');
+    Route::post('/admin/refunds/{item}/approve', [AdminController::class, 'approveRefund'])->name('admin.refunds.approve');
+    Route::post('/admin/refunds/{item}/deny', [AdminController::class, 'denyRefund'])->name('admin.refunds.deny');
 
     // User Management
     Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');

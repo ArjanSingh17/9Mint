@@ -111,6 +111,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex: 1 1 130px;
     min-width: 110px;
 }
 
@@ -123,7 +124,8 @@ body {
 }
 
 .nft-filter-group select,
-.nft-filter-group input[type="number"] {
+.nft-filter-group input[type="number"],
+.nft-filter-group input[type="text"] {
     background: var(--surface-muted);
     color: var(--text-main);
     border: 1px solid var(--border-soft);
@@ -135,15 +137,26 @@ body {
 }
 
 .nft-filter-group select:focus,
-.nft-filter-group input[type="number"]:focus {
+.nft-filter-group input[type="number"]:focus,
+.nft-filter-group input[type="text"]:focus {
     border-color: var(--button-bg);
 }
 
+.nft-filter-break {
+    flex-basis: 100%;
+    height: 0;
+}
+
 .nft-filter-check {
+    flex: 0 0 auto;
     flex-direction: row;
     align-items: center;
     min-width: unset;
     padding-bottom: 4px;
+}
+
+.nft-filter-check + .filter-apply-btn {
+    margin-left: auto;
 }
 
 .nft-filter-check label {
@@ -159,7 +172,7 @@ body {
 }
 
 .filter-apply-btn {
-    background: var(--button-bg);
+    background: var(--link-hover);
     color: var(--text-inverse);
     border: none;
     border-radius: 6px;
@@ -171,7 +184,7 @@ body {
 }
 
 .filter-apply-btn:hover {
-    background: var(--button-hover-bg);
+    background: color-mix(in srgb, var(--link-hover) 85%, #000 15%);
 }
 
 .filter-reset-btn {

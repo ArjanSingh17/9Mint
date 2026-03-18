@@ -10,6 +10,7 @@ use App\Models\SalesHistory;
 use App\Models\User;
 use App\Models\WalletTransaction;
 use App\Services\WalletService;
+use App\Services\UserNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -22,8 +23,11 @@ class AdminController extends Controller
         $pendingCollectionsCount = Collection::query()
             ->where('approval_status', Collection::APPROVAL_PENDING)
             ->count();
+        $pendingRefundRequestsCount = OrderItem::query()
+            ->where('lifecycle_status', OrderItem::LIFECYCLE_REFUND_REQUESTED)
+            ->count();
 
-        return view('admin.dashboard', compact('pendingCollectionsCount'));
+        return view('admin.dashboard', compact('pendingCollectionsCount', 'pendingRefundRequestsCount'));
     }
 
     public function approvals()
@@ -109,9 +113,33 @@ class AdminController extends Controller
             return redirect()->back()->with('error', 'Username confirmation does not match. Account not deleted.');
         }
 
-        $user->delete();
+        try {
+            DB::transaction(function () use ($user): void {
+                $stamp = now()->format('YmdHis');
 
-        return redirect()->back()->with('success', 'User deleted successfully.');
+                $user->forceFill([
+                    'name' => "deleted-user-{$user->id}-{$stamp}",
+                    'email' => "deleted+{$user->id}.{$stamp}@deleted.local",
+                    'wallet_address' => null,
+                    'profile_image_url' => null,
+                    'description' => 'Deleted account',
+                    'remember_token' => null,
+                    'nfts_public' => false,
+                    'search_public' => false,
+                ])->save();
+
+                $user->delete();
+            });
+        } catch (\Throwable $e) {
+            Log::error('Failed to delete user account safely', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Failed to delete user account. Please try again.');
+        }
+
+        return redirect()->back()->with('success', 'User account deactivated successfully.');
     }
 
     public function unbanUser($id)
@@ -294,6 +322,125 @@ class AdminController extends Controller
             ->values();
 
         return view('admin.orders', compact('transactions'));
+    }
+
+    public function refunds()
+    {
+        $items = OrderItem::query()
+            ->with(['order.user', 'listing.seller', 'token.nft'])
+            ->whereIn('lifecycle_status', [
+                OrderItem::LIFECYCLE_REFUND_REQUESTED,
+                OrderItem::LIFECYCLE_REFUND_DENIED,
+                OrderItem::LIFECYCLE_REFUND_APPROVED,
+                OrderItem::LIFECYCLE_INVESTIGATION_REQUESTED,
+            ])
+            ->orderByRaw("CASE WHEN lifecycle_status = 'refund_requested' THEN 0 ELSE 1 END")
+            ->orderByDesc('updated_at')
+            ->get();
+
+        return view('admin.refunds', compact('items'));
+    }
+
+    public function approveRefund(OrderItem $item)
+    {
+        if ($item->lifecycle_status !== OrderItem::LIFECYCLE_REFUND_REQUESTED) {
+            return back()->with('error', 'Only pending refund requests can be approved.');
+        }
+
+        DB::transaction(function () use ($item) {
+            $item->loadMissing(['order.user', 'listing.seller', 'token']);
+            $order = $item->order;
+            $buyer = $order?->user;
+            $seller = $item->listing?->seller;
+
+            if ($item->token && $seller) {
+                $item->token->update([
+                    'owner_user_id' => $seller->id,
+                    'status' => 'owned',
+                ]);
+            }
+
+            SalesHistory::query()
+                ->where('order_id', $item->order_id)
+                ->where('token_id', $item->token_id)
+                ->where('listing_id', $item->listing_id)
+                ->where('settlement_status', SalesHistory::SETTLEMENT_PENDING)
+                ->update([
+                    'settlement_status' => SalesHistory::SETTLEMENT_CANCELLED,
+                    'settlement_cancelled_at' => now(),
+                ]);
+
+            $provider = PaymentIntent::query()
+                ->where('order_id', $item->order_id)
+                ->latest('created_at')
+                ->value('provider');
+
+            if ($buyer && $provider === 'mock_wallet') {
+                $refundAmount = (float) ($item->pay_unit_amount ?? 0) * (float) ($item->quantity ?? 1);
+                if ($refundAmount > 0) {
+                    app(WalletService::class)->credit((int) $buyer->id, (string) ($item->pay_currency ?? $order?->pay_currency ?? 'GBP'), $refundAmount, [
+                        'order_id' => $item->order_id,
+                        'listing_id' => $item->listing_id,
+                        'metadata' => [
+                            'source' => 'refund_approved',
+                            'order_item_id' => $item->id,
+                        ],
+                    ]);
+                }
+            }
+
+            $item->update([
+                'lifecycle_status' => OrderItem::LIFECYCLE_REFUND_APPROVED,
+                'refund_decided_at' => now(),
+                'refund_decided_by_user_id' => auth()->id(),
+                'refund_denial_reason' => null,
+            ]);
+
+            $notifications = app(UserNotificationService::class);
+            if ($buyer) {
+                $notifications->notifyUser((int) $buyer->id, 'refund_approved', 'Refund approved', 'Your refund request for item #' . $item->id . ' was approved.', [
+                    'order_item_id' => $item->id,
+                    'order_id' => $item->order_id,
+                ]);
+            }
+            if ($seller) {
+                $notifications->notifyUser((int) $seller->id, 'refund_approved_seller', 'Sale reversed by refund', 'A sold NFT has been returned due to approved refund request.', [
+                    'order_item_id' => $item->id,
+                    'order_id' => $item->order_id,
+                ]);
+            }
+        });
+
+        return back()->with('status', 'Refund approved.');
+    }
+
+    public function denyRefund(Request $request, OrderItem $item)
+    {
+        if ($item->lifecycle_status !== OrderItem::LIFECYCLE_REFUND_REQUESTED) {
+            return back()->with('error', 'Only pending refund requests can be denied.');
+        }
+
+        $data = $request->validate([
+            'reason' => ['required', 'string', 'max:4000'],
+        ]);
+
+        $item->update([
+            'lifecycle_status' => OrderItem::LIFECYCLE_REFUND_DENIED,
+            'refund_decided_at' => now(),
+            'refund_decided_by_user_id' => auth()->id(),
+            'refund_denial_reason' => trim($data['reason']),
+        ]);
+
+        $buyerId = (int) ($item->order?->user_id ?? 0);
+        if ($buyerId > 0) {
+            app(UserNotificationService::class)->notifyUser($buyerId, 'refund_denied', 'Refund denied', 'Your refund request for item #' . $item->id . ' was denied.', [
+                'order_item_id' => $item->id,
+                'order_id' => $item->order_id,
+                'reason' => trim($data['reason']),
+            ]);
+        }
+
+        return back()->with('status', 'Refund denied.');
     }
 
     public function approveCollection(Collection $collection)

@@ -2,6 +2,16 @@
 
 @section('title', 'My Orders')
 
+@php
+  $currencySymbols = [
+    'GBP' => '£',
+    'USD' => '$',
+    'EUR' => '€',
+    'BTC' => '₿',
+    'ETH' => 'Ξ',
+  ];
+@endphp
+
 @push('styles')
   @vite('resources/css/pages/app-pages.css')
 @endpush
@@ -15,6 +25,11 @@
     @if (session('status'))
       <div class="orders-status">
         {{ session('status') }}
+      </div>
+    @endif
+    @if (session('error'))
+      <div class="orders-status">
+        {{ session('error') }}
       </div>
     @endif
 
@@ -55,6 +70,7 @@
                     <th>NFT</th>
                     <th>Quantity</th>
                     <th>Price</th>
+                    <th>Lifecycle</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -63,6 +79,17 @@
                       $nft = $item->listing?->token?->nft;
                       $itemCurrency = $item->pay_currency ?? ($order->pay_currency ?? 'GBP');
                       $itemSymbol = $currencySymbols[$itemCurrency] ?? null;
+                      $status = $item->lifecycle_status ?? ($order->status === 'paid' ? 'finalized' : 'checkout_pending');
+                      $holdReleaseAt = $item->hold_extended_until ?? $item->hold_expires_at;
+                      $statusLabel = match ($status) {
+                        'hold_pending' => 'Pending - Tradable/Marketable After ' . optional($holdReleaseAt)->format('Y-m-d H:i'),
+                        'refund_requested' => 'Refund Requested - Under Review',
+                        'refund_approved' => 'Refund Approved',
+                        'refund_denied' => 'Refund Denied',
+                        'investigation_requested' => 'Escalated Investigation',
+                        'finalized' => 'Purchased',
+                        default => ucfirst(str_replace('_', ' ', (string) $status)),
+                      };
                     @endphp
                     <tr>
                       <td>
@@ -74,10 +101,20 @@
                       <td>
                         {{ $itemSymbol ? $itemSymbol . number_format($item->pay_unit_amount ?? 0, 2) : number_format($item->pay_unit_amount ?? 0, 2) . ' ' . $itemCurrency }}
                       </td>
+                      <td>
+                        <div>{{ $statusLabel }}</div>
+                        @if($item->refund_denial_reason)
+                          <div class="orders-meta">Admin reason: {{ $item->refund_denial_reason }}</div>
+                        @endif
+                      </td>
                     </tr>
                   @endforeach
                 </tbody>
               </table>
+              <form method="GET" action="{{ route('orders.refund.form', $order->id) }}" style="margin-top:10px; display:flex; gap:8px; justify-content:flex-end;">
+                <button type="submit" class="nav-btn signin">Request Refund</button>
+                <a href="/contactUs" class="nav-btn signout">Contact Us</a>
+              </form>
             @else
               <p class="orders-meta">No items recorded for this order.</p>
             @endif
@@ -114,7 +151,14 @@
                     Gross: {{ $currencySymbol ? $currencySymbol . number_format($gross, 2) : number_format($gross, 2) . ' ' . $currency }}
                   </p>
                   <p class="orders-meta">
-                    Status: Sold
+                    Status:
+                    @if(($sale->settlement_status ?? 'pending') === 'released')
+                      Sold
+                    @elseif(($sale->settlement_status ?? 'pending') === 'cancelled')
+                      Refund Approved (Settlement Cancelled)
+                    @else
+                      Pending - Finalized After {{ optional($sale->settlement_eligible_at)->format('Y-m-d H:i') }}
+                    @endif
                   </p>
                 </div>
               </div>

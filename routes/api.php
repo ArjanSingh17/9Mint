@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\MarketController;
 use App\Http\Controllers\Api\V1\QuotesController;
 use App\Http\Controllers\Api\V1\PriceController;
 use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\AdminNftController;
 use App\Http\Controllers\Api\V1\ReviewController;
 use App\Http\Controllers\SearchController;
@@ -61,6 +62,11 @@ Route::get('/reviews/high', [ReviewController::class, 'highRated']);
         Route::get('checkout/{id}', [CheckoutController::class, 'show']);
         Route::delete('checkout/{id}', [CheckoutController::class, 'destroy']);
         Route::post('checkout/{id}/pay', [PaymentController::class, 'pay']);
+        Route::post('checkout/items/{item}/refund-request', [CheckoutController::class, 'requestRefund']);
+        Route::post('checkout/items/{item}/investigation-request', [CheckoutController::class, 'requestInvestigation']);
+
+        Route::get('notifications', [NotificationController::class, 'index']);
+        Route::post('notifications/mark-all-read', [NotificationController::class, 'markAllRead']);
 
         // Listings (resale)
         Route::post('listings', [ListingsController::class, 'store']);

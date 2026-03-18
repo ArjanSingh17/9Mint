@@ -130,6 +130,7 @@ class InventoryController extends Controller
             ->get();
 
         $paidTokenIds = [];
+        $tokenLifecycleMap = [];
         $currencies = [];
         $currencyCatalog = app(CurrencyCatalogInterface::class);
         $walletService = app(WalletService::class);
@@ -166,6 +167,38 @@ class InventoryController extends Controller
                 ->unique()
                 ->values()
                 ->all();
+
+            $latestOrderItemsByToken = OrderItem::query()
+                ->with('order')
+                ->whereIn('token_id', $tokens->pluck('id'))
+                ->whereHas('order', function ($q) use ($profileUser) {
+                    $q->where('status', 'paid')
+                        ->where('user_id', $profileUser->id);
+                })
+                ->orderByDesc('id')
+                ->get()
+                ->groupBy('token_id')
+                ->map(fn ($rows) => $rows->first());
+
+            foreach ($latestOrderItemsByToken as $tokenId => $orderItem) {
+                $releaseAt = $orderItem->holdReleaseAt();
+                $isLocked = in_array($orderItem->lifecycle_status, [
+                    OrderItem::LIFECYCLE_HOLD_PENDING,
+                    OrderItem::LIFECYCLE_REFUND_REQUESTED,
+                    OrderItem::LIFECYCLE_REFUND_DENIED,
+                    OrderItem::LIFECYCLE_REFUND_APPROVED,
+                ], true) && (
+                    $orderItem->lifecycle_status === OrderItem::LIFECYCLE_REFUND_APPROVED
+                    || $orderItem->lifecycle_status === OrderItem::LIFECYCLE_REFUND_REQUESTED
+                    || ($releaseAt && $releaseAt->isFuture())
+                );
+
+                $tokenLifecycleMap[(int) $tokenId] = [
+                    'status' => $orderItem->lifecycle_status,
+                    'locked' => $isLocked,
+                    'release_at' => optional($releaseAt)->toIso8601String(),
+                ];
+            }
         }
 
         $inventoryTotals = array_fill_keys($currencies, 0.0);
@@ -255,6 +288,7 @@ class InventoryController extends Controller
             'inventoryValuationBase' => $baseCurrency,
             'inventoryRateMatrix' => $rateMatrix,
             'inventoryValuedTokenCount' => $valuedTokenCount,
+            'tokenLifecycleMap' => $tokenLifecycleMap,
         ]);
     }
 
@@ -263,6 +297,10 @@ class InventoryController extends Controller
         $user = $request->user();
         if (! $user || (int) $token->owner_user_id !== (int) $user->id) {
             abort(403, 'You can only download images for tokens you own.');
+        }
+
+        if ($this->tokenIsHoldLocked($token, $user->id)) {
+            abort(403, 'This NFT is currently hold-locked and cannot be downloaded yet.');
         }
 
         $token->loadMissing(['nft.collection']);
@@ -351,6 +389,10 @@ class InventoryController extends Controller
 
         if (! $isPaid && ! $wasPreviouslyListedByUser) {
             return back()->with('error', 'Only paid NFTs can be listed for resale unless they were previously listed by you.');
+        }
+
+        if ($this->tokenIsHoldLocked($token, $request->user()->id)) {
+            return back()->with('error', 'This NFT is currently hold-locked and cannot be listed yet.');
         }
 
         $existing = Listing::where('token_id', $token->id)
@@ -454,5 +496,35 @@ class InventoryController extends Controller
         }
 
         return pack('N', strlen($data)) . $type . $data . pack('N', $crc);
+    }
+
+    private function tokenIsHoldLocked(NftToken $token, int $userId): bool
+    {
+        $item = OrderItem::query()
+            ->with('order')
+            ->where('token_id', $token->id)
+            ->whereHas('order', function ($q) use ($userId) {
+                $q->where('status', 'paid')
+                    ->where('user_id', $userId);
+            })
+            ->orderByDesc('id')
+            ->first();
+
+        if (! $item) {
+            return false;
+        }
+
+        $releaseAt = $item->holdReleaseAt();
+        if ($item->lifecycle_status === OrderItem::LIFECYCLE_REFUND_APPROVED) {
+            return true;
+        }
+        if ($item->lifecycle_status === OrderItem::LIFECYCLE_REFUND_REQUESTED) {
+            return true;
+        }
+
+        return in_array($item->lifecycle_status, [
+            OrderItem::LIFECYCLE_HOLD_PENDING,
+            OrderItem::LIFECYCLE_REFUND_DENIED,
+        ], true) && $releaseAt && $releaseAt->isFuture();
     }
 }

@@ -75,6 +75,46 @@
         background: color-mix(in srgb, var(--link-hover) 85%, #000 15%);
     }
 
+    .profile-show-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .profile-show-actions-row {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+        max-width: 420px;
+        justify-content: center;
+    }
+
+    .profile-show-actions-row form {
+        flex: 1 1 0;
+    }
+
+    .profile-show-actions-row .profile-show-contact-btn {
+        width: 100%;
+    }
+
+    .profile-show-contact-btn--secondary {
+        background: transparent;
+        color: var(--text-muted);
+        border: 1px solid var(--border-soft);
+    }
+
+    .profile-show-contact-btn--secondary:hover {
+        background: var(--surface-muted);
+        color: var(--text-main);
+    }
+
+    .profile-show-contact-btn--wide {
+        width: 100%;
+        max-width: 420px;
+    }
+
     .profile-show-details {
         background: var(--surface-panel);
         color: var(--text-main);
@@ -241,12 +281,49 @@
     @if (($isOwner ?? false) === true)
         <a href="{{ route('profile.settings') }}" class="profile-show-account-settings">Account Settings</a>
     @elseif(auth()->check())
-        <form method="POST" action="{{ route('conversations.start-user', $user->id) }}">
-            @csrf
-            <button type="submit" class="profile-show-contact-btn">Contact me</button>
-        </form>
+        @php
+            $friendshipState = $friendshipState ?? 'none';
+            $existingConversationId = $existingConversationId ?? null;
+        @endphp
+        <div class="profile-show-actions">
+            @if ($friendshipState === 'friends')
+                <div class="profile-show-actions-row">
+                    <form method="POST" action="{{ route('friends.unfriend', $user->id) }}">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="profile-show-contact-btn profile-show-contact-btn--secondary">Unfriend</button>
+                    </form>
+                    @if ($existingConversationId)
+                        <a href="{{ route('chat.user', ['user' => auth()->id(), 'conversation' => $existingConversationId]) }}" class="profile-show-contact-btn">
+                            Send Message
+                        </a>
+                    @else
+                        <form method="POST" action="{{ route('conversations.start-user', $user->id) }}">
+                            @csrf
+                            <button type="submit" class="profile-show-contact-btn">Send Message</button>
+                        </form>
+                    @endif
+                </div>
+            @elseif ($friendshipState === 'outgoing_pending')
+                <form method="POST" action="{{ route('friends.request.cancel', $user->id) }}">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="profile-show-contact-btn profile-show-contact-btn--wide">Undo Friend Request</button>
+                </form>
+            @elseif ($friendshipState === 'incoming_pending')
+                <form method="POST" action="{{ route('friends.accept', $user->id) }}">
+                    @csrf
+                    <button type="submit" class="profile-show-contact-btn profile-show-contact-btn--wide">Accept Friend Request</button>
+                </form>
+            @else
+                <form method="POST" action="{{ route('friends.request', $user->id) }}">
+                    @csrf
+                    <button type="submit" class="profile-show-contact-btn profile-show-contact-btn--wide">Add Friend</button>
+                </form>
+            @endif
+        </div>
     @else
-        <a href="{{ route('login', ['redirect' => request()->fullUrl()]) }}" class="profile-show-contact-btn">Contact me</a>
+        <a href="{{ route('login', ['redirect' => request()->fullUrl()]) }}" class="profile-show-contact-btn">Add Friend</a>
     @endif
 
     <div class="profile-show-details">

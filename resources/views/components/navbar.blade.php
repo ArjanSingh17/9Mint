@@ -64,10 +64,9 @@
     </div>
 
     <div class="nav-search__menu" data-nav-search-menu>
-      {{-- <button type="button" class="nav-searchoption" data-search-type="nft" data-search-scope="NFTs">Search NFTs</button>
-      <button type="button" class="nav-searchoption" data-search-type="collection" data-search-scope="NFT collections">Search NFT collections</button>
-      <button type="button" class="nav-search__option" data-search-type="user" data-search-scope="users">Search users</button>--}}
-      <div class="nav-search__results" data-nav-search-results></div>
+      <button type="button" class="nav-search__option" data-search-type="nft" data-search-scope="NFTs"></button>
+      <button type="button" class="nav-search__option" data-search-type="collection" data-search-scope="NFT collections"></button>
+      <button type="button" class="nav-search__option" data-search-type="user" data-search-scope="users"></button>
     </div>
   </form>
 
@@ -79,9 +78,43 @@
       $cartCount = 0;
       $walletIsLinked = false;
       $walletBalances = collect();
+      $unreadNotificationsCount = 0;
+      $unreadBellNotifications = collect();
+      $friendRequestUnreadCount = 0;
+      $singleFriendRequesterName = null;
+      $adminRefundQueueCount = 0;
+      $adminCollectionApprovalsCount = 0;
       if (auth()->check()) {
         $cartCount = \App\Models\CartItem::where('user_id', auth()->id())->sum('quantity');
         $walletIsLinked = filled(trim((string) auth()->user()->wallet_address));
+        $unreadNotificationsCount = \App\Models\UserNotification::where('user_id', auth()->id())->whereNull('read_at')->count();
+        $unreadBellNotifications = \App\Models\UserNotification::where('user_id', auth()->id())
+          ->whereNull('read_at')
+          ->latest('created_at')
+          ->limit(8)
+          ->get();
+        $friendRequestUnreadCount = \App\Models\UserNotification::where('user_id', auth()->id())
+          ->whereNull('read_at')
+          ->where('type', 'friend_request_received')
+          ->count();
+
+        if ($friendRequestUnreadCount === 1) {
+          $singleFriendRequest = \App\Models\UserNotification::where('user_id', auth()->id())
+            ->whereNull('read_at')
+            ->where('type', 'friend_request_received')
+            ->latest('created_at')
+            ->first();
+
+          $singleFriendRequesterName = trim((string) data_get($singleFriendRequest?->data, 'requester_name', ''));
+          if ($singleFriendRequesterName === '') {
+            $singleFriendRequesterName = 'Someone';
+          }
+        }
+
+        if (Auth::user()->role === 'admin') {
+          $adminRefundQueueCount = \App\Models\OrderItem::where('lifecycle_status', \App\Models\OrderItem::LIFECYCLE_REFUND_REQUESTED)->count();
+          $adminCollectionApprovalsCount = \App\Models\Collection::where('approval_status', \App\Models\Collection::APPROVAL_PENDING)->count();
+        }
 
         if ($walletIsLinked) {
           $currencyCatalog = app(\App\Services\Pricing\CurrencyCatalogInterface::class);
@@ -125,7 +158,7 @@
     @endauth
 
     @auth
-      <a href="/cart">
+      <a href="/cart" class="nav-auth__basket-link">
         <button class="basket-btn">
           <span class="basket-icon">🛒</span>
           @if($cartCount > 0)
@@ -133,6 +166,72 @@
           @endif
         </button>
       </a>
+    @endauth
+
+    @auth
+      <details class="nav-dropdown nav-dropdown--notifications">
+        <summary>
+          🔔
+          @if($unreadNotificationsCount > 0)
+            <span class="basket-badge">{{ $unreadNotificationsCount }}</span>
+          @endif
+        </summary>
+        <div class="nav-links__menu nav-links__menu--notifications">
+          @php
+            $remainingUnreadNotifications = $unreadBellNotifications->reject(function ($notification) {
+              return ($notification->type ?? '') === 'friend_request_received';
+            })->values();
+            $hasDropdownItems = false;
+          @endphp
+
+          @if(Auth::user()->role === 'admin' && $adminRefundQueueCount > 0)
+            @php $hasDropdownItems = true; @endphp
+            <a href="{{ route('admin.refunds') }}">
+              @if($adminRefundQueueCount === 1)
+                1 refund request is waiting for review
+              @else
+                {{ $adminRefundQueueCount }} refund requests
+              @endif
+            </a>
+          @endif
+
+          @if(Auth::user()->role === 'admin' && $adminCollectionApprovalsCount > 0)
+            @php $hasDropdownItems = true; @endphp
+            <a href="{{ route('admin.approvals.index') }}">
+              @if($adminCollectionApprovalsCount === 1)
+                1 collection is waiting for approval
+              @else
+                {{ $adminCollectionApprovalsCount }} collection approvals
+              @endif
+            </a>
+          @endif
+
+          @if($friendRequestUnreadCount > 0)
+            @php $hasDropdownItems = true; @endphp
+            <a href="{{ route('notifications.index') }}">
+              @if($friendRequestUnreadCount === 1)
+                <strong>{{ $singleFriendRequesterName }} wants to be your friend</strong>
+              @else
+                <strong>{{ $friendRequestUnreadCount }} new friend requests</strong>
+              @endif
+            </a>
+          @endif
+
+          @foreach($remainingUnreadNotifications as $notification)
+            @php $hasDropdownItems = true; @endphp
+            <a href="{{ route('notifications.index') }}">
+              <strong>{{ $notification->title }}</strong><br>
+              <small>{{ optional($notification->created_at)->format('Y-m-d H:i') }}</small>
+            </a>
+          @endforeach
+
+          @if(!$hasDropdownItems)
+            <span class="orders-meta nav-notification-empty">No notifications yet.</span>
+          @endif
+
+          <a href="{{ route('notifications.index') }}">View all notifications</a>
+        </div>
+      </details>
     @endauth
 
     @auth
@@ -147,7 +246,7 @@
         <button type="submit" class="nav-btn signout">Logout</button>
       </form>
 
-      <a href="{{ route('profile.show', ['username' => auth()->user()->name]) }}" class="nav-btn profile-icon" title="My Profile">
+      {{-- <a href="{{ route('profile.show', ['username' => auth()->user()->name]) }}" class="nav-btn profile-icon" title="My Profile">
         @if(!empty(auth()->user()->profile_image_url))
           <img
             src="{{ asset(ltrim(auth()->user()->profile_image_url, '/')) }}"
@@ -161,7 +260,7 @@
             <circle cx="12" cy="7" r="4" />
           </svg>
         @endif
-      </a>
+      </a> --}}
     @else
       <a href="{{ route('login') }}" class="nav-btn signin">Login / Register</a>
     @endauth
@@ -176,16 +275,64 @@ document.addEventListener('DOMContentLoaded', function () {
   const form = root; // the form itself
   const input = root.querySelector('[data-nav-search-input]');
   const menu = root.querySelector('[data-nav-search-menu]');
-  const resultsEl = root.querySelector('[data-nav-search-results]');
   const clearBtn = root.querySelector('[data-nav-search-clear]');
+  const typeButtons = Array.from(root.querySelectorAll('[data-search-type]'));
 
-  if (!input || !menu || !resultsEl || !clearBtn) return;
+  if (!input || !menu || !clearBtn) return;
 
-  let debounceTimer = null;
-  let lastResults = null;
+  let selectedSearchType = 'nft';
 
   function openMenu(show) {
     menu.classList.toggle('is-open', !!show);
+  }
+
+  function setSearchType(nextType) {
+    selectedSearchType = nextType;
+    typeButtons.forEach((btn) => {
+      const active = btn.dataset.searchType === nextType;
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+
+  function updateIntentLabels() {
+    const query = input.value.trim();
+    const escapedQuery = escapeHtml(query);
+
+    typeButtons.forEach((btn) => {
+      const type = btn.dataset.searchType || 'nft';
+      if (!query) {
+        if (type === 'collection') btn.textContent = 'Search collections';
+        else if (type === 'user') btn.textContent = 'Search users';
+        else btn.textContent = 'Search NFTs';
+        return;
+      }
+
+      if (type === 'collection') {
+        btn.innerHTML = `Search '<span class="nav-search__option-query">${escapedQuery}</span>' Collection`;
+      } else if (type === 'user') {
+        btn.innerHTML = `Search '<span class="nav-search__option-query">${escapedQuery}</span>' User`;
+      } else {
+        btn.innerHTML = `Search '<span class="nav-search__option-query">${escapedQuery}</span>' NFT`;
+      }
+    });
+  }
+
+  function routeByIntent(query, explicitType) {
+    const type = explicitType || selectedSearchType;
+    if (!query) return;
+
+    if (type === 'collection') {
+      window.location.href = `/search/collections?q=${encodeURIComponent(query)}`;
+      return;
+    }
+
+    if (type === 'user') {
+      window.location.href = `/users?q=${encodeURIComponent(query)}`;
+      return;
+    }
+
+    window.location.href = `/search/nfts?q=${encodeURIComponent(query)}`;
   }
 
   function escapeHtml(str) {
@@ -197,94 +344,21 @@ document.addEventListener('DOMContentLoaded', function () {
       .replace(/'/g,"&#039;");
   }
 
-  function renderResults(data, query) {
-    const nfts = data?.nfts || [];
-    const collections = data?.collections || [];
-
-    if (!nfts.length && !collections.length) {
-      resultsEl.innerHTML = `<div class="nav-search__empty">No results for "${escapeHtml(query)}"</div>`;
-      return;
-    }
-
-    let html = '';
-
-    if (nfts.length) {
-      html += `<div class="nav-search__section">
-        <div class="nav-search__section-title">NFTs</div>`;
-
-      nfts.forEach(nft => {
-        const nftUrl = nft?.nft_url || '';
-        html += `
-          <button type="button" class="nav-search__result" data-url="${escapeHtml(nftUrl)}">
-            <div class="nav-search__result-title">${escapeHtml(nft.name)}</div>
-            <div class="nav-search__result-sub">${escapeHtml(nft.collection?.name || '')}</div>
-          </button>`;
-      });
-
-      html += `</div>`;
-    }
-
-    if (collections.length) {
-      html += `<div class="nav-search__section">
-        <div class="nav-search__section-title">Collections</div>`;
-
-      collections.forEach(col => {
-        const colUrl = col?.collection_url || '';
-        html += `
-          <button type="button" class="nav-search__result" data-url="${escapeHtml(colUrl)}">
-            <div class="nav-search__result-title">${escapeHtml(col.name)}</div>
-            <div class="nav-search__result-sub">Collection</div>
-          </button>`;
-      });
-
-      html += `</div>`;
-    }
-
-    resultsEl.innerHTML = html;
-
-    resultsEl.querySelectorAll('[data-url]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const url = btn.dataset.url;
-        if (url) window.location.href = url;
-      });
-    });
-  }
-
-  async function fetchSuggestions(query) {
-    const url = `/api/v1/search/suggestions?q=${encodeURIComponent(query)}`;
-    const res = await fetch(url, { headers: { Accept: 'application/json' } });
-    if (!res.ok) return null;
-    return await res.json();
-  }
-
-  async function onInput() {
+  function onInput() {
     const query = input.value.trim();
+    updateIntentLabels();
 
     clearBtn.classList.toggle('is-visible', !!query);
 
     if (!query) {
       openMenu(false);
-      resultsEl.innerHTML = '';
-      lastResults = null;
       return;
     }
-
     openMenu(true);
-    resultsEl.innerHTML = `<div class="nav-search__loading">Searching...</div>`;
-
-    try {
-      const data = await fetchSuggestions(query);
-      lastResults = data || { nfts: [], collections: [] };
-      renderResults(lastResults, query);
-    } catch (e) {
-      resultsEl.innerHTML = `<div class="nav-search__empty">Search error</div>`;
-      lastResults = null;
-    }
   }
 
   input.addEventListener('input', () => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(onInput, 200);
+    onInput();
   });
 
   input.addEventListener('focus', onInput);
@@ -293,31 +367,28 @@ document.addEventListener('DOMContentLoaded', function () {
     input.value = '';
     input.focus();
     openMenu(false);
-    resultsEl.innerHTML = '';
-    lastResults = null;
+    updateIntentLabels();
   });
 
-  // Press Enter: go to first NFT result, else first collection, else fallback
+  setSearchType('nft');
+  updateIntentLabels();
+  typeButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setSearchType(btn.dataset.searchType || 'nft');
+      const query = input.value.trim();
+      if (query) {
+        routeByIntent(query, btn.dataset.searchType || 'nft');
+      }
+    });
+  });
+
+  // Press Enter: follow selected search intent
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
     const query = input.value.trim();
     if (!query) return;
-
-    const firstNFT = lastResults?.nfts?.[0]?.nft_url;
-    const firstCollection = lastResults?.collections?.[0]?.collection_url;
-
-    if (firstNFT) {
-      window.location.href = firstNFT;
-      return;
-    }
-
-    if (firstCollection) {
-      window.location.href = firstCollection;
-      return;
-    }
-
-    window.location.href = `/products?q=${encodeURIComponent(query)}`;
+    routeByIntent(query);
   });
 
   document.addEventListener('click', function(e) {

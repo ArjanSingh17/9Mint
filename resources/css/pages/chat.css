@@ -258,12 +258,12 @@ html.light-mode .chat-btn-send:hover {
 }
 
 .user-btn-message {
-  background-color: #059669;
-  color: #ffffff;
+  background-color: var(--link-hover);
+  color: var(--text-inverse);
 }
 
 .user-btn-message:hover {
-  background-color: color-mix(in srgb, #059669 75%, #000 25%);
+  background-color: color-mix(in srgb, var(--link-hover) 85%, #000 15%);
 }
 
 .user-btn-add {
